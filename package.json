@@ -12,7 +12,7 @@
     "test:watch": "cd packages/react-live-props && yarn test:watch",
     "build": "cd packages/react-live-props && yarn build",
     "prepare": "yarn build",
-    "predeploy": "yarn build && cd packages/example && yarn install && yarn build",
+    "predeploy": "cd packages/example && yarn install && yarn build",
     "deploy": "gh-pages -d packages/example/.docz/dist"
   },
   "devDependencies": {
