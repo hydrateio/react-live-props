@@ -10,6 +10,7 @@ dist
 
 # misc
 .DS_Store
+.docz
 .env
 .env.local
 .env.development.local

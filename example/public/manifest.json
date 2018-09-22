@@ -1,8 +1,0 @@
-{
-  "short_name": "react-live-props",
-  "name": "react-live-props",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
-}
