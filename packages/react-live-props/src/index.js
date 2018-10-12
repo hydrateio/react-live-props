@@ -1,1 +1,2 @@
-export { default } from './ReactLiveProps'
+export { ReactLiveProps } from './ReactLiveProps'
+export { rehypeReactLiveProps } from './rehype-plugin'

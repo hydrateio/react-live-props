@@ -1,98 +1,72 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import Input from '../Input'
 
-import docgenToJsonSchema from 'react-docgen-to-json-schema'
-import cs from 'classnames'
-import jsf from 'json-schema-faker'
-
-import EditablePropsTable from '../EditablePropsTable'
-import ComponentPreview from '../ComponentPreview'
-
-import styles from './styles.css'
-
-export default class ReactLiveProps extends Component {
+export class ReactLiveProps extends Component {
   static propTypes = {
-    of: PropTypes.func.isRequired,
-    docgenInfo: PropTypes.object,
-    className: PropTypes.string
+    children: PropTypes.func,
+    value: PropTypes.object
   }
 
-  state = {
-    schema: null,
-    values: null
+  constructor(props) {
+    super(props)
+    this.newContext = React.createContext()
+    const liveProps = Object.keys(this.props.value).reduce((props, key) => {
+      props[key] = {
+        ...this.props.value[key],
+        value: this.props.value[key].defaultValue,
+        id: key
+      }
+      return props
+    }, {})
+    this.state = {
+      schema: null,
+      liveProps
+    }
   }
 
-  componentDidMount() {
-    this._reset()
+  _onChange = ({ id, newValue }) => {
+    this.setState({
+      liveProps: {
+        ...this.state.liveProps,
+        [id]: {
+          ...this.state.liveProps[id],
+          value: newValue
+        }
+      }
+    })
+  }
+
+  get inputRows() {
+    return Object.keys(this.state.liveProps).map(propKey => {
+      const liveProp = this.state.liveProps[propKey]
+      return (
+        <tr key={propKey}>
+          <td>
+            <label htmlFor={liveProp.id}>{liveProp.description}</label>
+          </td>
+          <td>
+            <Input type={liveProp.type} liveProp={liveProp} onChange={this._onChange} />
+          </td>
+        </tr>
+      )
+    })
   }
 
   render() {
-    const {
-      of,
-      docgenInfo,
-      className,
-      ...rest
-    } = this.props
-
-    const {
-      schema,
-      values
-    } = this.state
-
-    if (!schema || !values) {
-      return null
-    }
-
+    const { Consumer, Provider } = this.newContext
     return (
-      <div
-        className={cs(styles.container, className)}
-        {...rest}
-      >
-        <EditablePropsTable
-          schema={schema}
-          values={values}
-          onChange={this._onChange}
-        />
-
-        <ComponentPreview
-          component={of}
-          values={values}
-        />
-      </div>
+      <Provider value={this.state.liveProps}>
+        <Consumer>
+          {this.props.children}
+        </Consumer>
+        <hr />
+        <table style={{width: '100%'}}>
+          <tbody>
+            {this.inputRows}
+          </tbody>
+        </table>
+      </Provider >
     )
-  }
-
-  async _reset() {
-    const {
-      of,
-      docgenInfo
-    } = this.props
-
-    const info = docgenInfo || of.__docgenInfo
-    if (!info) {
-      throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
-    }
-
-    try {
-      const schema = docgenToJsonSchema(info)
-      jsf.option({ alwaysFakeOptionals: true })
-      const values = await jsf.resolve(schema)
-
-      console.log(values)
-
-      this.setState({
-        schema,
-        values
-      })
-    } catch (err) {
-      console.error('ReactLiveProps error resolving JSON Schema', err)
-      throw err
-    }
-  }
-
-  _onChange = (values) => {
-    this.setState({
-      values
-    })
   }
 }

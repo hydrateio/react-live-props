@@ -1,1 +1,1 @@
-export { default } from './ReactLiveProps'
+export { ReactLiveProps } from './ReactLiveProps'

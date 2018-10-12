@@ -6,9 +6,16 @@ name: ReactLiveProps Basic Example
 
 import { PropsTable } from 'docz'
 
-import ReactLiveProps from 'react-live-props'
+import { ReactLiveProps } from 'react-live-props'
 import ExampleComponent from './ExampleComponent'
 
 <PropsTable of={ExampleComponent} />
 
-<ReactLiveProps of={ExampleComponent} />
+<ReactLiveProps>
+  <ExampleComponent
+    bar={text('Bar Knob Desc', 'bar default value')}
+    foo={3}
+    baz={boolean('Baz Knob Desc', true)}
+    uncontrolledBoolean={true}
+  />
+</ReactLiveProps>

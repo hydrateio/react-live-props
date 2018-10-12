@@ -6,7 +6,7 @@ export default class ExampleComponent extends Component {
     /**
      * Description foo.
      */
-    foo: PropTypes.number.isRequired,
+    foo: PropTypes.number,
 
     /**
      * Description bar.
@@ -14,7 +14,7 @@ export default class ExampleComponent extends Component {
      * - markdown list-item 1
      * - markdown list-item 2
      */
-    bar: PropTypes.string,
+    bar: PropTypes.string.isRequired,
 
     /**
      * Description baz.
@@ -30,7 +30,8 @@ export default class ExampleComponent extends Component {
     const {
       foo,
       bar,
-      baz
+      baz,
+      uncontrolledBoolean
     } = this.props
 
     return (
@@ -45,6 +46,10 @@ export default class ExampleComponent extends Component {
 
         <div>
           baz: {JSON.stringify(baz, null, 2)}
+        </div>
+
+        <div>
+          uncontrolledBoolean: {JSON.stringify(uncontrolledBoolean, null, 2)}
         </div>
       </div>
     )

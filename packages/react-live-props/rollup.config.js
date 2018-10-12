@@ -22,6 +22,7 @@ export default {
       sourcemap: true
     }
   ],
+  external: ['ajv', 'tty', 'util', 'os'],
   plugins: [
     external(),
     postcss({
