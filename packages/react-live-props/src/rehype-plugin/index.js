@@ -199,7 +199,8 @@ export function rehypeReactLiveProps() {
         traverse.default(ast, visitors, state)
 
         const newComponentSource = generate.default(ast).code
-        node.value = newComponentSource
+        // remove trailing semicolon added by babel generate
+        node.value = newComponentSource.substr(0, newComponentSource.length - 1)
       }
     }
   }
