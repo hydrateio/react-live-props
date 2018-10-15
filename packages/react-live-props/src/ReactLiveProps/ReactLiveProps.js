@@ -1,28 +1,38 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Input from '../Input'
+import docgenToJsonSchema from 'react-docgen-to-json-schema'
+import jsf from 'json-schema-faker'
 
 export class ReactLiveProps extends Component {
   static propTypes = {
     children: PropTypes.func,
-    value: PropTypes.object
+    knobType: PropTypes.string,
+    value: PropTypes.object,
+    defaultValues: PropTypes.object,
+    component: PropTypes.func
   }
 
-  constructor(props) {
-    super(props)
-    this.newContext = React.createContext()
-    const liveProps = Object.keys(this.props.value).reduce((props, key) => {
-      props[key] = {
-        ...this.props.value[key],
-        value: this.props.value[key].defaultValue,
-        id: key
-      }
-      return props
-    }, {})
-    this.state = {
-      schema: null,
-      liveProps
+  newContext = React.createContext()
+  state = {
+    liveProps: null
+  }
+
+  componentDidMount() {
+    this._setInitialValues()
+  }
+
+  async _setInitialValues() {
+    let liveProps
+    if (this.props.knobType === 'auto') {
+      liveProps = await getLivePropsForAutoKnobs(this.props.defaultValues, this.props.component.__docgenInfo)
+    } else {
+      liveProps = getLivePropsForDefinedKnobs(this.props.value)
     }
+
+    this.setState({
+      liveProps
+    })
   }
 
   _onChange = ({ id, newValue }) => {
@@ -41,32 +51,86 @@ export class ReactLiveProps extends Component {
     return Object.keys(this.state.liveProps).map(propKey => {
       const liveProp = this.state.liveProps[propKey]
       return (
-        <tr key={propKey}>
+        <tr key={propKey} >
           <td>
             <label htmlFor={liveProp.id}>{liveProp.description}</label>
           </td>
-          <td>
-            <Input type={liveProp.type} liveProp={liveProp} onChange={this._onChange} />
+          <td >
+            <Input
+              type={liveProp.type}
+              liveProp={liveProp}
+              onChange={this._onChange}
+            />
           </td>
         </tr>
       )
     })
   }
 
+  get childComponent() {
+    if (this.props.knobType !== 'auto') {
+      return this.props.children
+    }
+    return (liveProps) => <this.props.component {...Object.keys(this.state.liveProps).reduce((props, key) => {
+      props[key] = liveProps[key].value
+      return props
+    }, {})} />
+  }
+
   render() {
+    if (this.state.liveProps === null) {
+      return null
+    }
+
     const { Consumer, Provider } = this.newContext
     return (
       <Provider value={this.state.liveProps}>
         <Consumer>
-          {this.props.children}
+          {this.childComponent}
         </Consumer>
         <hr />
-        <table style={{width: '100%'}}>
+        <table style={{ width: '100%' }}>
           <tbody>
             {this.inputRows}
           </tbody>
         </table>
-      </Provider >
+      </Provider>
     )
+  }
+}
+
+function getLivePropsForDefinedKnobs(values) {
+  return Object.keys(values).reduce((props, key) => {
+    props[key] = {
+      ...values[key],
+      value: values[key].defaultValue,
+      id: key
+    }
+    return props
+  }, {})
+}
+
+async function getLivePropsForAutoKnobs(defaults, docgenInfo) {
+  try {
+    const schema = docgenToJsonSchema(docgenInfo)
+    jsf.option({ alwaysFakeOptionals: true, useDefaultValue: true })
+    const fakedValues = await jsf.resolve(schema)
+    const defaultValues = {
+      ...fakedValues,
+      ...defaults
+    }
+    const liveProps = Object.keys(defaultValues).reduce((values, key) => {
+      values[key] = {
+        id: key,
+        description: docgenInfo.props[key] ? docgenInfo.props[key].description : `No prop description provided for ${key}`,
+        type: docgenInfo.props[key] ? docgenInfo.props[key].type.name : typeof defaultValues[key],
+        value: defaultValues[key] !== undefined ? defaultValues[key] : ''
+      }
+      return values
+    }, {})
+    return liveProps
+  } catch (err) {
+    console.error('ReactLiveProps error resolving JSON Schema', err)
+    throw err
   }
 }

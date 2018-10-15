@@ -19,7 +19,12 @@ export default class ExampleComponent extends Component {
     /**
      * Description baz.
      */
-    baz: PropTypes.bool
+    baz: PropTypes.bool,
+
+    /**
+     * uncontrolled boolean.
+     */
+    uncontrolledBoolean: PropTypes.bool
   }
 
   static defaultProps = {
