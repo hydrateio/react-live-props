@@ -13,8 +13,8 @@
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "build": "babel src --out-dir dist --ignore \"src/**/*test*\" --ignore \"src/test.js\"",
-    "start": "babel src --watch --out-dir dist --ignore \"src/**/*test*\" --ignore \"src/test.js\"",
+    "build": "babel src --out-dir dist --ignore \"src/**/*test*\" --ignore \"src/test.js\" --source-maps",
+    "start": "babel src --watch --out-dir dist --ignore \"src/**/*test*\" --ignore \"src/test.js\" --source-maps",
     "prepare": "yarn run build",
     "predeploy": "cd example && yarn install && yarn run build",
     "deploy": "gh-pages -d example/build"

@@ -2,7 +2,7 @@
 name: ReactLiveProps AutoProps Example
 ---
 
-# ReactLiveProps Basic Example
+# ReactLiveProps Basic Example with Auto Generated Props
 
 import { PropsTable } from 'docz'
 import { ReactLiveProps } from 'react-live-props'
@@ -10,6 +10,6 @@ import ExampleComponent from './ExampleComponent'
 
 <PropsTable of={ExampleComponent} />
 
-<ReactLiveProps knobType='auto'>
+<ReactLiveProps auto-generate={true}>
   <ExampleComponent/>
 </ReactLiveProps>

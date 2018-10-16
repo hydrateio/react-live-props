@@ -7,7 +7,7 @@ import jsf from 'json-schema-faker'
 export class ReactLiveProps extends Component {
   static propTypes = {
     children: PropTypes.func,
-    knobType: PropTypes.string,
+    'auto-generate': PropTypes.bool,
     value: PropTypes.object,
     defaultValues: PropTypes.object,
     component: PropTypes.func
@@ -24,7 +24,7 @@ export class ReactLiveProps extends Component {
 
   async _setInitialValues() {
     let liveProps
-    if (this.props.knobType === 'auto') {
+    if (this.props['auto-generate'] === true) {
       liveProps = await getLivePropsForAutoKnobs(this.props.defaultValues, this.props.component.__docgenInfo)
     } else {
       liveProps = getLivePropsForDefinedKnobs(this.props.value)
@@ -50,17 +50,23 @@ export class ReactLiveProps extends Component {
   get inputRows() {
     return Object.keys(this.state.liveProps).map(propKey => {
       const liveProp = this.state.liveProps[propKey]
+      const props = {
+        type: liveProp.type,
+        liveProp,
+        onChange: this._onChange
+      }
+      try {
+        PropTypes.checkPropTypes(Input.propTypes, props, 'prop', 'Input')
+      } catch (e) {
+        return null
+      }
       return (
         <tr key={propKey} >
           <td>
             <label htmlFor={liveProp.id}>{liveProp.description}</label>
           </td>
           <td >
-            <Input
-              type={liveProp.type}
-              liveProp={liveProp}
-              onChange={this._onChange}
-            />
+            <Input {...props} />
           </td>
         </tr>
       )
@@ -68,7 +74,7 @@ export class ReactLiveProps extends Component {
   }
 
   get childComponent() {
-    if (this.props.knobType !== 'auto') {
+    if (!this.props['auto-generate']) {
       return this.props.children
     }
     return (liveProps) => <this.props.component {...Object.keys(this.state.liveProps).reduce((props, key) => {

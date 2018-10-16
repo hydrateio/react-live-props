@@ -2,15 +2,15 @@
 name: ReactLiveProps Basic Example
 ---
 
-# ReactLiveProps Basic Example
+# ReactLiveProps Basic Example with Explicit Knobs
 
 import { PropsTable } from 'docz'
 import ExampleComponent from './ExampleComponent'
 import { ReactLiveProps } from 'react-live-props'
 const jsxControlsList = [
-  <button>Button 1</button>,
-  <button>Button 2</button>,
-  <button>Button 3</button>
+  <button key="1">Button 1</button>,
+  <button key="2">Button 2</button>,
+  <button key="3">Button 3</button>
 ]
 
 <PropsTable of={ExampleComponent} />

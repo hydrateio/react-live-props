@@ -29,8 +29,6 @@ export default class Input extends React.Component {
         return <BooleanInput {...liveProp} onChange={onChange} />
       case 'number':
         return <NumberInput {...liveProp} onChange={onChange} />
-      default:
-        return <TextInput id={liveProp.id} value={String(liveProp.value)} onChange={onChange} />
     }
   }
 }

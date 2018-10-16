@@ -72,7 +72,7 @@ export function rehypeReactLiveProps() {
                 }
                 // Check if auto-knobs are enabled
                 attributes.forEach(attr => {
-                  if (attr.name.name === 'knobType' && attr.value.value === 'auto') {
+                  if (attr.name.name === 'auto-generate' && attr.value.expression && attr.value.expression.value === true) {
                     state.isAutoKnobEnabled = true
                   }
                 })
@@ -101,7 +101,7 @@ export function rehypeReactLiveProps() {
               if (id === 'ReactLiveProps') {
                 if (state.isAutoKnobEnabled) {
                   /**
-                   * If knobtype is set to auto, props descriptions and types will come from docgen
+                   * If auto-generate is set to true, props descriptions and types will come from docgen
                    * info supplied by the DocZ compile process. We need to send the user component to the
                    * ReactLiveProps component in order to look up those values.
                    */
