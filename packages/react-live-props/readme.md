@@ -11,19 +11,27 @@ npm install --save react-live-props
 ```
 
 ## Usage
+### Add the rehype plugin to your doczrc.js config
+```javascript
+import { rehypeReactLiveProps } from '../react-live-props'
+export default {
+  hastPlugins: [rehypeReactLiveProps]
+}
+```
 
+### Wrap your component with `ReactLiveProps`
 ```jsx
 import React, { Component } from 'react'
 
-import ReactLiveProps from 'react-live-props'
+import { ReactLiveProps } from 'react-live-props'
 import MyExampleComponent from './my-example-component'
 
 class Example extends Component {
   render () {
     return (
-      <ReactLiveProps
-        of={MyExampleComponent}
-      />
+      <ReactLiveProps knobType='auto'>
+        <MyExampleComponent />
+      </ReactLiveProps>
     )
   }
 }

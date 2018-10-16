@@ -5,14 +5,11 @@ name: ReactLiveProps AutoProps Example
 # ReactLiveProps Basic Example
 
 import { PropsTable } from 'docz'
-
 import { ReactLiveProps } from 'react-live-props'
 import ExampleComponent from './ExampleComponent'
 
 <PropsTable of={ExampleComponent} />
 
 <ReactLiveProps knobType='auto'>
-  <ExampleComponent
-    baz={true}
-  />
+  <ExampleComponent/>
 </ReactLiveProps>

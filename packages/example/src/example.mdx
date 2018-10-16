@@ -5,9 +5,13 @@ name: ReactLiveProps Basic Example
 # ReactLiveProps Basic Example
 
 import { PropsTable } from 'docz'
-
-import { ReactLiveProps } from 'react-live-props'
 import ExampleComponent from './ExampleComponent'
+import { ReactLiveProps } from 'react-live-props'
+const jsxControlsList = [
+  <button>Button 1</button>,
+  <button>Button 2</button>,
+  <button>Button 3</button>
+]
 
 <PropsTable of={ExampleComponent} />
 
@@ -17,5 +21,8 @@ import ExampleComponent from './ExampleComponent'
     foo={3}
     baz={boolean('Baz Knob Desc', true)}
     uncontrolledBoolean={true}
-  />
+    jsxControls={jsxControlsList}
+  >
+    <span>{text('Child span content text', 'Child Element')}</span>
+  </ExampleComponent>
 </ReactLiveProps>

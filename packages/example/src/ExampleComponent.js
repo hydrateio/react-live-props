@@ -24,7 +24,12 @@ export default class ExampleComponent extends Component {
     /**
      * uncontrolled boolean.
      */
-    uncontrolledBoolean: PropTypes.bool
+    uncontrolledBoolean: PropTypes.bool,
+
+    /**
+     * List of JSX elements
+     */
+    jsxControls: PropTypes.arrayOf(PropTypes.node)
   }
 
   static defaultProps = {
@@ -55,6 +60,14 @@ export default class ExampleComponent extends Component {
 
         <div>
           uncontrolledBoolean: {JSON.stringify(uncontrolledBoolean, null, 2)}
+        </div>
+
+        <div>
+          {this.props.jsxControls ? this.props.jsxControls : null}
+        </div>
+
+        <div>
+          {this.props.children}
         </div>
       </div>
     )

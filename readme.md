@@ -15,19 +15,36 @@ npm install --save react-live-props
 ```jsx
 import React, { Component } from 'react'
 
-import ReactLiveProps from 'react-live-props'
+import { ReactLiveProps } from 'react-live-props'
 import MyExampleComponent from './my-example-component'
 
 class Example extends Component {
   render () {
     return (
-      <ReactLiveProps
-        of={MyExampleComponent}
-      />
+      <ReactLiveProps>
+        <MyExampleComponent />
+      </ReactLiveProps>
     )
   }
 }
 ```
+
+## Developing
+Most easily done with two terminal windows
+
+In first window
+```bash
+cd packages/react-live-props
+yarn start
+```
+
+In second window
+```bash
+cd packages/example
+yarn start
+```
+
+open browser to https://localhost:3000
 
 ## License
 
