@@ -4,6 +4,7 @@ export default {
   indexHtml: './index.html',
   hashRouter: true,
   hastPlugins: [rehypeReactLiveProps],
+  debug: true,
   modifyBundlerConfig: (config) => {
     config.module.rules.push({
       test: /\.js$/,

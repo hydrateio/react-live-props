@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Input from '../Input'
+import ComponentPreview from '../ComponentPreview'
 import docgenToJsonSchema from 'react-docgen-to-json-schema'
 import jsf from 'json-schema-faker'
 
@@ -91,9 +92,11 @@ export class ReactLiveProps extends Component {
     const { Consumer, Provider } = this.newContext
     return (
       <Provider value={this.state.liveProps}>
-        <Consumer>
-          {this.childComponent}
-        </Consumer>
+        <ComponentPreview>
+          <Consumer>
+            {this.childComponent}
+          </Consumer>
+        </ComponentPreview>
         <hr />
         <table style={{ width: '100%' }}>
           <tbody>
