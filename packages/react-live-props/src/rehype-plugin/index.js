@@ -2,7 +2,7 @@ import visit from 'unist-util-visit'
 import * as parser from '@babel/parser'
 import traverse from '@babel/traverse'
 import generate from '@babel/generator'
-import types from '@babel/types'
+import * as types from '@babel/types'
 
 export function rehypeReactLiveProps() {
   return transformer
@@ -196,9 +196,9 @@ export function rehypeReactLiveProps() {
           newChildren: null
         }
 
-        traverse.default(ast, visitors, state)
+        traverse(ast, visitors, state)
 
-        const newComponentSource = generate.default(ast).code
+        const newComponentSource = generate(ast).code
         // remove trailing semicolon added by babel generate
         node.value = newComponentSource.substr(0, newComponentSource.length - 1)
       }

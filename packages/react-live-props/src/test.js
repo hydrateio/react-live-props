@@ -1,4 +1,4 @@
-import ReactLiveProps from './'
+import { ReactLiveProps } from './'
 
 describe('ReactLiveProps', () => {
   it('is truthy', () => {

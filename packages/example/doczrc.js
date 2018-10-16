@@ -1,6 +1,4 @@
-// TODO figure out why mdx compile process stalls when importing from rolled-up library
-import { rehypeReactLiveProps } from '../react-live-props/src/rehype-plugin/index.js';
-// import { rehypeReactLiveProps } from '../react-live-props'
+import { rehypeReactLiveProps } from '../react-live-props'
 
 export default {
   indexHtml: './index.html',
