@@ -46,6 +46,25 @@ yarn start
 
 open browser to https://localhost:3000
 
+## TODO
+### MVP
+ - [ ] add knob for enums (select list)
+ - [ ] add knob for arrays of primitives (multi-input)
+ - [ ] add knob for date
+ - [ ] style knobs table and component preview
+### Later Enhancements
+ - [ ] allow for knob constraints (number/date range, string length, etc)
+ - [ ] allow knobs to be grouped together
+
+## Other related work
+
+- Create DocZ plugin to serve static assets from custom location
+  - DocZ does not currently have a way to specify a static directory from which to serve assets for documentation purposes.
+  - This is useful for documenting components that rely on an asset being available via URL (i.e. image carousel)
+- Expand MDX-js to allow for variable declarations anywhere in MDX doc
+  - Right now, `const something = 'something'` must directly follow an `import` statement and cannot live on its own
+
+
 ## License
 
 MIT © [Hydrate](https://hydrate.io)
