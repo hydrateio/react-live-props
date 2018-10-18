@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import Input from '../Input'
 import ComponentPreview from '../ComponentPreview'
 import docgenToJsonSchema from 'react-docgen-to-json-schema'
 import jsf from 'json-schema-faker'
+import EditablePropsTable from '../EditablePropsTable'
 
 export class ReactLiveProps extends Component {
   static propTypes = {
@@ -20,111 +20,44 @@ export class ReactLiveProps extends Component {
   }
 
   componentDidMount() {
-    this._setInitialValues()
+    this.setInitialValues()
   }
 
-  async _setInitialValues() {
-    let liveProps
+  setInitialValues() {
     if (this.props['auto-generate'] === true) {
-      liveProps = await getLivePropsForAutoKnobs(this.props.defaultValues, this.props.component.__docgenInfo)
+      this.getLivePropsForAutoKnobs()
     } else {
-      liveProps = getLivePropsForDefinedKnobs(this.props.value)
+      this.getLivePropsForDefinedKnobs()
     }
-
-    this.setState({
-      liveProps
-    })
   }
 
-  _onChange = ({ id, newValue }) => {
-    this.setState({
-      liveProps: {
-        ...this.state.liveProps,
-        [id]: {
-          ...this.state.liveProps[id],
-          value: newValue
-        }
+  getLivePropsForDefinedKnobs = () => {
+    const values = this.props.value
+    const liveProps = Object.keys(values).reduce((props, key) => {
+      props[key] = {
+        ...values[key],
+        value: values[key].defaultValue,
+        id: key
       }
-    })
-  }
-
-  get inputRows() {
-    return Object.keys(this.state.liveProps).map(propKey => {
-      const liveProp = this.state.liveProps[propKey]
-      const props = {
-        type: liveProp.type,
-        liveProp,
-        onChange: this._onChange
-      }
-      try {
-        PropTypes.checkPropTypes(Input.propTypes, props, 'prop', 'Input')
-      } catch (e) {
-        return null
-      }
-      return (
-        <tr key={propKey} >
-          <td>
-            <label htmlFor={liveProp.id}>{liveProp.description}</label>
-          </td>
-          <td >
-            <Input {...props} />
-          </td>
-        </tr>
-      )
-    })
-  }
-
-  get childComponent() {
-    if (!this.props['auto-generate']) {
-      return this.props.children
-    }
-    return (liveProps) => <this.props.component {...Object.keys(this.state.liveProps).reduce((props, key) => {
-      props[key] = liveProps[key].value
       return props
-    }, {})} />
+    }, {})
+    this.setState({ liveProps })
   }
 
-  render() {
-    if (this.state.liveProps === null) {
-      return null
-    }
-
-    const { Consumer, Provider } = this.newContext
-    return (
-      <Provider value={this.state.liveProps}>
-        <ComponentPreview>
-          <Consumer>
-            {this.childComponent}
-          </Consumer>
-        </ComponentPreview>
-        <hr />
-        <table style={{ width: '100%' }}>
-          <tbody>
-            {this.inputRows}
-          </tbody>
-        </table>
-      </Provider>
-    )
-  }
-}
-
-function getLivePropsForDefinedKnobs(values) {
-  return Object.keys(values).reduce((props, key) => {
-    props[key] = {
-      ...values[key],
-      value: values[key].defaultValue,
-      id: key
-    }
-    return props
-  }, {})
-}
-
-async function getLivePropsForAutoKnobs(defaults, docgenInfo) {
-  try {
+  getLivePropsForAutoKnobs = () => {
+    const defaults = this.props.defaultValues
+    const docgenInfo = this.props.component.__docgenInfo
+    const docgenDefaults = Object.keys(docgenInfo.props)
+      .reduce((values, key) => {
+        const prop = docgenInfo.props[key]
+        values[key] = prop.defaultValue ? prop.defaultValue.value : null
+        return values
+      }, {})
     const schema = docgenToJsonSchema(docgenInfo)
     jsf.option({ alwaysFakeOptionals: true, useDefaultValue: true })
-    const fakedValues = await jsf.resolve(schema)
+    const fakedValues = jsf(schema)
     const defaultValues = {
+      ...docgenDefaults,
       ...fakedValues,
       ...defaults
     }
@@ -137,9 +70,47 @@ async function getLivePropsForAutoKnobs(defaults, docgenInfo) {
       }
       return values
     }, {})
-    return liveProps
-  } catch (err) {
-    console.error('ReactLiveProps error resolving JSON Schema', err)
-    throw err
+    this.setState({ liveProps })
+  }
+
+  onChange = ({ id, newValue }) => {
+    this.setState({
+      liveProps: {
+        ...this.state.liveProps,
+        [id]: {
+          ...this.state.liveProps[id],
+          value: newValue
+        }
+      }
+    })
+  }
+
+  get childComponent() {
+    if (!this.props['auto-generate']) {
+      return this.props.children
+    }
+    return (liveProps) => {
+      const props = Object.keys(this.state.liveProps).reduce((props, key) => {
+        props[key] = liveProps[key].value
+        return props
+      }, {})
+      return <this.props.component {...props} />
+    }
+  }
+
+  render() {
+    if (this.state.liveProps === null) {
+      return null
+    }
+
+    const { Consumer, Provider } = this.newContext
+    return (
+      <Provider value={this.state.liveProps}>
+        <ComponentPreview
+          component={<Consumer>{this.childComponent}</Consumer>}
+          knobs={<EditablePropsTable liveProps={this.state.liveProps} onChange={this.onChange} />}
+        />
+      </Provider>
+    )
   }
 }

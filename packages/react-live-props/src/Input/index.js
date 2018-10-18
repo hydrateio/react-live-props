@@ -11,10 +11,10 @@ export default class Input extends React.Component {
         PropTypes.number,
         PropTypes.string,
         PropTypes.bool
-      ]).isRequired,
+      ]),
       id: PropTypes.string.isRequired
     }),
-    type: PropTypes.oneOf(['text', 'string', 'boolean', 'bool', 'number']),
+    type: PropTypes.string,
     onChange: PropTypes.func.isRequired
   }
 
@@ -29,6 +29,8 @@ export default class Input extends React.Component {
         return <BooleanInput {...liveProp} onChange={onChange} />
       case 'number':
         return <NumberInput {...liveProp} onChange={onChange} />
+      default:
+        return <span>Unhandled PropType</span>
     }
   }
 }

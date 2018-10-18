@@ -1,44 +1,57 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import styled from 'styled-components'
+import Input from '../Input'
 
-import Form from 'react-jsonschema-form'
-import cs from 'classnames'
-
-import styles from './styles.css'
-
-export default class EditablePropsTable extends Component {
+class EditablePropsTable extends Component {
   static propTypes = {
-    schema: PropTypes.object.isRequired,
-    values: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    className: PropTypes.string
+    liveProps: PropTypes.object.isRequired
   }
+
+  static Table = styled.table`
+    width: 100%;
+    border: 1px solid #AAA;
+  `
+  static Row = styled.tr`
+    height: 24px;
+    line-height: 24px;
+    font-size: 18px;
+    border-bottom: 1px solid #CCC;
+    &:last-child {
+      border-bottom: none;
+    }
+  `
+  static Cell = styled.td`
+    padding: 4px;
+  `
 
   render() {
-    const {
-      schema,
-      values,
-      onChange,
-      className,
-      ...rest
-    } = this.props
-
     return (
-      <div
-        className={cs(styles.container, className)}
-        {...rest}
-      >
-        <Form
-          schema={schema}
-          formData={values}
-          onChange={this._onChange}
-          onSubmit={this._onChange}
-        />
-      </div>
+      <EditablePropsTable.Table>
+        <tbody>
+          {Object.keys(this.props.liveProps).map(propKey => {
+            const liveProp = this.props.liveProps[propKey]
+            const props = {
+              type: liveProp.type,
+              liveProp,
+              onChange: this.props.onChange
+            }
+            return (
+              <EditablePropsTable.Row key={propKey} >
+                <EditablePropsTable.Cell>
+                  <label htmlFor={liveProp.id}>{liveProp.description}</label>
+                </EditablePropsTable.Cell>
+                <EditablePropsTable.Cell >
+                  <Input {...props} />
+                </EditablePropsTable.Cell>
+              </EditablePropsTable.Row>
+            )
+          })}
+
+        </tbody>
+      </EditablePropsTable.Table>
     )
   }
-
-  _onChange = (e) => {
-    this.props.onChange(e.formData)
-  }
 }
+
+export default EditablePropsTable
