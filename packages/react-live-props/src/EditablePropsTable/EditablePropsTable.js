@@ -11,8 +11,30 @@ export default class EditablePropsTable extends Component {
     schema: PropTypes.object.isRequired,
     values: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
-    className: PropTypes.string
+    className: PropTypes.string,
+    editableProperties: PropTypes.arrayOf(PropTypes.string),
+    uiSchema: PropTypes.object
   }
+
+  static getDerivedStateFromProps(props, state) {
+    const editableProperties = props.editableProperties || Object.keys(props.schema.properties)
+
+    const editablePropertyDefs = {}
+    editableProperties.forEach(key => {
+      editablePropertyDefs[key] = props.schema.properties[key]
+    })
+
+    const schema = {
+      ...props.schema,
+      properties: editablePropertyDefs
+    }
+    return {
+      ...state,
+      schema
+    }
+  }
+
+  state = {}
 
   render() {
     const {
@@ -20,6 +42,8 @@ export default class EditablePropsTable extends Component {
       values,
       onChange,
       className,
+      uiSchema,
+      editableProperties,
       ...rest
     } = this.props
 
@@ -29,7 +53,8 @@ export default class EditablePropsTable extends Component {
         {...rest}
       >
         <Form
-          schema={schema}
+          schema={this.state.schema}
+          uiSchema={uiSchema}
           formData={values}
           onChange={this._onChange}
           onSubmit={this._onChange}
