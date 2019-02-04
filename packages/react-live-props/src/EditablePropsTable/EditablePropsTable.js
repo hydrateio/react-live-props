@@ -13,14 +13,19 @@ export default class EditablePropsTable extends Component {
     onChange: PropTypes.func.isRequired,
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
+    blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
     uiSchema: PropTypes.object
   }
 
   static getDerivedStateFromProps(props, state) {
+    const blacklistedProperties = props.blacklistedProperties || []
+
     const editableProperties = props.editableProperties || Object.keys(props.schema.properties)
 
     const editablePropertyDefs = {}
     editableProperties.forEach(key => {
+      if (blacklistedProperties.includes(key)) return
+
       editablePropertyDefs[key] = props.schema.properties[key]
     })
 
@@ -44,6 +49,7 @@ export default class EditablePropsTable extends Component {
       className,
       uiSchema,
       editableProperties,
+      blacklistedProperties,
       ...rest
     } = this.props
 

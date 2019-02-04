@@ -7,6 +7,7 @@ import jsf from 'json-schema-faker'
 
 import EditablePropsTable from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
+import ComponentMarkup from '../ComponentMarkup'
 
 import styles from './styles.css'
 
@@ -17,7 +18,8 @@ export default class ReactLiveProps extends Component {
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
     uiSchema: PropTypes.object,
-    additionalTitleText: PropTypes.string
+    additionalTitleText: PropTypes.string,
+    hideComponentMarkup: PropTypes.bool
   }
 
   state = {
@@ -43,6 +45,8 @@ export default class ReactLiveProps extends Component {
       editableProperties,
       uiSchema,
       additionalTitleText,
+      hideComponentMarkup,
+      blacklistedProperties,
       ...rest
     } = this.props
 
@@ -69,6 +73,7 @@ export default class ReactLiveProps extends Component {
           schema={renderSchema}
           values={values}
           editableProperties={editableProperties}
+          blacklistedProperties={blacklistedProperties}
           uiSchema={uiSchema}
           onChange={this._onChange}
         />
@@ -79,6 +84,18 @@ export default class ReactLiveProps extends Component {
           component={of}
           values={values}
         />
+
+        {!hideComponentMarkup && (
+          <React.Fragment>
+            <hr />
+
+            <ComponentMarkup
+              component={of}
+              values={values}
+              schema={schema}
+            />
+          </React.Fragment>
+        )}
       </div>
     )
   }
@@ -98,8 +115,6 @@ export default class ReactLiveProps extends Component {
       const schema = docgenToJsonSchema(info)
       jsf.option({ alwaysFakeOptionals: true })
       const values = await jsf.resolve(schema)
-
-      console.log(values)
 
       this.setState({
         schema,
