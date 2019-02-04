@@ -60,7 +60,6 @@
   ],
   "dependencies": {
     "classnames": "^2.2.6",
-    "react-docgen-to-json-schema": "^0.1.0",
-    "react-jsonschema-form": "^1.0.4"
+    "react-jsonschema-form": "^1.2.1"
   }
 }

@@ -22,7 +22,7 @@ export default class ComponentPreview extends Component {
 
     return (
       <div
-        className={cs(styles.container, className)}
+        className={cs(className)}
         {...rest}
       >
         {React.createElement(component, values)}

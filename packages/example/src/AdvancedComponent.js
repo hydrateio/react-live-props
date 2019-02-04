@@ -53,6 +53,8 @@ export default class AdvancedComponent extends Component {
        */
       prop2: PropTypes.number
     }),
+
+    anything: PropTypes.any
   }
 
   static defaultProps = {
@@ -68,7 +70,8 @@ export default class AdvancedComponent extends Component {
       far,
       faz,
       car,
-      caz
+      caz,
+      anything
     } = this.props
 
     return (
@@ -103,6 +106,10 @@ export default class AdvancedComponent extends Component {
 
         <div>
           caz: {JSON.stringify(caz, null, 2)}
+        </div>
+
+        <div>
+          anything: {JSON.stringify(anything, null, 2)}
         </div>
       </div>
     )

@@ -34,6 +34,24 @@ const renderPropertyValue = (schema, property, value) => {
     return `{null}`
   }
 
+  if (property.type === 'anyOf') {
+    const allowedTypes = property.anyOf.map(type => type.type)
+
+    if (typeof value === 'string' && allowedTypes.includes('string')) {
+      return `"${value}"`
+    }
+
+    if (typeof value === 'number' && allowedTypes.includes('number')) {
+      return `{${value}}`
+    }
+
+    if (typeof value === 'boolean' && allowedTypes.includes('boolean')) {
+      return `{${value}}`
+    }
+
+    return `{${JSON.stringify(value, null, 2)}}`
+  }
+
   return `'${value}'`
 }
 
@@ -70,7 +88,7 @@ export default class ComponentMarkup extends Component {
 
     return (
       <pre
-        className={cs(styles.container, className)}
+        className={cs(className)}
         {...rest}
       >
         {componentMarkup}

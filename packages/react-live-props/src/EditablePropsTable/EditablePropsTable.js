@@ -55,7 +55,7 @@ export default class EditablePropsTable extends Component {
 
     return (
       <div
-        className={cs(styles.container, className)}
+        className={cs(className)}
         {...rest}
       >
         <Form

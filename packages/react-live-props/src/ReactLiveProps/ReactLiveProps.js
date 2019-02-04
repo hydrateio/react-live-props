@@ -8,6 +8,7 @@ import jsf from 'json-schema-faker'
 import EditablePropsTable from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
+import ShadowRoot from '../ShadowRoot'
 
 import styles from './styles.css'
 
@@ -65,38 +66,47 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <div
-        className={cs(styles.container, className)}
-        {...rest}
-      >
-        <EditablePropsTable
-          schema={renderSchema}
-          values={values}
-          editableProperties={editableProperties}
-          blacklistedProperties={blacklistedProperties}
-          uiSchema={uiSchema}
-          onChange={this._onChange}
-        />
+      <ShadowRoot>
+        <div
+          className={cs('rlp-container', className)}
+          {...rest}
+        >
+          <link rel='stylesheet' type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' />
+          <link rel='stylesheet' type='text/css' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css' />
 
-        <hr />
+          <style type='text/css'>
+            {styles}
+          </style>
 
-        <ComponentPreview
-          component={of}
-          values={values}
-        />
+          <EditablePropsTable
+            schema={renderSchema}
+            values={values}
+            editableProperties={editableProperties}
+            blacklistedProperties={blacklistedProperties}
+            uiSchema={uiSchema}
+            onChange={this._onChange}
+          />
 
-        {!hideComponentMarkup && (
-          <React.Fragment>
-            <hr />
+          <hr />
 
-            <ComponentMarkup
-              component={of}
-              values={values}
-              schema={schema}
-            />
-          </React.Fragment>
-        )}
-      </div>
+          <ComponentPreview
+            component={of}
+            values={values}
+          />
+
+          {!hideComponentMarkup && (
+            <React.Fragment>
+              <hr />
+
+              <ComponentMarkup
+                component={of}
+                values={values}
+                schema={schema}
+              />
+            </React.Fragment>
+          )}
+        </div>
+      </ShadowRoot>
     )
   }
 
@@ -114,7 +124,9 @@ export default class ReactLiveProps extends Component {
     try {
       const schema = docgenToJsonSchema(info)
       jsf.option({ alwaysFakeOptionals: true })
-      const values = await jsf.resolve(schema)
+      // something in jsf.resolve is mutating the original schema
+      // for anyOf properties, so give them a copy of the properties
+      const values = await jsf.resolve(JSON.parse(JSON.stringify(schema)))
 
       this.setState({
         schema,
