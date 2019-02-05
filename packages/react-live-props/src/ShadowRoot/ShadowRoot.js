@@ -18,6 +18,10 @@ class ShadowRoot extends React.Component {
     })
   }
 
+  componentDidUpdate() {
+    ReactDOM.render(this.props.children, this.state.shadowRoot)
+  }
+
   render() {
     const { children, loader, ...rest } = this.props
 
