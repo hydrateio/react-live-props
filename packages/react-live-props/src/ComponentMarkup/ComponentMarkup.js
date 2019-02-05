@@ -34,7 +34,7 @@ const renderPropertyValue = (schema, property, value) => {
     return `{null}`
   }
 
-  if (property.type === 'anyOf') {
+  if (property.anyOf) {
     const allowedTypes = property.anyOf.map(type => type.type)
 
     if (typeof value === 'string' && allowedTypes.includes('string')) {
