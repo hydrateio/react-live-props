@@ -1,3 +1,6 @@
 export default {
-  indexHtml: './index.html'
+  wrapper: undefined,
+  indexHtml: './index.html',
+  title: 'React Live Props Example',
+  theme: 'docz-theme-default'
 }

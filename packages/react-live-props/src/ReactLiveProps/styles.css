@@ -1,4 +1,9 @@
-.rlp-container {
+:global .rlp-container {
   border: 2px solid #000;
   padding: 12px;
+}
+
+:global .rlp-container #root {
+  height: auto;
+  min-height: auto;
 }
