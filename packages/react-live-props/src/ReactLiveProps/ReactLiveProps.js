@@ -61,18 +61,13 @@ export default class ReactLiveProps extends Component {
       return null
     }
 
-    const renderSchema = {
-      ...schema,
-      title: this.buildComponentTitle(schema.title, additionalTitleText)
-    }
-
     return (
       <div
         className={cs('rlp-container', className)}
         {...rest}
       >
         <EditablePropsTable
-          schema={renderSchema}
+          schema={schema}
           values={values}
           editableProperties={editableProperties}
           blacklistedProperties={blacklistedProperties}
@@ -109,7 +104,8 @@ export default class ReactLiveProps extends Component {
   async _reset() {
     const {
       of,
-      docgenInfo
+      docgenInfo,
+      additionalTitleText
     } = this.props
 
     const info = docgenInfo || of.__docgenInfo
@@ -125,7 +121,10 @@ export default class ReactLiveProps extends Component {
       const values = await jsf.resolve(JSON.parse(JSON.stringify(schema)))
 
       this.setState({
-        schema,
+        schema: {
+          ...schema,
+          title: this.buildComponentTitle(schema.title, additionalTitleText)
+        },
         values
       })
     } catch (err) {

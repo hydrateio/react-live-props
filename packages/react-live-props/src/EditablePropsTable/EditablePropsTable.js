@@ -29,6 +29,13 @@ export default class EditablePropsTable extends Component {
       editablePropertyDefs[key] = props.schema.properties[key]
     })
 
+    if (state.schema && state.schema.properties) {
+      const keys = Object.keys(state.schema.properties)
+      const editableKeys = Object.keys(editablePropertyDefs)
+
+      if (keys.length === editableKeys.length) return state
+    }
+
     const schema = {
       ...props.schema,
       properties: editablePropertyDefs
@@ -37,6 +44,31 @@ export default class EditablePropsTable extends Component {
       ...state,
       schema
     }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    let shouldUpdate = false
+
+    Object.entries(this.props).forEach(([key, val]) => {
+      if (nextProps[key] !== val) {
+        shouldUpdate = true
+      }
+    })
+    Object.entries(this.state).forEach(([key, val]) => {
+      if (nextState[key] !== val) {
+        shouldUpdate = true
+      }
+    })
+
+    if (Object.entries(this.props).length !== Object.entries(nextProps).length) {
+      shouldUpdate = true
+    }
+
+    if (Object.entries(this.state).length !== Object.entries(nextState).length) {
+      shouldUpdate = true
+    }
+
+    return shouldUpdate
   }
 
   state = {}
