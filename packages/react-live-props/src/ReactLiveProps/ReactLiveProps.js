@@ -20,7 +20,8 @@ export default class ReactLiveProps extends Component {
     uiSchema: PropTypes.object,
     additionalTitleText: PropTypes.string,
     hideComponentMarkup: PropTypes.bool,
-    hideComponentPreview: PropTypes.bool
+    hideComponentPreview: PropTypes.bool,
+    customComponentMarkup: PropTypes.node
   }
 
   state = {
@@ -49,6 +50,7 @@ export default class ReactLiveProps extends Component {
       hideComponentMarkup,
       blacklistedProperties,
       hideComponentPreview,
+      customComponentMarkup: CustomComponentMarkup,
       ...rest
     } = this.props
 
@@ -95,6 +97,16 @@ export default class ReactLiveProps extends Component {
               values={values}
               schema={schema}
             />
+          </React.Fragment>
+        )}
+
+        {CustomComponentMarkup && (
+          <React.Fragment>
+            <hr />
+
+            <CustomComponentMarkup>
+              {React.createElement(of, values)}
+            </CustomComponentMarkup>
           </React.Fragment>
         )}
       </div>
