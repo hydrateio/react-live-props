@@ -14,7 +14,10 @@ export default class ReactLiveProps extends Component {
   static propTypes = {
     of: PropTypes.func.isRequired,
     docgenInfo: PropTypes.object,
-    className: PropTypes.string
+    className: PropTypes.string,
+    editableProperties: PropTypes.arrayOf(PropTypes.string),
+    uiSchema: PropTypes.object,
+    additionalTitleText: PropTypes.string
   }
 
   state = {
@@ -26,11 +29,20 @@ export default class ReactLiveProps extends Component {
     this._reset()
   }
 
+  buildComponentTitle = (title, additionalTitleText) => {
+    if (!additionalTitleText) return title
+
+    return `${title} - ${additionalTitleText}`
+  }
+
   render() {
     const {
       of,
       docgenInfo,
       className,
+      editableProperties,
+      uiSchema,
+      additionalTitleText,
       ...rest
     } = this.props
 
@@ -43,16 +55,25 @@ export default class ReactLiveProps extends Component {
       return null
     }
 
+    const renderSchema = {
+      ...schema,
+      title: this.buildComponentTitle(schema.title, additionalTitleText)
+    }
+
     return (
       <div
         className={cs(styles.container, className)}
         {...rest}
       >
         <EditablePropsTable
-          schema={schema}
+          schema={renderSchema}
           values={values}
+          editableProperties={editableProperties}
+          uiSchema={uiSchema}
           onChange={this._onChange}
         />
+
+        <hr />
 
         <ComponentPreview
           component={of}

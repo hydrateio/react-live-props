@@ -11,4 +11,8 @@ import ExampleComponent from './ExampleComponent'
 
 <PropsTable of={ExampleComponent} />
 
-<ReactLiveProps of={ExampleComponent} />
+<ReactLiveProps of={ExampleComponent} additionalTitleText='Basic Usage' />
+
+<ReactLiveProps of={ExampleComponent} uiSchema={{ foo: { 'ui:options': { inputType: 'number' }}}} additionalTitleText='Custom Input Fields' />
+
+<ReactLiveProps of={ExampleComponent} editableProperties={['baz']} additionalTitleText='Whitelisted Input Fields' />
