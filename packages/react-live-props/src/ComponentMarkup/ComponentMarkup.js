@@ -5,6 +5,8 @@ import cs from 'classnames'
 
 import styles from './styles.css'
 
+/* global Prism */
+
 const getDisplayName = (Component) => {
   return Component.displayName || Component.name || 'Component'
 }
@@ -75,6 +77,23 @@ export default class ComponentMarkup extends Component {
     className: PropTypes.string
   }
 
+  componentDidMount() {
+    // we don't includew prism, but consumers can provide prism.js and prism.css and this will apply
+    if (!Prism) return
+
+    this.node.querySelectorAll('code').forEach((block) => {
+      Prism.highlightElement(block)
+    })
+  }
+
+  componentDidUpdate() {
+    if (!Prism) return
+
+    this.node.querySelectorAll('code').forEach((block) => {
+      Prism.highlightElement(block)
+    })
+  }
+
   render() {
     const {
       component,
@@ -87,12 +106,11 @@ export default class ComponentMarkup extends Component {
     const componentMarkup = buildComponentMarkup(component, schema, values)
 
     return (
-      <pre
-        className={cs(className)}
-        {...rest}
-      >
-        {componentMarkup}
-      </pre>
+      <div ref={ref => this.node = ref} className={cs('codeRoot', className)} {...rest}>
+        <pre>
+          <code className='language-jsx'>{componentMarkup}</code>
+        </pre>
+      </div>
     )
   }
 }

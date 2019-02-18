@@ -3,7 +3,22 @@
   padding: 12px;
 }
 
+:global .rlp-container h2.rlp-container-title {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
 :global .rlp-container #root {
   height: auto;
   min-height: auto;
+}
+
+:global .rlp-container .rlp-section {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+:global .rlp-container .rlp-component-preview {
+  padding: 12px;
+  border: 1px solid #e5e5e5;
 }

@@ -17,11 +17,10 @@ export default class ReactLiveProps extends Component {
     docgenInfo: PropTypes.object,
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
-    uiSchema: PropTypes.object,
     additionalTitleText: PropTypes.string,
     hideComponentMarkup: PropTypes.bool,
     hideComponentPreview: PropTypes.bool,
-    customComponentMarkup: PropTypes.node
+    customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func])
   }
 
   state = {
@@ -45,7 +44,6 @@ export default class ReactLiveProps extends Component {
       docgenInfo,
       className,
       editableProperties,
-      uiSchema,
       additionalTitleText,
       hideComponentMarkup,
       blacklistedProperties,
@@ -68,46 +66,43 @@ export default class ReactLiveProps extends Component {
         className={cs('rlp-container', className)}
         {...rest}
       >
-        <EditablePropsTable
-          schema={schema}
-          values={values}
-          editableProperties={editableProperties}
-          blacklistedProperties={blacklistedProperties}
-          uiSchema={uiSchema}
-          onChange={this._onChange}
-        />
+        <h2 className='rlp-container-title'>{schema.title}</h2>
 
         {!hideComponentPreview && (
-          <React.Fragment>
-            <hr />
-
+          <div className='rlp-section rlp-component-preview'>
             <ComponentPreview
               component={of}
               values={values}
             />
-          </React.Fragment>
+          </div>
         )}
 
-        {!hideComponentMarkup && (
-          <React.Fragment>
-            <hr />
+        <div className='rlp-section rlp-editable-props-table'>
+          <EditablePropsTable
+            schema={schema}
+            values={values}
+            editableProperties={editableProperties}
+            blacklistedProperties={blacklistedProperties}
+            onChange={this._onChange}
+          />
+        </div>
 
+        {!hideComponentMarkup && (
+          <div className='rlp-section rlp-component-markup'>
             <ComponentMarkup
               component={of}
               values={values}
               schema={schema}
             />
-          </React.Fragment>
+          </div>
         )}
 
         {CustomComponentMarkup && (
-          <React.Fragment>
-            <hr />
-
+          <div className='rlp-section rlp-component-markup rlp-custom-component-markup'>
             <CustomComponentMarkup>
               {React.createElement(of, values)}
             </CustomComponentMarkup>
-          </React.Fragment>
+          </div>
         )}
       </div>
     )

@@ -1,0 +1,53 @@
+:global .rlp-editable-props {
+
+}
+
+:global .rlp-prop {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+:global .rlp-prop label {
+  display: block;
+}
+
+:global .rlp-prop .rlp-prop-description {
+  font-weight: normal;
+  font-size: 14px;
+  border-bottom: none;
+  margin-bottom: 0px;
+}
+
+:global .rlp-prop .rlp-prop-header,
+:global .rlp-prop .rlp-prop-list-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+:global .rlp-prop .rlp-prop-list-item {
+  justify-content: center;
+  align-items: center;
+}
+
+:global .rlp-prop .rlp-prop-header .rlp-prop-input,
+:global .rlp-prop .rlp-prop-header .rlp-prop-header-action,
+:global .rlp-prop .rlp-prop-list-item .rlp-prop-list-item-input  {
+  flex-grow: 1;
+}
+
+:global .rlp-prop .rlp-prop-header .rlp-prop-header-action {
+  text-align: right;
+}
+
+:global .rlp-prop .rlp-prop-header .rlp-prop-input {
+  margin-left: 12px;
+}
+
+:global .rlp-prop .rlp-prop-list-item .rlp-prop-list-item-input {
+  margin-right: 12px;
+}
+
+:global .rlp-prop-input input, :global .rlp-prop-input select {
+  width: 100%;
+  font-weight: normal;
+}

@@ -1,0 +1,1 @@
+export { namespaceName } from './namespace'

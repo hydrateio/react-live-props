@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import Form from 'react-jsonschema-form'
 import cs from 'classnames'
+import dotProp from 'dot-prop'
+import cloneDeep from 'lodash.clonedeep'
+import { PropertyRenderer } from '../Renderers'
 
-import styles from './styles.css'
+import './styles.css'
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
@@ -13,8 +15,7 @@ export default class EditablePropsTable extends Component {
     onChange: PropTypes.func.isRequired,
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
-    blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
-    uiSchema: PropTypes.object
+    blacklistedProperties: PropTypes.arrayOf(PropTypes.string)
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -79,29 +80,78 @@ export default class EditablePropsTable extends Component {
       values,
       onChange,
       className,
-      uiSchema,
       editableProperties,
       blacklistedProperties,
       ...rest
     } = this.props
 
+    const propertyKeys = Object.keys(this.state.schema.properties)
+
     return (
       <div
-        className={cs(className)}
+        className={cs('rlp-editable-props', className)}
         {...rest}
       >
-        <Form
-          schema={this.state.schema}
-          uiSchema={uiSchema}
-          formData={values}
-          onChange={this._onChange}
-          onSubmit={this._onChange}
-        />
+        {propertyKeys.map((key, idx) => {
+          const propertyValue = values ? values[key] : null
+          return (
+            <PropertyRenderer key={`${key}.${idx}`} parentName={null} name={key} value={propertyValue} onChange={this._onChange} onDelete={this._onDelete} onAdd={this._onAdd} property={this.state.schema.properties[key]} />
+          )
+        })}
+
       </div>
     )
   }
 
-  _onChange = (e) => {
-    this.props.onChange(e.formData)
+  _onChange = (name, newValue) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(this.props.values)
+
+    dotProp.set(clonedValues, name, newValue)
+
+    this.props.onChange(clonedValues)
+  }
+
+  _onDelete = (name) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(this.props.values)
+
+    const nameParts = name.split('.')
+    const lastProp = nameParts.pop()
+    try {
+      const index = parseInt(lastProp, 10)
+      // the property is an array index
+      const array = dotProp.get(clonedValues, nameParts.join('.'))
+      array.splice(index, 1)
+      dotProp.set(clonedValues, nameParts.join('.'), array)
+    } catch (e) {
+      // the property is not an array index
+      dotProp.delete(clonedValues, name)
+    }
+
+    this.props.onChange(clonedValues)
+  }
+
+  _onAdd = (name, type) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(this.props.values)
+
+    const array = dotProp.get(clonedValues, name)
+
+    if (type === 'string') {
+      array.push('')
+    } else if (type === 'number') {
+      array.push(0)
+    } else if (type === 'boolean') {
+      array.push(false)
+    } else if (type === 'object') {
+      array.push({})
+    } else if (type === 'array') {
+      array.push([])
+    } else {
+      array.push(null)
+    }
+
+    this.props.onChange(clonedValues)
   }
 }
