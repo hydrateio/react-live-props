@@ -13,24 +13,25 @@ const getDisplayName = (Component) => {
 }
 
 const renderPropertyValue = (schema, property, value) => {
+  let valueOrDefault = typeof value !== 'undefined' ? value : property.default
   if (property.type === 'string') {
-    return `"${value}"`
+    return `"${valueOrDefault}"`
   }
 
   if (property.type === 'number') {
-    return `{${value}}`
+    return `{${valueOrDefault}}`
   }
 
   if (property.type === 'boolean') {
-    return `{${value}}`
+    return `{${valueOrDefault}}`
   }
 
   if (property.type === 'object') {
-    return `{${JSON.stringify(value, null, 2)}}`
+    return `{${JSON.stringify(valueOrDefault, null, 2)}}`
   }
 
   if (property.type === 'array') {
-    return `{${JSON.stringify(value, null, 2)}}`
+    return `{${JSON.stringify(valueOrDefault, null, 2)}}`
   }
 
   if (property.type === 'null') {
@@ -41,21 +42,21 @@ const renderPropertyValue = (schema, property, value) => {
     const allowedTypes = property.anyOf.map(type => type.type)
 
     if (typeof value === 'string' && allowedTypes.includes('string')) {
-      return `"${value}"`
+      return `"${valueOrDefault}"`
     }
 
     if (typeof value === 'number' && allowedTypes.includes('number')) {
-      return `{${value}}`
+      return `{${valueOrDefault}}`
     }
 
     if (typeof value === 'boolean' && allowedTypes.includes('boolean')) {
-      return `{${value}}`
+      return `{${valueOrDefault}}`
     }
 
-    return `{${JSON.stringify(value, null, 2)}}`
+    return `{${JSON.stringify(valueOrDefault, null, 2)}}`
   }
 
-  return `'${value}'`
+  return `'${valueOrDefault}'`
 }
 
 const buildComponentMarkup = (Component, schema, values) => {
