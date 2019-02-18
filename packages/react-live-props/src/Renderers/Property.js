@@ -2,7 +2,7 @@ import React from 'react'
 import PrimitiveArrayRenderer from './PrimitiveArray'
 import FieldRenderer from './Field'
 import { AddButton, DeleteButton } from '../Components'
-import { namespaceName } from '../Utils'
+import { namespaceName, tryParseStringAsType, tryConvertTypeToString } from '../Utils'
 
 const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
   const singleFieldTypes = ['number', 'boolean', 'string']
@@ -47,7 +47,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
     <div className='rlp-prop-header'>
         <strong className='rlp-prop-name'>{name}</strong>
         <div className='rlp-prop-input'>
-        <input type='text' name={name} value={value} onChange={(e) => onChange(namespaceName(parentName, name), e.target.value)} />
+        <input type='text' name={name} value={tryConvertTypeToString(value)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
         </div>
       </div>
       {property.description && (
