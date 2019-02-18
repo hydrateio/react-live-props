@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
 
 import cs from 'classnames'
@@ -61,6 +62,18 @@ const buildComponentMarkup = (Component, schema, values) => {
   const componentName = getDisplayName(Component)
 
   const { properties } = schema
+
+  if (properties.children) {
+    const keys = Object.keys(properties).filter(key => key !== 'children')
+    const childrenMarkup = ReactDOMServer.renderToStaticMarkup(values['children'])
+    return `<${componentName}
+${keys.map(key => {
+    return `  ${key}=${renderPropertyValue(schema, properties[key], values[key])}`
+  }).join('\n')}
+>
+  ${childrenMarkup}
+</${componentName}>`
+  }
 
   return `<${componentName}
 ${Object.keys(properties).map(key => {

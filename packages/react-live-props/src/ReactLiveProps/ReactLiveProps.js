@@ -20,7 +20,8 @@ export default class ReactLiveProps extends Component {
     additionalTitleText: PropTypes.string,
     hideComponentMarkup: PropTypes.bool,
     hideComponentPreview: PropTypes.bool,
-    customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func])
+    customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    componentChildren: PropTypes.node
   }
 
   state = {
@@ -126,6 +127,12 @@ export default class ReactLiveProps extends Component {
       // something in jsf.resolve is mutating the original schema
       // for anyOf properties, so give them a copy of the properties
       const values = await jsf.resolve(JSON.parse(JSON.stringify(schema)))
+
+      if (values.children && this.props.componentChildren) {
+        values.children = this.props.componentChildren
+      } else if (values.children) {
+        values.children = <div />
+      }
 
       this.setState({
         schema: {

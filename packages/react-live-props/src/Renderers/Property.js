@@ -5,6 +5,8 @@ import { AddButton, DeleteButton } from '../Components'
 import { namespaceName, tryParseStringAsType, tryConvertTypeToString } from '../Utils'
 
 const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
+  if (name === 'children') return null
+
   const singleFieldTypes = ['number', 'boolean', 'string']
 
   if (singleFieldTypes.includes(property.type)) {
@@ -83,7 +85,11 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
 }
 
 export const ObjectRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
-  const propertyKeys = Object.keys(property.properties)
+  let propertyKeys = []
+  if (property.properties) {
+    propertyKeys = Object.keys(property.properties)
+  }
+
   const newParentName = namespaceName(parentName, name)
 
   return <div className='rlp-prop'>
