@@ -92,7 +92,7 @@ export default class ComponentMarkup extends Component {
   }
 
   componentDidMount() {
-    // we don't includew prism, but consumers can provide prism.js and prism.css and this will apply
+    // we don't include prism, but consumers can provide prism.js and prism.css and this will apply
     if (!Prism) return
 
     this.node.querySelectorAll('code').forEach((block) => {
