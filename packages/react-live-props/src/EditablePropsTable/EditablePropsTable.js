@@ -6,6 +6,7 @@ import dotProp from 'dot-prop'
 import cloneDeep from 'lodash.clonedeep'
 import { PropertyRenderer } from '../Renderers'
 import { SchemaContext } from '../Context'
+import { AddButton } from '../Components'
 
 import './styles.css'
 
@@ -15,7 +16,13 @@ export default class EditablePropsTable extends Component {
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
     blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
-    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
+    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
+    onAddProperty: PropTypes.func
+  }
+
+  state = {
+    pendingAttributeName: '',
+    pendingAttributeValue: ''
   }
 
   filterProperties(schema) {
@@ -84,7 +91,7 @@ export default class EditablePropsTable extends Component {
 
     return (
       <SchemaContext.Consumer>
-        {({ schema, values, editingComponent }) => {
+        {({ schema, values, editingComponent, htmlTypes }) => {
           const filteredSchema = this.filterProperties(schema[editingComponent])
           const propertyKeys = Object.keys(filteredSchema.properties)
           const currentValue = values[editingComponent]
@@ -113,11 +120,56 @@ export default class EditablePropsTable extends Component {
                 )
               })}
 
+              {htmlTypes.includes(editingComponent) && (
+                <div className='rlp-prop'>
+                  <div className='rlp-prop-header'>
+                    <div className='rlp-prop-name'>
+                      <input type='text' value={this.state.pendingAttributeName} onChange={(e) => this.setState({ pendingAttributeName: e.target.value })} />
+                    </div>
+                    <div className='rlp-prop-input'>
+                      <input type='text' value={this.state.pendingAttributeValue} onChange={(e) => this.setState({ pendingAttributeValue: e.target.value })} />
+                    </div>
+                    <div className='rlp-prop-header-action'>
+                      <AddButton onClick={() => this._onAddProperty(editingComponent, schema, values, this.state.pendingAttributeName, this.state.pendingAttributeValue)} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )
         }}
       </SchemaContext.Consumer>
     )
+  }
+
+  _onAddProperty = (editingComponent, schema, values, name, value) => {
+    const newSchema = {
+      ...schema,
+      [editingComponent]: {
+        ...schema[editingComponent],
+        properties: {
+          ...schema[editingComponent].properties,
+          [name]: {
+            type: 'string'
+          }
+        }
+      }
+    }
+
+    const newValues = {
+      ...values,
+      [editingComponent]: {
+        ...values[editingComponent],
+        [name]: value
+      }
+    }
+
+    this.setState({
+      pendingAttributeName: '',
+      pendingAttributeValue: ''
+    }, () => {
+      this.props.onAddProperty(newValues, newSchema)
+    })
   }
 
   _onChange = (name, newValue, values, editingComponent) => {
@@ -153,20 +205,20 @@ export default class EditablePropsTable extends Component {
     // dotProp mutates the value, so we need to clone before using dotProp
     const clonedValues = cloneDeep(values)
 
-    const array = dotProp.get(clonedValues, `${editingComponent}.${name}`)
+    const prop = dotProp.get(clonedValues, `${editingComponent}.${name}`)
 
     if (type === 'string') {
-      array.push('')
+      prop.push('')
     } else if (type === 'number') {
-      array.push(0)
+      prop.push(0)
     } else if (type === 'boolean') {
-      array.push(false)
+      prop.push(false)
     } else if (type === 'object') {
-      array.push({})
+      prop.push({})
     } else if (type === 'array') {
-      array.push([])
+      prop.push([])
     } else {
-      array.push(null)
+      prop.push(null)
     }
 
     this.props.onChange(clonedValues)

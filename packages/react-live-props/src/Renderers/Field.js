@@ -5,7 +5,14 @@ const FieldRenderer = ({ parentName, name, type, value, onChange, options, avail
   const uniqueName = namespaceName(parentName, name)
 
   if (name === 'children') {
-    const currentValue = typeof value === 'string' ? value : value ? value.name : ''
+    let currentValue = ''
+    if (typeof value === 'string') {
+      currentValue = value
+    } else if (typeof value === 'object' && Object.keys(value).length === 0) {
+      currentValue = ''
+    } else if (value && value.name) {
+      currentValue = value.name
+    }
 
     return <select key={uniqueName} name={uniqueName} value={currentValue} onChange={(e) => onChange(uniqueName, findSelectedType(availableTypes, e.target.value))}>
       <option value=''>default (normally empty unless ReactLiveProps was given default children)</option>

@@ -62,7 +62,8 @@ export default class ReactLiveProps extends Component {
       schema,
       values,
       rootComponentDisplayName,
-      editingComponent
+      editingComponent,
+      htmlTypes
     } = this.state
 
     if (!schema || !values) {
@@ -70,7 +71,7 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent }}>
+      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, htmlTypes }}>
         <div
           className={cs('rlp-container', className)}
           {...rest}
@@ -102,6 +103,7 @@ export default class ReactLiveProps extends Component {
                 blacklistedProperties={blacklistedProperties}
                 onChange={this._onChange}
                 availableTypes={availableTypes}
+                onAddProperty={this._onAddProperty}
               />
             </div>
           </div>
@@ -138,6 +140,7 @@ export default class ReactLiveProps extends Component {
       defaultComponentChildren
     } = this.props
 
+    const htmlTypes = []
     const allDocGenInfo = []
     const info = docgenInfo || of.__docgenInfo
     if (!info) {
@@ -149,6 +152,7 @@ export default class ReactLiveProps extends Component {
     if (availableTypes) {
       const typeInfo = availableTypes.map(type => {
         if (typeof type === 'string') {
+          htmlTypes.push(type)
           return {
             description: '',
             methods: [],
@@ -195,7 +199,8 @@ export default class ReactLiveProps extends Component {
         },
         values: typeValues,
         rootComponentDisplayName: info.displayName,
-        editingComponent: info.displayName
+        editingComponent: info.displayName,
+        htmlTypes
       })
     } catch (err) {
       console.error('ReactLiveProps error resolving JSON Schema', err)
@@ -212,6 +217,13 @@ export default class ReactLiveProps extends Component {
   _onChange = (values) => {
     this.setState({
       values
+    })
+  }
+
+  _onAddProperty = (values, schema) => {
+    this.setState({
+      values,
+      schema
     })
   }
 }
