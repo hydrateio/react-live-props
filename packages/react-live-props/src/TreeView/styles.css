@@ -1,0 +1,13 @@
+:global .rlp-container .rlp-tree-view ul {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+
+:global .rlp-container .rlp-tree-view ul ul {
+  margin-left: 12px;
+}
+
+:global .rlp-container .rlp-tree-view .rlp-tree-view-selected {
+  font-weight: bold;
+}

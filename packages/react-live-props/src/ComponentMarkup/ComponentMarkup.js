@@ -1,16 +1,14 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
+import { getDisplayName, hasChildren } from '../Utils'
+import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
 
 import styles from './styles.css'
 
 /* global Prism */
-
-const getDisplayName = (Component) => {
-  return Component.displayName || Component.name || 'Component'
-}
 
 const renderPropertyValue = (schema, property, value) => {
   let valueOrDefault = typeof value !== 'undefined' ? value : property.default
@@ -59,36 +57,49 @@ const renderPropertyValue = (schema, property, value) => {
   return `'${valueOrDefault}'`
 }
 
-const buildComponentMarkup = (Component, schema, values) => {
+const buildComponentMarkup = (Component, schema, values, componentDisplayName, availableTypes) => {
+  // in case we got a React element
+  if (Component['$$typeof']) {
+    return ReactDOMServer.renderToStaticMarkup(Component)
+  }
+
+  if (componentDisplayName === null) return ''
+
   const componentName = getDisplayName(Component)
+  const componentValues = values[componentDisplayName]
+  const componentSchema = schema[componentDisplayName]
 
-  const { properties } = schema
+  const { properties = {} } = componentSchema
+  const { children, ...keys } = properties
 
-  if (properties.children) {
-    const keys = Object.keys(properties).filter(key => key !== 'children')
-    const childrenMarkup = ReactDOMServer.renderToStaticMarkup(values['children'])
+  if (hasChildren(componentValues) && properties.children) {
+    const displayName = typeof componentValues.children === 'string' ? componentValues.children : componentValues.children && componentValues.children.__docgenInfo ? componentValues.children.__docgenInfo.displayName : null
+    const childrenMarkup = buildComponentMarkup(componentValues.children, schema, values, displayName, availableTypes)
     return `<${componentName}
-${keys.map(key => {
-    return `  ${key}=${renderPropertyValue(schema, properties[key], values[key])}`
-  }).join('\n')}
->
+${Object.keys(keys).map(key => {
+    const value = renderPropertyValue(componentSchema, properties[key], componentValues[key])
+    if (value === '{undefined}') return null
+
+    return `  ${key}=${value}`
+  }).filter(item => item !== null).join('\n')}>
   ${childrenMarkup}
 </${componentName}>`
   }
 
   return `<${componentName}
-${Object.keys(properties).map(key => {
-    return `  ${key}=${renderPropertyValue(schema, properties[key], values[key])}`
-  }).join('\n')}
-/>`
+${Object.keys(keys).map(key => {
+    const value = renderPropertyValue(componentSchema, properties[key], componentValues[key])
+    if (value === '{undefined}') return null
+
+    return `  ${key}=${value}`
+  }).filter(item => item !== null).join('\n')} />`
 }
 
 export default class ComponentMarkup extends Component {
   static propTypes = {
-    schema: PropTypes.object.isRequired,
     component: PropTypes.func.isRequired,
-    values: PropTypes.object.isRequired,
-    className: PropTypes.string
+    className: PropTypes.string,
+    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
   }
 
   componentDidMount() {
@@ -111,20 +122,25 @@ export default class ComponentMarkup extends Component {
   render() {
     const {
       component,
-      values,
       className,
-      schema,
+      availableTypes,
       ...rest
     } = this.props
 
-    const componentMarkup = buildComponentMarkup(component, schema, values)
-
     return (
-      <div ref={ref => this.node = ref} className={cs('codeRoot', className)} {...rest}>
-        <pre>
-          <code className='language-jsx'>{componentMarkup}</code>
-        </pre>
-      </div>
+      <SchemaContext.Consumer>
+        {({ schema, values, rootComponentDisplayName }) => {
+          const componentMarkup = buildComponentMarkup(component, schema, values, rootComponentDisplayName, availableTypes)
+          return (
+            <div ref={ref => this.node = ref} className={cs('codeRoot', className)} {...rest}>
+              <pre>
+                <code className='language-jsx'>{componentMarkup}</code>
+              </pre>
+            </div>
+          )
+        }}
+
+      </SchemaContext.Consumer>
     )
   }
 }

@@ -5,45 +5,41 @@ import cs from 'classnames'
 import dotProp from 'dot-prop'
 import cloneDeep from 'lodash.clonedeep'
 import { PropertyRenderer } from '../Renderers'
+import { SchemaContext } from '../Context'
 
 import './styles.css'
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
-    schema: PropTypes.object.isRequired,
-    values: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
-    blacklistedProperties: PropTypes.arrayOf(PropTypes.string)
+    blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
+    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
   }
 
-  static getDerivedStateFromProps(props, state) {
-    const blacklistedProperties = props.blacklistedProperties || []
+  filterProperties(schema) {
+    const blacklistedProperties = this.props.blacklistedProperties || []
 
-    const editableProperties = props.editableProperties || Object.keys(props.schema.properties)
+    const editableProperties = this.props.editableProperties || Object.keys(schema.properties)
 
     const editablePropertyDefs = {}
     editableProperties.forEach(key => {
       if (blacklistedProperties.includes(key)) return
 
-      editablePropertyDefs[key] = props.schema.properties[key]
+      editablePropertyDefs[key] = schema.properties[key]
     })
 
-    if (state.schema && state.schema.properties) {
-      const keys = Object.keys(state.schema.properties)
+    if (schema && schema.properties) {
+      const keys = Object.keys(schema.properties)
       const editableKeys = Object.keys(editablePropertyDefs)
 
-      if (keys.length === editableKeys.length) return state
+      if (keys.length === editableKeys.length) return schema
     }
 
-    const schema = {
-      ...props.schema,
-      properties: editablePropertyDefs
-    }
     return {
-      ...state,
-      schema
+      ...schema,
+      properties: editablePropertyDefs
     }
   }
 
@@ -76,67 +72,88 @@ export default class EditablePropsTable extends Component {
 
   render() {
     const {
-      schema,
-      values,
       onChange,
       className,
       editableProperties,
       blacklistedProperties,
+      availableTypes,
       ...rest
     } = this.props
 
-    const propertyKeys = Object.keys(this.state.schema.properties)
+
 
     return (
-      <div
-        className={cs('rlp-editable-props', className)}
-        {...rest}
-      >
-        {propertyKeys.map((key, idx) => {
-          const propertyValue = values ? values[key] : null
+      <SchemaContext.Consumer>
+        {({ schema, values, editingComponent }) => {
+          const filteredSchema = this.filterProperties(schema[editingComponent])
+          const propertyKeys = Object.keys(filteredSchema.properties)
+          const currentValue = values[editingComponent]
+          const onAdd = (type, name) => this._onAdd(type, name, values, editingComponent)
+          const onChange = (name, newValue) => this._onChange(name, newValue, values, editingComponent)
+          const onDelete = (name) => this._onDelete(name, values, editingComponent)
           return (
-            <PropertyRenderer key={`${key}.${idx}`} parentName={null} name={key} value={propertyValue} onChange={this._onChange} onDelete={this._onDelete} onAdd={this._onAdd} property={this.state.schema.properties[key]} />
-          )
-        })}
+            <div
+              className={cs('rlp-editable-props', className)}
+              {...rest}
+            >
+              {propertyKeys.map((key, idx) => {
+                const propertyValue = currentValue ? currentValue[key] : null
+                return (
+                  <PropertyRenderer
+                    key={`${key}.${idx}`}
+                    parentName={null}
+                    name={key}
+                    value={propertyValue}
+                    onChange={onChange}
+                    onDelete={onDelete}
+                    onAdd={onAdd}
+                    property={filteredSchema.properties[key]}
+                    availableTypes={availableTypes}
+                  />
+                )
+              })}
 
-      </div>
+            </div>
+          )
+        }}
+      </SchemaContext.Consumer>
     )
   }
 
-  _onChange = (name, newValue) => {
+  _onChange = (name, newValue, values, editingComponent) => {
     // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(this.props.values)
+    const clonedValues = cloneDeep(values)
 
-    dotProp.set(clonedValues, name, newValue)
+    dotProp.set(clonedValues, `${editingComponent}.${name}`, newValue)
 
     this.props.onChange(clonedValues)
   }
 
-  _onDelete = (name) => {
+  _onDelete = (name, values, editingComponent) => {
     // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(this.props.values)
+    const clonedValues = cloneDeep(values)
 
     const nameParts = name.split('.')
     const lastProp = nameParts.pop()
     try {
       const index = parseInt(lastProp, 10)
       // the property is an array index
-      const array = dotProp.get(clonedValues, nameParts.join('.'))
+      const array = dotProp.get(clonedValues, `${editingComponent}.${nameParts.join('.')}`)
       array.splice(index, 1)
-      dotProp.set(clonedValues, nameParts.join('.'), array)
+      dotProp.set(clonedValues, `${editingComponent}.${nameParts.join('.')}`, array)
     } catch (e) {
       // the property is not an array index
-      dotProp.delete(clonedValues, name)
+      dotProp.delete(clonedValues, `${editingComponent}.${name}`)
     }
 
     this.props.onChange(clonedValues)
   }
 
-  _onAdd = (name, type) => {
+  _onAdd = (name, type, values, editingComponent) => {
     // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(this.props.values)
+    const clonedValues = cloneDeep(values)
 
-    const array = dotProp.get(clonedValues, name)
+    const array = dotProp.get(clonedValues, `${editingComponent}.${name}`)
 
     if (type === 'string') {
       array.push('')

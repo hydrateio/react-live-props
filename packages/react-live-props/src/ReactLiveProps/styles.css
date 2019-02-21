@@ -22,3 +22,19 @@
   padding: 12px;
   border: 1px solid #e5e5e5;
 }
+
+:global .rlp-container .rlp-editable-props-table {
+  display: flex;
+}
+
+:global .rlp-container .rlp-editable-props-table .rlp-editable-props-table-spacer {
+  width: 24px;
+}
+
+:global .rlp-container .rlp-editable-props-table .rlp-editable-props-table-main {
+  flex-grow: 1;
+}
+
+:global .rlp-container .rlp-editable-props-table .rlp-editable-props-table-tree-view {
+
+}

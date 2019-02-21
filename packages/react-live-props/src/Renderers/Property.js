@@ -4,10 +4,21 @@ import FieldRenderer from './Field'
 import { AddButton, DeleteButton } from '../Components'
 import { namespaceName, tryParseStringAsType, tryConvertTypeToString } from '../Utils'
 
-const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
-  if (name === 'children') return null
+const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd, availableTypes }) => {
+  if (name === 'children' && !availableTypes) return null
 
   const singleFieldTypes = ['number', 'boolean', 'string']
+
+  if (name === 'children') {
+    return <div className='rlp-prop'>
+      <div className='rlp-prop-header'>
+        <strong className='rlp-prop-name'>{name}</strong>
+        <div className='rlp-prop-input'>
+          <FieldRenderer parentName={parentName} name={name} type={property.type} value={value} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
+        </div>
+      </div>
+    </div>
+  }
 
   if (singleFieldTypes.includes(property.type)) {
     const currentValue = typeof value !== 'undefined' && value !== null ? value : property.default
@@ -15,7 +26,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
       <div className='rlp-prop-header'>
         <strong className='rlp-prop-name'>{name}</strong>
         <div className='rlp-prop-input'>
-          <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
+          <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
         </div>
       </div>
       {property.description && (
@@ -26,11 +37,11 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
 
   if (property.type === 'array') {
     if (singleFieldTypes.includes(property.items.type)) {
-      return <PrimitiveArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+      return <PrimitiveArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
     }
 
     if (property.items.type === 'object') {
-      return <ObjectArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+      return <ObjectArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
     }
 
     return <div className='rlp-prop'>
@@ -42,7 +53,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
   }
 
   if (property.type === 'object') {
-    return <ObjectRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+    return <ObjectRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
   }
 
   return <div className='rlp-prop'>
@@ -58,7 +69,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
   </div>
 }
 
-export const ObjectArrayRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
+export const ObjectArrayRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd, availableTypes }) => {
   const newParentName = namespaceName(parentName, name)
 
   return <div className='rlp-prop'>
@@ -75,7 +86,7 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
       {value && value.map((item, idx) => (
         <div className='rlp-prop-list-item' key={namespaceName(newParentName, `value-${idx}`)}>
           <div className='rlp-prop-list-item-input'>
-            <ObjectRenderer parentName={newParentName} name={idx} value={item} property={property.items} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+            <ObjectRenderer parentName={newParentName} name={idx} value={item} property={property.items} onChange={onChange} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
           </div>
           <DeleteButton onClick={() => onDelete(namespaceName(newParentName, idx))} />
         </div>
@@ -84,7 +95,7 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
   </div>
 }
 
-export const ObjectRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
+export const ObjectRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd, availableTypes }) => {
   let propertyKeys = []
   if (property.properties) {
     propertyKeys = Object.keys(property.properties)
@@ -98,9 +109,7 @@ export const ObjectRenderer = ({ parentName, name, property, value, onChange, on
       const itemValue = value ? value[key] : null
       const currentValue = typeof itemValue !== 'undefined' && itemValue !== null ? itemValue : property.properties[key].default
       return (
-        <React.Fragment key={namespaceName(newParentName, idx)}>
-          <PropertyRenderer key={key} parentName={newParentName} name={key} property={property.properties[key]} value={currentValue} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
-        </React.Fragment>
+        <PropertyRenderer key={namespaceName(newParentName, idx)} parentName={newParentName} name={key} property={property.properties[key]} value={currentValue} onChange={onChange} onDelete={onDelete} onAdd={onAdd} availableTypes={availableTypes} />
       )
     })}
   </div>

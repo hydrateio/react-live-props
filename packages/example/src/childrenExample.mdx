@@ -1,0 +1,12 @@
+---
+name: ReactLiveProps Children Example
+---
+
+# ReactLiveProps Advanced Example
+
+import { PropsTable } from 'docz'
+
+import ReactLiveProps from 'react-live-props'
+import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
+
+<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Text, 'div']} />
