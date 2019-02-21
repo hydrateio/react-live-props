@@ -87,8 +87,6 @@ export default class EditablePropsTable extends Component {
       ...rest
     } = this.props
 
-
-
     return (
       <SchemaContext.Consumer>
         {({ schema, values, editingComponent, htmlTypes }) => {
