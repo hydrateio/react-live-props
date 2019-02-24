@@ -25,7 +25,8 @@ export default class ReactLiveProps extends Component {
     hideComponentPreview: PropTypes.bool,
     customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
     initialComponentChildren: PropTypes.node,
-    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
+    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
+    initialCollapsed: PropTypes.bool
   }
 
   constructor(props) {
@@ -67,6 +68,7 @@ export default class ReactLiveProps extends Component {
       customComponentMarkup: CustomComponentMarkup,
       initialComponentChildren,
       availableTypes,
+      initialCollapsed,
       ...rest
     } = this.props
 
