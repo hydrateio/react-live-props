@@ -177,8 +177,6 @@ export default class ReactLiveProps extends Component {
       allDocGenInfo.push(...filteredTypes)
     }
 
-    console.log(allDocGenInfo)
-
     try {
       const typeSchema = {}
       allDocGenInfo.map(typeInfo => {
