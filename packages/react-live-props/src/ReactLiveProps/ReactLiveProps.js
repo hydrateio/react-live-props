@@ -158,7 +158,10 @@ export default class ReactLiveProps extends Component {
               children: {
                 description: '',
                 required: false,
-                type: { name: 'node' }
+                type: {
+                  name: 'arrayOf',
+                  value: { name: 'node' }
+                }
               }
             },
             displayName: type
@@ -173,6 +176,8 @@ export default class ReactLiveProps extends Component {
       }
       allDocGenInfo.push(...filteredTypes)
     }
+
+    console.log(allDocGenInfo)
 
     try {
       const typeSchema = {}
