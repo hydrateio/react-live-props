@@ -9,41 +9,10 @@ import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
 import { SchemaContext } from '../Context'
-import { buildDefaultValuesForType } from '../Utils'
+import { Expand, Collapse } from '../Components'
+import { buildDefaultValuesForType, processReactElementToValue } from '../Utils'
 
 import './styles.css'
-
-const processReactElementToValue = (schema, element) => {
-  let children
-  if (element.props.children) {
-    children = []
-    children = element.props.children.map(child => processReactElementToValue(schema, child))
-  }
-
-  Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
-    if (schema[element.type] && schema[element.type].properties && schema[element.type].properties[prop]) return
-
-    // default unknown properties to strings
-    schema[element.type].properties[prop] = { type: 'string' }
-  })
-
-  if (children) {
-    return {
-      type: element.type,
-      [element.type]: {
-        ...element.props,
-        children
-      }
-    }
-  }
-
-  return {
-    type: element.type,
-    [element.type]: {
-      ...element.props
-    }
-  }
-}
 
 export default class ReactLiveProps extends Component {
   static propTypes = {
@@ -59,9 +28,14 @@ export default class ReactLiveProps extends Component {
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
   }
 
-  state = {
-    schema: null,
-    values: null
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      schema: null,
+      values: null,
+      collapsed: this.props.initialCollapsed || false
+    }
   }
 
   componentDidMount() {
@@ -72,6 +46,12 @@ export default class ReactLiveProps extends Component {
     if (!additionalTitleText) return title
 
     return `${title} - ${additionalTitleText}`
+  }
+
+  onToggleExpandCollapse = (collapsed) => {
+    this.setState({
+      collapsed
+    })
   }
 
   render() {
@@ -109,52 +89,64 @@ export default class ReactLiveProps extends Component {
           className={cs('rlp-container', className)}
           {...rest}
         >
-          <h2 className='rlp-container-title'>{schema.title}</h2>
-
-          {!hideComponentPreview && (
-            <div className='rlp-section rlp-component-preview'>
-              <ComponentPreview
-                component={of}
-              />
-            </div>
-          )}
-
-          <div className='rlp-section rlp-editable-props-table'>
-            {schema[rootComponentDisplayName].properties && schema[rootComponentDisplayName].properties.children && (
-              <div className='rlp-editable-props-table-tree-view'>
-                <TreeView
-                  of={of}
-                  onChangeComponent={this._editComponent}
-                />
-              </div>
+          <h2 className='rlp-container-title'>
+            {schema.title}
+            {this.state.collapsed && (
+              <Expand onClick={() => this.onToggleExpandCollapse(false)} />
             )}
-            <div className='rlp-editable-props-table-spacer' />
-            <div className='rlp-editable-props-table-main'>
-              <EditablePropsTable
-                editableProperties={editableProperties}
-                blacklistedProperties={blacklistedProperties}
-                onChange={this._onChange}
-                onAddProperty={this._onAddProperty}
-              />
-            </div>
-          </div>
+            {!this.state.collapsed && (
+              <Collapse onClick={() => this.onToggleExpandCollapse(true)} />
+            )}
+          </h2>
 
-          {!hideComponentMarkup && (
-            <div className='rlp-section rlp-component-markup'>
-              <ComponentMarkup
-                component={of}
-              />
-            </div>
-          )}
+          {!this.state.collapsed && (
+            <React.Fragment>
+              {!hideComponentPreview && (
+                <div className='rlp-section rlp-component-preview'>
+                  <ComponentPreview
+                    component={of}
+                  />
+                </div>
+              )}
 
-          {CustomComponentMarkup && (
-            <div className='rlp-section rlp-component-markup rlp-custom-component-markup'>
-              <CustomComponentMarkup>
-                <ComponentPreview
-                  component={of}
-                />
-              </CustomComponentMarkup>
-            </div>
+              <div className='rlp-section rlp-editable-props-table'>
+                {schema[rootComponentDisplayName].properties && schema[rootComponentDisplayName].properties.children && (
+                  <div className='rlp-editable-props-table-tree-view'>
+                    <TreeView
+                      of={of}
+                      onChangeComponent={this._editComponent}
+                    />
+                  </div>
+                )}
+                <div className='rlp-editable-props-table-spacer' />
+                <div className='rlp-editable-props-table-main'>
+                  <EditablePropsTable
+                    editableProperties={editableProperties}
+                    blacklistedProperties={blacklistedProperties}
+                    onChange={this._onChange}
+                    onAddProperty={this._onAddProperty}
+                  />
+                </div>
+              </div>
+
+              {!hideComponentMarkup && (
+                <div className='rlp-section rlp-component-markup'>
+                  <ComponentMarkup
+                    component={of}
+                  />
+                </div>
+              )}
+
+              {CustomComponentMarkup && (
+                <div className='rlp-section rlp-component-markup rlp-custom-component-markup'>
+                  <CustomComponentMarkup>
+                    <ComponentPreview
+                      component={of}
+                    />
+                  </CustomComponentMarkup>
+                </div>
+              )}
+            </React.Fragment>
           )}
         </div>
       </SchemaContext.Provider>

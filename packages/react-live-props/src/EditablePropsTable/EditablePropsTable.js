@@ -74,7 +74,10 @@ export default class EditablePropsTable extends Component {
     return shouldUpdate
   }
 
-  state = {}
+  state = {
+    pendingAttributeName: '',
+    pendingAttributeValue: ''
+  }
 
   render() {
     const {
@@ -127,7 +130,7 @@ export default class EditablePropsTable extends Component {
                       <input type='text' value={this.state.pendingAttributeValue} onChange={(e) => this.setState({ pendingAttributeValue: e.target.value })} />
                     </div>
                     <div className='rlp-prop-header-action'>
-                      <AddButton onClick={() => this._onAddProperty(editingComponent, schema, values, this.state.pendingAttributeName, this.state.pendingAttributeValue)} />
+                      <AddButton onClick={() => this._onAddProperty(editingComponent, editingComponentPath, schema, values, this.state.pendingAttributeName, this.state.pendingAttributeValue)} />
                     </div>
                   </div>
                 </div>
@@ -139,7 +142,7 @@ export default class EditablePropsTable extends Component {
     )
   }
 
-  _onAddProperty = (editingComponent, schema, values, name, value) => {
+  _onAddProperty = (editingComponent, editingComponentPath, schema, values, name, value) => {
     const newSchema = {
       ...schema,
       [editingComponent]: {
@@ -153,19 +156,17 @@ export default class EditablePropsTable extends Component {
       }
     }
 
-    const newValues = {
-      ...values,
-      [editingComponent]: {
-        ...values[editingComponent],
-        [name]: value
-      }
-    }
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(values)
+
+    const compPropValues = dotProp.get(clonedValues, editingComponentPath)
+    compPropValues[name] = value
 
     this.setState({
       pendingAttributeName: '',
       pendingAttributeValue: ''
     }, () => {
-      this.props.onAddProperty(newValues, newSchema)
+      this.props.onAddProperty(clonedValues, newSchema)
     })
   }
 

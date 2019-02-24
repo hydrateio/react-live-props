@@ -75,7 +75,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
               <strong className='rlp-prop-name'>{name}</strong>
               <div className='rlp-prop-input'>
                 <select key={uniqueName} name={uniqueName} value={value.type} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, onChange)}>
-                  <option value=''>default (normally empty unless ReactLiveProps was given default children)</option>
+                  <option value=''>none</option>
                   {availableTypes.map(availableType => {
                     if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
 
@@ -126,11 +126,12 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
     return <ObjectRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
   }
 
+  const valueOrDefault = value || ''
   return <div className='rlp-prop'>
     <div className='rlp-prop-header'>
       <strong className='rlp-prop-name'>{name}</strong>
       <div className='rlp-prop-input'>
-        <input type='text' name={name} value={tryConvertTypeToString(value)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
+        <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
       </div>
     </div>
     {property.description && (

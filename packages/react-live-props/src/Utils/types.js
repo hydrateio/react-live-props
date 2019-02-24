@@ -30,6 +30,38 @@ export const buildDefaultValuesForType = async (schema, componentName) => {
   return values
 }
 
+export const processReactElementToValue = (schema, element) => {
+  let children
+  if (element.props.children) {
+    children = []
+    children = element.props.children.map(child => processReactElementToValue(schema, child))
+  }
+
+  Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
+    if (schema[element.type] && schema[element.type].properties && schema[element.type].properties[prop]) return
+
+    // default unknown properties to any so they get parsed to JSON if possible
+    schema[element.type].properties[prop] = { type: 'any' }
+  })
+
+  if (children) {
+    return {
+      type: element.type,
+      [element.type]: {
+        ...element.props,
+        children
+      }
+    }
+  }
+
+  return {
+    type: element.type,
+    [element.type]: {
+      ...element.props
+    }
+  }
+}
+
 export const hasChildren = (component) => {
   if (!component) return false
 

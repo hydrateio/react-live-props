@@ -35,6 +35,8 @@
   flex-grow: 1;
 }
 
-:global .rlp-container .rlp-editable-props-table .rlp-editable-props-table-tree-view {
-
+:global .rlp-container .rlp-container-title button {
+  float: right;
+  background-color: transparent;
+  border: none;
 }
