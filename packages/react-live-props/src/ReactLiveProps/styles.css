@@ -20,7 +20,7 @@
 
 :global .rlp-container .rlp-component-preview {
   padding: 12px;
-  border: 1px solid #e5e5e5;
+  border: 2px solid #e5e5e5;
 }
 
 :global .rlp-container .rlp-editable-props-table {

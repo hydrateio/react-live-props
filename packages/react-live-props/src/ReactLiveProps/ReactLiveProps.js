@@ -13,6 +13,38 @@ import { buildDefaultValuesForType } from '../Utils'
 
 import './styles.css'
 
+const processReactElementToValue = (schema, element) => {
+  let children
+  if (element.props.children) {
+    children = []
+    children = element.props.children.map(child => processReactElementToValue(schema, child))
+  }
+
+  Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
+    if (schema[element.type] && schema[element.type].properties && schema[element.type].properties[prop]) return
+
+    // default unknown properties to strings
+    schema[element.type].properties[prop] = { type: 'string' }
+  })
+
+  if (children) {
+    return {
+      type: element.type,
+      [element.type]: {
+        ...element.props,
+        children
+      }
+    }
+  }
+
+  return {
+    type: element.type,
+    [element.type]: {
+      ...element.props
+    }
+  }
+}
+
 export default class ReactLiveProps extends Component {
   static propTypes = {
     of: PropTypes.func.isRequired,
@@ -23,7 +55,7 @@ export default class ReactLiveProps extends Component {
     hideComponentMarkup: PropTypes.bool,
     hideComponentPreview: PropTypes.bool,
     customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-    defaultComponentChildren: PropTypes.node,
+    initialComponentChildren: PropTypes.node,
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
   }
 
@@ -53,7 +85,7 @@ export default class ReactLiveProps extends Component {
       blacklistedProperties,
       hideComponentPreview,
       customComponentMarkup: CustomComponentMarkup,
-      defaultComponentChildren,
+      initialComponentChildren,
       availableTypes,
       ...rest
     } = this.props
@@ -135,7 +167,7 @@ export default class ReactLiveProps extends Component {
       docgenInfo,
       additionalTitleText,
       availableTypes,
-      defaultComponentChildren
+      initialComponentChildren
     } = this.props
 
     const htmlTypes = []
@@ -189,8 +221,17 @@ export default class ReactLiveProps extends Component {
         [info.displayName]: initialValues
       }
 
-      if (values[info.displayName].children && defaultComponentChildren) {
-        values[info.displayName].children = defaultComponentChildren
+      if (values[info.displayName].children && initialComponentChildren) {
+        if (Array.isArray(initialComponentChildren)) {
+          values[info.displayName].children = []
+          initialComponentChildren.forEach(child => {
+            const childValues = processReactElementToValue(typeSchema, child)
+            values[info.displayName].children.push(childValues)
+          })
+        } else {
+          const childValues = processReactElementToValue(typeSchema, initialComponentChildren)
+          values[info.displayName].children = childValues
+        }
       }
 
       this.setState({

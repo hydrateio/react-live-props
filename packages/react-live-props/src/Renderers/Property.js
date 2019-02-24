@@ -17,21 +17,21 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
     const uniqueName = namespaceName(parentName, name)
 
     if (property.type === 'array') {
+      const valueOrDefault = value || []
       return <SchemaContext>
         {({ schema, availableTypes }) => {
           if (availableTypes.length === 0) return null
 
           return (
             <React.Fragment>
-              {value.map((child, idx) => {
-                console.log(child)
+              {valueOrDefault.map((child, idx) => {
                 return (
                   <div className='rlp-prop' key={`${child.type}-${idx}`}>
                     <div className='rlp-prop-header'>
                       <strong className='rlp-prop-name'>{name}</strong>
                       <div className='rlp-prop-input'>
                         <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, onChange)}>
-                          <option value=''>default (normally empty unless ReactLiveProps was given default children)</option>
+                          <option value=''>none</option>
                           {availableTypes.map(availableType => {
                             if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
 
@@ -48,8 +48,8 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
                 <div className='rlp-prop-header'>
                   <strong className='rlp-prop-name'>{name}</strong>
                   <div className='rlp-prop-input'>
-                    <select key={`${uniqueName}.${value.length}`} name={`${uniqueName}.${value.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${value.length}`, e.target.value, onChange)}>
-                      <option value=''>default (normally empty unless ReactLiveProps was given default children)</option>
+                    <select key={`${uniqueName}.${valueOrDefault.length}`} name={`${uniqueName}.${valueOrDefault.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${valueOrDefault.length}`, e.target.value, onChange)}>
+                      <option value=''>none</option>
                       {availableTypes.map(availableType => {
                         if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
 
