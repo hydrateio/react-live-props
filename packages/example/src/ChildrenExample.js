@@ -1,15 +1,17 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import './prism.js'
+import './prism.css'
 
 export const Panel = ({ children, bold = false }) => (
-  <div style={{ fontWeight: bold ? 'bold' : 'normal' }}>
+  <div style={{ fontWeight: bold ? 'bold' : 'normal', marginLeft: '8px', borderLeft: '1px solid black' }}>
     <div>Panel</div>
     {children}
   </div>
 )
 
 Panel.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.arrayOf(PropTypes.node),
   bold: PropTypes.bool
 }
 

@@ -1,25 +1,33 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
-import { getDisplayName } from '../Utils'
+import { hasChildren } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import './styles.css'
 
-const RenderComponent = ({ component, values, componentDisplayName, editingComponent, onChangeComponent }) => {
-  const displayName = getDisplayName(component)
-  const isSelected = displayName === editingComponent
+const RenderComponent = ({ values, componentDisplayName, editingComponent, editingComponentPath, onChangeComponent, componentPath }) => {
+  const isSelected = editingComponentPath === componentPath
+
   return (
     <React.Fragment>
-      <div>
-        <a href='javascript:void(0)' className={isSelected ? 'rlp-tree-view-selected' : ''} onClick={() => onChangeComponent(displayName)}>{displayName}</a>
-      </div>
-      {values[componentDisplayName] && values[componentDisplayName].children && getDisplayName(values[componentDisplayName].children) && (
-        <ul>
-          <li>
-            <RenderComponent editingComponent={editingComponent} component={values[componentDisplayName].children} values={values} componentDisplayName={getDisplayName(values[componentDisplayName].children)} onChangeComponent={onChangeComponent} />
-          </li>
-        </ul>
+      <li>
+        <p><a href='javascript:void(0)' className={isSelected ? 'rlp-tree-view-selected' : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{componentDisplayName}</a></p>
+      </li>
+      {hasChildren(values) && (
+        <li className='rlp-tree-view-list-container'>
+          <ul>
+            {values && values.children && Array.isArray(values.children) && values.children.map((child, idx) => {
+              const newPath = `${componentPath}.children.${idx}.${child.type}`
+              return (
+                <RenderComponent key={`${child.type}-${idx}`} editingComponent={editingComponent} editingComponentPath={editingComponentPath} componentPath={newPath} values={values.children[idx][child.type]} componentDisplayName={child.type} onChangeComponent={onChangeComponent} />
+              )
+            })}
+            {values && values.children && !Array.isArray(values.children) && (
+              <RenderComponent editingComponent={editingComponent} editingComponentPath={editingComponentPath} componentPath={`${componentPath}.children.${values.children.type}`} values={values.children[values.children.type]} componentDisplayName={values.children.type} onChangeComponent={onChangeComponent} />
+            )}
+          </ul>
+        </li>
       )}
     </React.Fragment>
   )
@@ -29,23 +37,24 @@ class TreeView extends React.Component {
   static propTypes = {
     of: PropTypes.func.isRequired,
     className: PropTypes.string,
-    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     onChangeComponent: PropTypes.func.isRequired
   }
 
   render() {
-    const { of, className, availableTypes, onChangeComponent, ...rest } = this.props
+    const { of, className, onChangeComponent, ...rest } = this.props
+
+
 
     return <SchemaContext.Consumer>
-      {({ schema, values, rootComponentDisplayName, editingComponent }) => (
-        <div className={cs('rlp-tree-view', className)} {...rest}>
-          <ul>
-            <li>
-              <RenderComponent component={of} values={values} editingComponent={editingComponent} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
-            </li>
-          </ul>
-        </div>
-      )}
+      {({ values, rootComponentDisplayName, editingComponent, editingComponentPath }) => {
+        return (
+          <div className={cs('rlp-tree-view', className)} {...rest}>
+            <ul>
+              <RenderComponent values={values[rootComponentDisplayName]} editingComponentPath={editingComponentPath} componentPath={rootComponentDisplayName} editingComponent={editingComponent} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
+            </ul>
+          </div>
+        )
+      }}
     </SchemaContext.Consumer>
   }
 }

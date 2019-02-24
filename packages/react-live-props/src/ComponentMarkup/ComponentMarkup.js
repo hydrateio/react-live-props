@@ -57,27 +57,44 @@ const renderPropertyValue = (schema, property, value) => {
   return `'${valueOrDefault}'`
 }
 
-const buildComponentMarkup = (Component, schema, values, componentDisplayName, availableTypes) => {
+const buildComponentMarkup = (componentName, schema, values) => {
   // in case we got a React element
   if (Component['$$typeof']) {
     return ReactDOMServer.renderToStaticMarkup(Component)
   }
 
-  if (componentDisplayName === null) return ''
+  if (componentName === null) return ''
 
-  const componentName = getDisplayName(Component)
-  const componentValues = values[componentDisplayName]
-  const componentSchema = schema[componentDisplayName]
+  const componentSchema = schema[componentName]
 
   const { properties = {} } = componentSchema
   const { children, ...keys } = properties
 
-  if (hasChildren(componentValues) && properties.children) {
-    const displayName = typeof componentValues.children === 'string' ? componentValues.children : componentValues.children && componentValues.children.__docgenInfo ? componentValues.children.__docgenInfo.displayName : null
-    const childrenMarkup = buildComponentMarkup(componentValues.children, schema, values, displayName, availableTypes)
+  if (hasChildren(values) && properties.children) {
+    if (Array.isArray(values.children)) {
+      const childrenMarkup = values.children.map((child, idx) => {
+        const displayName = child.type
+        const childValues = child[displayName]
+        return buildComponentMarkup(displayName, schema, childValues)
+      })
+
+      return `<${componentName}
+  ${Object.keys(keys).map(key => {
+    const value = renderPropertyValue(componentSchema, properties[key], values[key])
+    if (value === '{undefined}') return null
+
+    return `  ${key}=${value}`
+  }).filter(item => item !== null).join('\n')}>
+    ${childrenMarkup.join('\n')}
+  </${componentName}>`
+    }
+
+    const displayName = values.children.type
+    const childValues = values.children[displayName]
+    const childrenMarkup = buildComponentMarkup(displayName, schema, childValues)
     return `<${componentName}
 ${Object.keys(keys).map(key => {
-    const value = renderPropertyValue(componentSchema, properties[key], componentValues[key])
+    const value = renderPropertyValue(componentSchema, properties[key], values[key])
     if (value === '{undefined}') return null
 
     return `  ${key}=${value}`
@@ -88,7 +105,7 @@ ${Object.keys(keys).map(key => {
 
   return `<${componentName}
 ${Object.keys(keys).map(key => {
-    const value = renderPropertyValue(componentSchema, properties[key], componentValues[key])
+    const value = renderPropertyValue(componentSchema, properties[key], values[key])
     if (value === '{undefined}') return null
 
     return `  ${key}=${value}`
@@ -98,8 +115,7 @@ ${Object.keys(keys).map(key => {
 export default class ComponentMarkup extends Component {
   static propTypes = {
     component: PropTypes.func.isRequired,
-    className: PropTypes.string,
-    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func]))
+    className: PropTypes.string
   }
 
   componentDidMount() {
@@ -123,14 +139,13 @@ export default class ComponentMarkup extends Component {
     const {
       component,
       className,
-      availableTypes,
       ...rest
     } = this.props
 
     return (
       <SchemaContext.Consumer>
         {({ schema, values, rootComponentDisplayName }) => {
-          const componentMarkup = buildComponentMarkup(component, schema, values, rootComponentDisplayName, availableTypes)
+          const componentMarkup = buildComponentMarkup(rootComponentDisplayName, schema, values[rootComponentDisplayName])
           return (
             <div ref={ref => this.node = ref} className={cs('codeRoot', className)} {...rest}>
               <pre>

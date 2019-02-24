@@ -1,13 +1,32 @@
-:global .rlp-container .rlp-tree-view ul {
+:global .rlp-container .rlp-tree-view ul,
+:global .rlp-container .rlp-tree-view li {
   margin: 0px;
   padding: 0px;
   list-style-type: none;
 }
 
-:global .rlp-container .rlp-tree-view ul ul {
-  margin-left: 12px;
-}
-
 :global .rlp-container .rlp-tree-view .rlp-tree-view-selected {
   font-weight: bold;
+}
+
+:global .rlp-container .rlp-tree-view ul { padding-left: 1em; }
+:global .rlp-container .rlp-tree-view li  { padding-left: 1em;
+  border: 1px dotted black;
+  border-width: 0 0 1px 1px;
+}
+:global .rlp-container .rlp-tree-view li.rlp-tree-view-list-container { border-bottom: 0px; }
+
+:global .rlp-container .rlp-tree-view li p { margin: 0;
+  background: white;
+  position: relative;
+  top: 0.5em;
+}
+:global .rlp-container .rlp-tree-view li ul {
+  border-top: 1px dotted black;
+  margin-left: -1em;
+  padding-left: 2em;
+}
+:global .rlp-container .rlp-tree-view ul li:last-child ul {
+  border-left: 1px solid white;
+  margin-left: -17px;
 }

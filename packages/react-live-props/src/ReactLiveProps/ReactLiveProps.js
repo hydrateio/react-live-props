@@ -3,13 +3,13 @@ import PropTypes from 'prop-types'
 
 import docgenToJsonSchema from 'react-docgen-to-json-schema'
 import cs from 'classnames'
-import jsf from 'json-schema-faker'
 
 import EditablePropsTable from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
 import { SchemaContext } from '../Context'
+import { buildDefaultValuesForType } from '../Utils'
 
 import './styles.css'
 
@@ -63,7 +63,8 @@ export default class ReactLiveProps extends Component {
       values,
       rootComponentDisplayName,
       editingComponent,
-      htmlTypes
+      htmlTypes,
+      editingComponentPath
     } = this.state
 
     if (!schema || !values) {
@@ -71,7 +72,7 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, htmlTypes }}>
+      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes }}>
         <div
           className={cs('rlp-container', className)}
           {...rest}
@@ -91,7 +92,6 @@ export default class ReactLiveProps extends Component {
               <div className='rlp-editable-props-table-tree-view'>
                 <TreeView
                   of={of}
-                  availableTypes={availableTypes}
                   onChangeComponent={this._editComponent}
                 />
               </div>
@@ -102,7 +102,6 @@ export default class ReactLiveProps extends Component {
                 editableProperties={editableProperties}
                 blacklistedProperties={blacklistedProperties}
                 onChange={this._onChange}
-                availableTypes={availableTypes}
                 onAddProperty={this._onAddProperty}
               />
             </div>
@@ -112,7 +111,6 @@ export default class ReactLiveProps extends Component {
             <div className='rlp-section rlp-component-markup'>
               <ComponentMarkup
                 component={of}
-                availableTypes={availableTypes}
               />
             </div>
           )}
@@ -177,19 +175,19 @@ export default class ReactLiveProps extends Component {
     }
 
     try {
-      jsf.option({ alwaysFakeOptionals: true, minItems: 1, maxItems: 2 })
       const typeSchema = {}
-      const typeValues = {}
-      await Promise.all(allDocGenInfo.map(async typeInfo => {
+      allDocGenInfo.map(typeInfo => {
         typeSchema[typeInfo.displayName] = docgenToJsonSchema(typeInfo)
+      })
 
-        // something in jsf.resolve is mutating the original schema
-        // for anyOf properties, so give them a copy of the properties
-        typeValues[typeInfo.displayName] = await jsf.resolve(JSON.parse(JSON.stringify(typeSchema[typeInfo.displayName])))
-      }))
+      const initialValues = await buildDefaultValuesForType(typeSchema, info.displayName)
+      const values = {
+        type: info.displayName,
+        [info.displayName]: initialValues
+      }
 
-      if (typeValues[info.displayName].children && defaultComponentChildren) {
-        typeValues[info.displayName].children = defaultComponentChildren
+      if (values[info.displayName].children && defaultComponentChildren) {
+        values[info.displayName].children = defaultComponentChildren
       }
 
       this.setState({
@@ -197,9 +195,10 @@ export default class ReactLiveProps extends Component {
           ...typeSchema,
           title: this.buildComponentTitle(typeSchema[info.displayName].title, additionalTitleText)
         },
-        values: typeValues,
+        values,
         rootComponentDisplayName: info.displayName,
         editingComponent: info.displayName,
+        editingComponentPath: info.displayName,
         htmlTypes
       })
     } catch (err) {
@@ -208,9 +207,10 @@ export default class ReactLiveProps extends Component {
     }
   }
 
-  _editComponent = (rootComponentDisplayName) => {
+  _editComponent = (rootComponentDisplayName, componentPath) => {
     this.setState({
-      editingComponent: rootComponentDisplayName
+      editingComponent: rootComponentDisplayName,
+      editingComponentPath: componentPath
     })
   }
 

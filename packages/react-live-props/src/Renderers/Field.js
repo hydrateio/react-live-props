@@ -1,28 +1,8 @@
 import React from 'react'
-import { namespaceName, findSelectedType } from '../Utils'
+import { namespaceName } from '../Utils'
 
-const FieldRenderer = ({ parentName, name, type, value, onChange, options, availableTypes }) => {
+const FieldRenderer = ({ parentName, name, type, value, onChange, options }) => {
   const uniqueName = namespaceName(parentName, name)
-
-  if (name === 'children') {
-    let currentValue = ''
-    if (typeof value === 'string') {
-      currentValue = value
-    } else if (typeof value === 'object' && Object.keys(value).length === 0) {
-      currentValue = ''
-    } else if (value && value.name) {
-      currentValue = value.name
-    }
-
-    return <select key={uniqueName} name={uniqueName} value={currentValue} onChange={(e) => onChange(uniqueName, findSelectedType(availableTypes, e.target.value))}>
-      <option value=''>default (normally empty unless ReactLiveProps was given default children)</option>
-      {availableTypes.map(availableType => {
-        if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
-
-        return <option key={availableType} value={availableType.name}>{availableType.name}</option>
-      })}
-    </select>
-  }
 
   if (options) {
     return <select key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value)}>

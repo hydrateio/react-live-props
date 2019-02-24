@@ -16,7 +16,6 @@ export default class EditablePropsTable extends Component {
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
     blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
-    availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     onAddProperty: PropTypes.func
   }
 
@@ -83,19 +82,20 @@ export default class EditablePropsTable extends Component {
       className,
       editableProperties,
       blacklistedProperties,
-      availableTypes,
+      onAddProperty,
       ...rest
     } = this.props
 
     return (
       <SchemaContext.Consumer>
-        {({ schema, values, editingComponent, htmlTypes }) => {
+        {({ schema, values, editingComponent, editingComponentPath, htmlTypes }) => {
           const filteredSchema = this.filterProperties(schema[editingComponent])
           const propertyKeys = Object.keys(filteredSchema.properties)
-          const currentValue = values[editingComponent]
+          const currentValue = dotProp.get(values, editingComponentPath)
           const onAdd = (type, name) => this._onAdd(type, name, values, editingComponent)
-          const onChange = (name, newValue) => this._onChange(name, newValue, values, editingComponent)
+          const onChange = (name, newValue) => this._onChange(name, newValue, values)
           const onDelete = (name) => this._onDelete(name, values, editingComponent)
+
           return (
             <div
               className={cs('rlp-editable-props', className)}
@@ -106,14 +106,13 @@ export default class EditablePropsTable extends Component {
                 return (
                   <PropertyRenderer
                     key={`${key}.${idx}`}
-                    parentName={null}
+                    parentName={editingComponentPath}
                     name={key}
                     value={propertyValue}
                     onChange={onChange}
                     onDelete={onDelete}
                     onAdd={onAdd}
                     property={filteredSchema.properties[key]}
-                    availableTypes={availableTypes}
                   />
                 )
               })}
@@ -170,11 +169,11 @@ export default class EditablePropsTable extends Component {
     })
   }
 
-  _onChange = (name, newValue, values, editingComponent) => {
+  _onChange = (name, newValue, values) => {
     // dotProp mutates the value, so we need to clone before using dotProp
     const clonedValues = cloneDeep(values)
 
-    dotProp.set(clonedValues, `${editingComponent}.${name}`, newValue)
+    dotProp.set(clonedValues, name, newValue)
 
     this.props.onChange(clonedValues)
   }
