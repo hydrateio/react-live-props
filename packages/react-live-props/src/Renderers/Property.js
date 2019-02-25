@@ -238,7 +238,7 @@ export const AddHtmlAttributeRenderer = ({ pendingAttributeName, pendingAttribut
             <input type='text' value={pendingAttributeValue} onChange={(e) => onChange({ pendingAttributeValue: e.target.value })} />
           </div>
           <div className={cs('rlpPropHeaderAction', styles.rlpPropHeaderAction)}>
-            <AddButton onClick={() => onAddProperty(editingComponent, editingComponentPath, schema, values, pendingAttributeName, pendingAttributeValue)} />
+            <AddButton onClick={() => onAddProperty(editingComponent, editingComponentPath, schema, values, pendingAttributeName, tryParseStringAsType(pendingAttributeValue))} />
           </div>
         </div>
       </div>

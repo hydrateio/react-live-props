@@ -131,15 +131,44 @@ export default class EditablePropsTable extends Component {
   }
 
   _onAddProperty = (editingComponent, editingComponentPath, schema, values, name, value) => {
+    let propertySchema
+    const valueType = typeof value
+    if (Array.isArray(value)) {
+      propertySchema = {
+        type: 'array',
+        items: { type: 'string' }
+      }
+    } else if (valueType === 'object') {
+      const childProperties = {}
+      Object.keys(value).forEach(childProp => {
+        childProperties[childProp] = { type: 'string' }
+      })
+
+      propertySchema = {
+        type: 'object',
+        properties: childProperties
+      }
+    } else if (valueType === 'boolean') {
+      propertySchema = {
+        type: 'boolean'
+      }
+    } else if (valueType === 'number') {
+      propertySchema = {
+        type: 'number'
+      }
+    } else {
+      propertySchema = {
+        type: 'string'
+      }
+    }
+
     const newSchema = {
       ...schema,
       [editingComponent]: {
         ...schema[editingComponent],
         properties: {
           ...schema[editingComponent].properties,
-          [name]: {
-            type: 'string'
-          }
+          [name]: propertySchema
         }
       }
     }
