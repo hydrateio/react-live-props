@@ -1,6 +1,7 @@
 .rlpContainer {
   border: 2px solid #000;
   padding: 12px;
+  background: white;
 }
 
 .rlpContainerTitle {
