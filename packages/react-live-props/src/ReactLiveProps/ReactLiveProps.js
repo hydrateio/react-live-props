@@ -78,7 +78,8 @@ export default class ReactLiveProps extends Component {
       rootComponentDisplayName,
       editingComponent,
       htmlTypes,
-      editingComponentPath
+      editingComponentPath,
+      availableTypes: availableChildTypes
     } = this.state
 
     if (!schema || !values) {
@@ -86,7 +87,7 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes }}>
+      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes }}>
         <div
           className={cs('rlpContainer', styles.rlpContainer, className)}
           {...rest}
@@ -173,7 +174,12 @@ export default class ReactLiveProps extends Component {
 
     allDocGenInfo.push(info)
 
+    const availableChildren = [{ name: '@@TEXT' }]
     if (availableTypes) {
+      availableTypes.forEach(child => {
+        availableChildren.push(child)
+      })
+
       const typeInfo = availableTypes.map(type => {
         if (typeof type === 'string') {
           htmlTypes.push(type)
@@ -216,16 +222,31 @@ export default class ReactLiveProps extends Component {
       }
 
       if (values[info.displayName].children && initialComponentChildren) {
-        if (Array.isArray(initialComponentChildren)) {
+        if (typeSchema[info.displayName].properties.children.type === 'array') {
           values[info.displayName].children = []
-          initialComponentChildren.forEach(child => {
-            const childValues = processReactElementToValue(typeSchema, child)
+          if (Array.isArray(initialComponentChildren)) {
+            initialComponentChildren.forEach(child => {
+              const childValues = processReactElementToValue(typeSchema, child)
+              values[info.displayName].children.push(childValues)
+            })
+          } else {
+            const childValues = processReactElementToValue(typeSchema, initialComponentChildren)
             values[info.displayName].children.push(childValues)
-          })
+          }
         } else {
           const childValues = processReactElementToValue(typeSchema, initialComponentChildren)
           values[info.displayName].children = childValues
         }
+      }
+
+      typeSchema['@@TEXT'] = {
+        title: 'Text Node',
+        properties: {
+          text: {
+            type: 'string'
+          }
+        },
+        type: 'object'
       }
 
       this.setState({
@@ -237,7 +258,8 @@ export default class ReactLiveProps extends Component {
         rootComponentDisplayName: info.displayName,
         editingComponent: info.displayName,
         editingComponentPath: info.displayName,
-        htmlTypes
+        htmlTypes,
+        availableTypes: availableChildren
       })
     } catch (err) {
       console.error('ReactLiveProps error resolving JSON Schema', err)

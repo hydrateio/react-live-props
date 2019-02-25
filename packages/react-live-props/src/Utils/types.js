@@ -31,6 +31,15 @@ export const buildDefaultValuesForType = async (schema, componentName) => {
 }
 
 export const processReactElementToValue = (schema, element) => {
+  if (typeof element === 'string') {
+    return {
+      type: '@@TEXT',
+      '@@TEXT': {
+        text: element
+      }
+    }
+  }
+
   let children
   if (element.props.children) {
     children = []

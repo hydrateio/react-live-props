@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
 import { hasChildren } from '../Utils'
 import { SchemaContext } from '../Context'
@@ -72,11 +71,11 @@ const renderIndentation = (level) => {
 
 const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel }) => {
   // in case we got a React element
-  if (Component['$$typeof']) {
-    return ReactDOMServer.renderToStaticMarkup(Component)
-  }
-
   if (componentName === null) return ''
+
+  if (componentName === '@@TEXT') {
+    return `${renderIndentation(indentationLevel)}${values.text}`
+  }
 
   const componentSchema = schema[componentName]
 

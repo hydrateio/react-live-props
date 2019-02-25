@@ -19,6 +19,10 @@ const RenderComponent = ({ component, values, availableTypes }) => {
       const childComponents = children.map((child, idx) => {
         const childDisplayName = child.type
         const childValues = children[idx][childDisplayName]
+        if (childDisplayName === '@@TEXT') {
+          return childValues.text
+        }
+
         const childComponent = findSelectedType(availableTypes, childDisplayName)
         return RenderComponent({ component: childComponent, values: { ...childValues, key: `${childDisplayName}-${idx}` }, availableTypes })
       })
@@ -28,6 +32,11 @@ const RenderComponent = ({ component, values, availableTypes }) => {
 
     const childDisplayName = children.type
     const childValues = children[childDisplayName]
+
+    if (childDisplayName === '@@TEXT') {
+      return React.createElement(component, restValues, childValues.text)
+    }
+
     const childComponent = findSelectedType(availableTypes, childDisplayName)
     return RenderComponent({ component: childComponent, values: { ...childValues, key: childDisplayName }, availableTypes })
   }
