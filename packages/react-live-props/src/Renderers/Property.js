@@ -241,6 +241,7 @@ export const AddHtmlAttributeRenderer = ({ pendingAttributeName, pendingAttribut
             <AddButton onClick={() => onAddProperty(editingComponent, editingComponentPath, schema, values, pendingAttributeName, tryParseStringAsType(pendingAttributeValue))} />
           </div>
         </div>
+        <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>Add new attribute to the element</legend>
       </div>
     )}
   </SchemaContext>
