@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { SchemaContext } from '../Context'
-import { getDisplayName, hasChildren, findSelectedType } from '../Utils'
+import { hasChildren, findSelectedType } from '../Utils'
 
 import cs from 'classnames'
 
 import styles from './styles.css'
 
-const RenderComponent = ({ component, values, componentDisplayName, availableTypes }) => {
+const RenderComponent = ({ component, values, availableTypes }) => {
   // just in case they gave us default children which are already elements
   if (component['$$typeof']) {
     return component
@@ -20,7 +20,7 @@ const RenderComponent = ({ component, values, componentDisplayName, availableTyp
         const childDisplayName = child.type
         const childValues = children[idx][childDisplayName]
         const childComponent = findSelectedType(availableTypes, childDisplayName)
-        return RenderComponent({ component: childComponent, componentDisplayName: childDisplayName, values: { ...childValues, key: `${childDisplayName}-${idx}` }, availableTypes })
+        return RenderComponent({ component: childComponent, values: { ...childValues, key: `${childDisplayName}-${idx}` }, availableTypes })
       })
 
       return React.createElement(component, restValues, childComponents)
@@ -29,10 +29,16 @@ const RenderComponent = ({ component, values, componentDisplayName, availableTyp
     const childDisplayName = children.type
     const childValues = children[childDisplayName]
     const childComponent = findSelectedType(availableTypes, childDisplayName)
-    return RenderComponent({ component: childComponent, componentDisplayName: childDisplayName, values: { ...childValues, key: childDisplayName }, availableTypes })
+    return RenderComponent({ component: childComponent, values: { ...childValues, key: childDisplayName }, availableTypes })
   }
 
   return React.createElement(component, restValues)
+}
+
+RenderComponent.propTypes = {
+  component: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
+  availableTypes: PropTypes.array.isRequired
 }
 
 export default class ComponentPreview extends Component {

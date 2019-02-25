@@ -4,6 +4,7 @@ import FieldRenderer from './Field'
 import { AddButton, DeleteButton } from '../Components'
 import { SchemaContext } from '../Context'
 import { namespaceName, tryParseStringAsType, tryConvertTypeToString, buildDefaultValuesForType } from '../Utils'
+import PropTypes from 'prop-types'
 
 const onChangeType = async (schema, uniqueName, value, onChange) => {
   const typeValue = await buildDefaultValuesForType(schema, value)
@@ -140,6 +141,16 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
   </div>
 }
 
+PropertyRenderer.propTypes = {
+  parentName: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  property: PropTypes.object.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired
+}
+
 export const ObjectArrayRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
   const newParentName = namespaceName(parentName, name)
 
@@ -166,6 +177,16 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
   </div>
 }
 
+ObjectArrayRenderer.propTypes = {
+  parentName: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  property: PropTypes.object.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired
+}
+
 export const ObjectRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
   let propertyKeys = []
   if (property.properties) {
@@ -184,6 +205,16 @@ export const ObjectRenderer = ({ parentName, name, property, value, onChange, on
       )
     })}
   </div>
+}
+
+ObjectRenderer.propTypes = {
+  parentName: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  property: PropTypes.object.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired
 }
 
 export default PropertyRenderer

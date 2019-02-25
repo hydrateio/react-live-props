@@ -1,5 +1,6 @@
 import React from 'react'
 import { namespaceName } from '../Utils'
+import PropTypes from 'prop-types'
 
 const FieldRenderer = ({ parentName, name, type, value, onChange, options }) => {
   const uniqueName = namespaceName(parentName, name)
@@ -23,6 +24,15 @@ const FieldRenderer = ({ parentName, name, type, value, onChange, options }) => 
   }
 
   return <input type='text' key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value)} />
+}
+
+FieldRenderer.propTypes = {
+  parentName: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func.isRequired,
+  options: PropTypes.array
 }
 
 export default FieldRenderer

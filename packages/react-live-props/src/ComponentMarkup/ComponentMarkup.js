@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ReactDOMServer from 'react-dom/server'
 import PropTypes from 'prop-types'
-import { getDisplayName, hasChildren } from '../Utils'
+import { hasChildren } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
@@ -12,7 +12,7 @@ import styles from './styles.css'
 
 const INDENTATION_SIZE = 2
 
-const renderPropertyValue = (schema, property, value) => {
+const renderPropertyValue = (property, value) => {
   let valueOrDefault = typeof value !== 'undefined' ? value : property.default
   if (property.type === 'string') {
     return `"${valueOrDefault}"`
@@ -84,6 +84,7 @@ const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel 
   const { children, ...keys } = properties
 
   if (hasChildren(values) && properties.children) {
+    // if there are multiple children then render them as an array
     if (Array.isArray(values.children)) {
       const childrenMarkup = values.children.map((child, idx) => {
         const displayName = child.type
@@ -92,7 +93,7 @@ const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel 
       })
 
       return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-        const value = renderPropertyValue(componentSchema, properties[key], values[key])
+        const value = renderPropertyValue(properties[key], values[key])
         if (value === '{undefined}') return null
 
         return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
@@ -101,11 +102,12 @@ ${childrenMarkup.join('\n')}
 ${renderIndentation(indentationLevel)}</${componentName}>`
     }
 
+    // otherwise render the children as a single object
     const displayName = values.children.type
     const childValues = values.children[displayName]
     const childrenMarkup = StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1 })
     return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-      const value = renderPropertyValue(componentSchema, properties[key], values[key])
+      const value = renderPropertyValue(properties[key], values[key])
       if (value === '{undefined}') return null
 
       return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
@@ -114,8 +116,9 @@ ${childrenMarkup}
 ${renderIndentation(indentationLevel)}</${componentName}>`
   }
 
+  // if there are no children then just render the component and props
   return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-    const value = renderPropertyValue(componentSchema, properties[key], values[key])
+    const value = renderPropertyValue(properties[key], values[key])
     if (value === '{undefined}') return null
 
     return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`

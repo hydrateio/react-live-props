@@ -33,6 +33,15 @@ const RenderComponent = ({ values, componentDisplayName, editingComponent, editi
   )
 }
 
+RenderComponent.propTypes = {
+  values: PropTypes.object.isRequired,
+  componentDisplayName: PropTypes.string.isRequired,
+  editingComponent: PropTypes.string.isRequired,
+  editingComponentPath: PropTypes.string.isRequired,
+  onChangeComponent: PropTypes.func.isRequired,
+  componentPath: PropTypes.string.isRequired
+}
+
 class TreeView extends React.Component {
   static propTypes = {
     of: PropTypes.func.isRequired,
@@ -42,8 +51,6 @@ class TreeView extends React.Component {
 
   render() {
     const { of, className, onChangeComponent, ...rest } = this.props
-
-
 
     return <SchemaContext.Consumer>
       {({ values, rootComponentDisplayName, editingComponent, editingComponentPath }) => {

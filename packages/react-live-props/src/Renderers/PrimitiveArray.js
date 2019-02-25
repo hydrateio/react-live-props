@@ -2,6 +2,7 @@ import React from 'react'
 import { AddButton, DeleteButton } from '../Components'
 import FieldRenderer from './Field'
 import { namespaceName } from '../Utils'
+import PropTypes from 'prop-types'
 
 const PrimitiveArrayRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd, availableTypes }) => {
   const newParentName = namespaceName(parentName, name)
@@ -27,6 +28,17 @@ const PrimitiveArrayRenderer = ({ parentName, name, property, value, onChange, o
       ))}
     </div>
   </div>
+}
+
+PrimitiveArrayRenderer.propTypes = {
+  parentName: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  property: PropTypes.object.isRequired,
+  value: PropTypes.any,
+  onChange: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired,
+  availableTypes: PropTypes.array.isRequired
 }
 
 export default PrimitiveArrayRenderer
