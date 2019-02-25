@@ -5,6 +5,9 @@ import { AddButton, DeleteButton } from '../Components'
 import { SchemaContext } from '../Context'
 import { namespaceName, tryParseStringAsType, tryConvertTypeToString, buildDefaultValuesForType } from '../Utils'
 import PropTypes from 'prop-types'
+import cs from 'classnames'
+
+import styles from './styles.css'
 
 const onChangeType = async (schema, uniqueName, value, onChange) => {
   const typeValue = await buildDefaultValuesForType(schema, value)
@@ -27,10 +30,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
             <React.Fragment>
               {valueOrDefault.map((child, idx) => {
                 return (
-                  <div className='rlp-prop' key={`${child.type}-${idx}`}>
-                    <div className='rlp-prop-header'>
-                      <strong className='rlp-prop-name'>{name}</strong>
-                      <div className='rlp-prop-input'>
+                  <div className={cs('rlpProp', styles.rlpProp)} key={`${child.type}-${idx}`}>
+                    <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+                      <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+                      <div className={cs('rlpPropInput', styles.rlpPropInput)}>
                         <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, onChange)}>
                           <option value=''>none</option>
                           {availableTypes.map(availableType => {
@@ -45,10 +48,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
                 )
               })}
 
-              <div className='rlp-prop'>
-                <div className='rlp-prop-header'>
-                  <strong className='rlp-prop-name'>{name}</strong>
-                  <div className='rlp-prop-input'>
+              <div className={cs('rlpProp', styles.rlpProp)}>
+                <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+                  <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+                  <div className={cs('rlpPropInput', styles.rlpPropInput)}>
                     <select key={`${uniqueName}.${valueOrDefault.length}`} name={`${uniqueName}.${valueOrDefault.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${valueOrDefault.length}`, e.target.value, onChange)}>
                       <option value=''>none</option>
                       {availableTypes.map(availableType => {
@@ -71,10 +74,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
         if (availableTypes.length === 0) return null
 
         return (
-          <div className='rlp-prop'>
-            <div className='rlp-prop-header'>
-              <strong className='rlp-prop-name'>{name}</strong>
-              <div className='rlp-prop-input'>
+          <div className={cs('rlpProp', styles.rlpProp)}>
+            <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+              <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+              <div className={cs('rlpPropInput', styles.rlpPropInput)}>
                 <select key={uniqueName} name={uniqueName} value={value.type} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, onChange)}>
                   <option value=''>none</option>
                   {availableTypes.map(availableType => {
@@ -93,15 +96,15 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
 
   if (singleFieldTypes.includes(property.type)) {
     const currentValue = typeof value !== 'undefined' && value !== null ? value : property.default
-    return <div className='rlp-prop'>
-      <div className='rlp-prop-header'>
-        <strong className='rlp-prop-name'>{name}</strong>
-        <div className='rlp-prop-input'>
+    return <div className={cs('rlpProp', styles.rlpProp)}>
+      <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+        <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+        <div className={cs('rlpPropInput', styles.rlpPropInput)}>
           <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
         </div>
       </div>
       {property.description && (
-        <legend className='rlp-prop-description'>{property.description}</legend>
+        <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
       )}
     </div>
   }
@@ -115,7 +118,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
       return <ObjectArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
     }
 
-    return <div className='rlp-prop'>
+    return <div className={cs('rlpProp', styles.rlpProp)}>
       <label>
         {name}
         NOT SUPPORTED
@@ -128,22 +131,22 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
   }
 
   const valueOrDefault = value || ''
-  return <div className='rlp-prop'>
-    <div className='rlp-prop-header'>
-      <strong className='rlp-prop-name'>{name}</strong>
-      <div className='rlp-prop-input'>
+  return <div className={cs('rlpProp', styles.rlpProp)}>
+    <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+      <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+      <div className={cs('rlpPropInput', styles.rlpPropInput)}>
         <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
       </div>
     </div>
     {property.description && (
-      <legend className='rlp-prop-description'>{property.description}</legend>
+      <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
     )}
   </div>
 }
 
 PropertyRenderer.propTypes = {
   parentName: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   property: PropTypes.object.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
@@ -154,32 +157,38 @@ PropertyRenderer.propTypes = {
 export const ObjectArrayRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
   const newParentName = namespaceName(parentName, name)
 
-  return <div className='rlp-prop'>
-    <div className='rlp-prop-header'>
-      <strong className='rlp-prop-name'>{name}</strong>
-      <div className='rlp-prop-header-action'>
-        <AddButton onClick={() => onAdd(newParentName, 'object')} />
-      </div>
-    </div>
-    {property.description && (
-      <legend className='rlp-prop-description'>{property.description}</legend>
-    )}
-    <div className='rlp-prop-input'>
-      {value && value.map((item, idx) => (
-        <div className='rlp-prop-list-item' key={namespaceName(newParentName, `value-${idx}`)}>
-          <div className='rlp-prop-list-item-input'>
-            <ObjectRenderer parentName={newParentName} name={idx} value={item} property={property.items} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+  return (
+    <SchemaContext>
+      {({ values }) => (
+        <div className={cs('rlpProp', styles.rlpProp)}>
+          <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+            <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+            <div className={cs('rlpPropHeaderAction', styles.rlpPropHeaderAction)}>
+              <AddButton onClick={() => onAdd(newParentName, 'object', values)} />
+            </div>
           </div>
-          <DeleteButton onClick={() => onDelete(namespaceName(newParentName, idx))} />
+          {property.description && (
+            <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
+          )}
+          <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+            {value && value.map((item, idx) => (
+              <div className={cs('rlpPropListItem', styles.rlpPropListItem)} key={namespaceName(newParentName, `value-${idx}`)}>
+                <div className={cs('rlpPropListItemInput', styles.rlpPropListItemInput)}>
+                  <ObjectRenderer parentName={newParentName} name={idx} value={item} property={property.items} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+                </div>
+                <DeleteButton onClick={() => onDelete(namespaceName(newParentName, idx), values)} />
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
+      )}
+    </SchemaContext>
+  )
 }
 
 ObjectArrayRenderer.propTypes = {
   parentName: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   property: PropTypes.object.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
@@ -195,7 +204,7 @@ export const ObjectRenderer = ({ parentName, name, property, value, onChange, on
 
   const newParentName = namespaceName(parentName, name)
 
-  return <div className='rlp-prop'>
+  return <div className={cs('rlpProp', styles.rlpProp)}>
     <span>{name}</span>
     {propertyKeys.map((key, idx) => {
       const itemValue = value ? value[key] : null
@@ -209,12 +218,39 @@ export const ObjectRenderer = ({ parentName, name, property, value, onChange, on
 
 ObjectRenderer.propTypes = {
   parentName: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   property: PropTypes.object.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onAdd: PropTypes.func.isRequired
+}
+
+export const AddHtmlAttributeRenderer = ({ pendingAttributeName, pendingAttributeValue, onAddProperty, onChange }) => (
+  <SchemaContext>
+    {({ schema, values, editingComponent, editingComponentPath }) => (
+      <div className={cs('rlpProp', styles.rlpProp)}>
+        <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+          <div className={cs('rlpPropName', styles.rlpPropName)}>
+            <input type='text' value={pendingAttributeName} onChange={(e) => onChange({ pendingAttributeName: e.target.value })} />
+          </div>
+          <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+            <input type='text' value={pendingAttributeValue} onChange={(e) => onChange({ pendingAttributeValue: e.target.value })} />
+          </div>
+          <div className={cs('rlpPropHeaderAction', styles.rlpPropHeaderAction)}>
+            <AddButton onClick={() => onAddProperty(editingComponent, editingComponentPath, schema, values, pendingAttributeName, pendingAttributeValue)} />
+          </div>
+        </div>
+      </div>
+    )}
+  </SchemaContext>
+)
+
+AddHtmlAttributeRenderer.propTypes = {
+  pendingAttributeName: PropTypes.string.isRequired,
+  pendingAttributeValue: PropTypes.string.isRequired,
+  onAddProperty: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired
 }
 
 export default PropertyRenderer

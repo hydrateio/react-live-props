@@ -38,7 +38,7 @@ const RenderComponent = ({ component, values, availableTypes }) => {
 RenderComponent.propTypes = {
   component: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
-  availableTypes: PropTypes.array.isRequired
+  availableTypes: PropTypes.array
 }
 
 export default class ComponentPreview extends Component {

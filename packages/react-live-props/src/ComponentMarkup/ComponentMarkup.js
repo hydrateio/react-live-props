@@ -160,7 +160,7 @@ export default class ComponentMarkup extends Component {
         {({ schema, values, rootComponentDisplayName }) => {
           const componentMarkup = StaticMarkupRenderer({ componentName: rootComponentDisplayName, schema, values: values[rootComponentDisplayName], indentationLevel: 0 })
           return (
-            <div ref={ref => this.node = ref} className={cs('codeRoot', className)} {...rest}>
+            <div ref={ref => this.node = ref} className={cs('codeRoot', styles.codeRoot, className)} {...rest}>
               <pre>
                 <code className='language-jsx'>{componentMarkup}</code>
               </pre>

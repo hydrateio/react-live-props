@@ -4,7 +4,7 @@ import cs from 'classnames'
 import { hasChildren } from '../Utils'
 import { SchemaContext } from '../Context'
 
-import './styles.css'
+import styles from './styles.css'
 
 const RenderComponent = ({ values, componentDisplayName, editingComponent, editingComponentPath, onChangeComponent, componentPath }) => {
   const isSelected = editingComponentPath === componentPath
@@ -12,10 +12,10 @@ const RenderComponent = ({ values, componentDisplayName, editingComponent, editi
   return (
     <React.Fragment>
       <li>
-        <p><a href='javascript:void(0)' className={isSelected ? 'rlp-tree-view-selected' : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{componentDisplayName}</a></p>
+        <p><a href='javascript:void(0)' className={isSelected ? cs('rlpTreeViewSelected', styles.rlpTreeViewSelected) : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{componentDisplayName}</a></p>
       </li>
       {hasChildren(values) && (
-        <li className='rlp-tree-view-list-container'>
+        <li className={cs('rlpTreeViewListContainer', styles.rlpTreeViewListContainer)}>
           <ul>
             {values && values.children && Array.isArray(values.children) && values.children.map((child, idx) => {
               const newPath = `${componentPath}.children.${idx}.${child.type}`
@@ -55,7 +55,7 @@ class TreeView extends React.Component {
     return <SchemaContext.Consumer>
       {({ values, rootComponentDisplayName, editingComponent, editingComponentPath }) => {
         return (
-          <div className={cs('rlp-tree-view', className)} {...rest}>
+          <div className={cs('rlpTreeView', styles.rlpTreeView, className)} {...rest}>
             <ul>
               <RenderComponent values={values[rootComponentDisplayName]} editingComponentPath={editingComponentPath} componentPath={rootComponentDisplayName} editingComponent={editingComponent} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
             </ul>

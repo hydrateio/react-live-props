@@ -4,11 +4,10 @@ import PropTypes from 'prop-types'
 import cs from 'classnames'
 import dotProp from 'dot-prop'
 import cloneDeep from 'lodash.clonedeep'
-import { PropertyRenderer } from '../Renderers'
+import { PropertyRenderer, AddHtmlAttributeRenderer } from '../Renderers'
 import { SchemaContext } from '../Context'
-import { AddButton } from '../Components'
 
-import './styles.css'
+import styles from './styles.css'
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
@@ -95,13 +94,10 @@ export default class EditablePropsTable extends Component {
           const filteredSchema = this.filterProperties(schema[editingComponent])
           const propertyKeys = Object.keys(filteredSchema.properties)
           const currentValue = dotProp.get(values, editingComponentPath)
-          const onAdd = (type, name) => this._onAdd(type, name, values, editingComponent)
-          const onChange = (name, newValue) => this._onChange(name, newValue, values)
-          const onDelete = (name) => this._onDelete(name, values, editingComponent)
 
           return (
             <div
-              className={cs('rlp-editable-props', className)}
+              className={cs('rlpEditableProps', styles.rlpEditableProps, className)}
               {...rest}
             >
               {propertyKeys.map((key, idx) => {
@@ -112,34 +108,26 @@ export default class EditablePropsTable extends Component {
                     parentName={editingComponentPath}
                     name={key}
                     value={propertyValue}
-                    onChange={onChange}
-                    onDelete={onDelete}
-                    onAdd={onAdd}
+                    onChange={this._onChange}
+                    onDelete={this._onDelete}
+                    onAdd={this._onAdd}
                     property={filteredSchema.properties[key]}
                   />
                 )
               })}
 
               {htmlTypes.includes(editingComponent) && (
-                <div className='rlp-prop'>
-                  <div className='rlp-prop-header'>
-                    <div className='rlp-prop-name'>
-                      <input type='text' value={this.state.pendingAttributeName} onChange={(e) => this.setState({ pendingAttributeName: e.target.value })} />
-                    </div>
-                    <div className='rlp-prop-input'>
-                      <input type='text' value={this.state.pendingAttributeValue} onChange={(e) => this.setState({ pendingAttributeValue: e.target.value })} />
-                    </div>
-                    <div className='rlp-prop-header-action'>
-                      <AddButton onClick={() => this._onAddProperty(editingComponent, editingComponentPath, schema, values, this.state.pendingAttributeName, this.state.pendingAttributeValue)} />
-                    </div>
-                  </div>
-                </div>
+                <AddHtmlAttributeRenderer pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
               )}
             </div>
           )
         }}
       </SchemaContext.Consumer>
     )
+  }
+
+  _onChangeProperty = (state) => {
+    this.setState(state)
   }
 
   _onAddProperty = (editingComponent, editingComponentPath, schema, values, name, value) => {
@@ -179,7 +167,7 @@ export default class EditablePropsTable extends Component {
     this.props.onChange(clonedValues)
   }
 
-  _onDelete = (name, values, editingComponent) => {
+  _onDelete = (name, values) => {
     // dotProp mutates the value, so we need to clone before using dotProp
     const clonedValues = cloneDeep(values)
 
@@ -188,22 +176,22 @@ export default class EditablePropsTable extends Component {
     try {
       const index = parseInt(lastProp, 10)
       // the property is an array index
-      const array = dotProp.get(clonedValues, `${editingComponent}.${nameParts.join('.')}`)
+      const array = dotProp.get(clonedValues, nameParts.join('.'))
       array.splice(index, 1)
-      dotProp.set(clonedValues, `${editingComponent}.${nameParts.join('.')}`, array)
+      dotProp.set(clonedValues, nameParts.join('.'), array)
     } catch (e) {
       // the property is not an array index
-      dotProp.delete(clonedValues, `${editingComponent}.${name}`)
+      dotProp.delete(clonedValues, name)
     }
 
     this.props.onChange(clonedValues)
   }
 
-  _onAdd = (name, type, values, editingComponent) => {
+  _onAdd = (name, type, values) => {
     // dotProp mutates the value, so we need to clone before using dotProp
     const clonedValues = cloneDeep(values)
 
-    const prop = dotProp.get(clonedValues, `${editingComponent}.${name}`)
+    const prop = dotProp.get(clonedValues, name)
 
     if (type === 'string') {
       prop.push('')

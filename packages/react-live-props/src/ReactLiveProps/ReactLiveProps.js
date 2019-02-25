@@ -12,7 +12,7 @@ import { SchemaContext } from '../Context'
 import { Expand, Collapse } from '../Components'
 import { buildDefaultValuesForType, processReactElementToValue } from '../Utils'
 
-import './styles.css'
+import styles from './styles.css'
 
 export default class ReactLiveProps extends Component {
   static propTypes = {
@@ -88,10 +88,10 @@ export default class ReactLiveProps extends Component {
     return (
       <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes }}>
         <div
-          className={cs('rlp-container', className)}
+          className={cs('rlpContainer', styles.rlpContainer, className)}
           {...rest}
         >
-          <h2 className='rlp-container-title'>
+          <h2 className={cs('rlpContainerTitle', styles.rlpContainerTitle)}>
             {schema.title}
             {this.state.collapsed && (
               <Expand onClick={() => this.onToggleExpandCollapse(false)} />
@@ -104,24 +104,24 @@ export default class ReactLiveProps extends Component {
           {!this.state.collapsed && (
             <React.Fragment>
               {!hideComponentPreview && (
-                <div className='rlp-section rlp-component-preview'>
+                <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
                   <ComponentPreview
                     component={of}
                   />
                 </div>
               )}
 
-              <div className='rlp-section rlp-editable-props-table'>
+              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
                 {schema[rootComponentDisplayName].properties && schema[rootComponentDisplayName].properties.children && (
-                  <div className='rlp-editable-props-table-tree-view'>
+                  <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
                     <TreeView
                       of={of}
                       onChangeComponent={this._editComponent}
                     />
                   </div>
                 )}
-                <div className='rlp-editable-props-table-spacer' />
-                <div className='rlp-editable-props-table-main'>
+                <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
+                <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
                   <EditablePropsTable
                     editableProperties={editableProperties}
                     blacklistedProperties={blacklistedProperties}
@@ -132,7 +132,7 @@ export default class ReactLiveProps extends Component {
               </div>
 
               {!hideComponentMarkup && (
-                <div className='rlp-section rlp-component-markup'>
+                <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
                   <ComponentMarkup
                     component={of}
                   />
@@ -140,7 +140,7 @@ export default class ReactLiveProps extends Component {
               )}
 
               {CustomComponentMarkup && (
-                <div className='rlp-section rlp-component-markup rlp-custom-component-markup'>
+                <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
                   <CustomComponentMarkup>
                     <ComponentPreview
                       component={of}
