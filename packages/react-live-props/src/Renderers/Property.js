@@ -3,22 +3,12 @@ import PrimitiveArrayRenderer from './PrimitiveArray'
 import FieldRenderer from './Field'
 import { AddButton, DeleteButton } from '../Components'
 import { SchemaContext } from '../Context'
-import { namespaceName, tryParseStringAsType, tryConvertTypeToString, buildDefaultValuesForType } from '../Utils'
+import { namespaceName, tryParseStringAsType, tryConvertTypeToString } from '../Utils'
+import { ChildrenObjectRenderer, ChildrenArrayRenderer } from './Children'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
 
 import styles from './styles.css'
-
-const onChangeType = async (schema, uniqueName, value, values, onChange, onDelete) => {
-  if (value === '') {
-    // this is a delete
-    onDelete(uniqueName, values)
-    return
-  }
-
-  const typeValue = await buildDefaultValuesForType(schema, value)
-  onChange(uniqueName, { type: value, [value]: typeValue }, values)
-}
 
 const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
   const singleFieldTypes = ['number', 'boolean', 'string']
@@ -28,78 +18,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
 
     if (property.type === 'array') {
       const valueOrDefault = value ? (Array.isArray(value) ? value : [value]) : []
-      return <SchemaContext>
-        {({ schema, availableTypes, values }) => {
-          if (availableTypes.length === 0) return null
-
-          return (
-            <React.Fragment>
-              {valueOrDefault.map((child, idx) => {
-                return (
-                  <div className={cs('rlpProp', styles.rlpProp)} key={`${child.type}-${idx}`}>
-                    <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-                      <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-                      <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-                        <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, `${uniqueName}.${idx}`, e.target.value, values, onChange, onDelete)}>
-                          <option value=''>none</option>
-                          {availableTypes.map(availableType => {
-                            if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
-
-                            return <option key={availableType} value={availableType.name}>{availableType.name}</option>
-                          })}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-
-              <div className={cs('rlpProp', styles.rlpProp)}>
-                <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-                  <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-                  <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-                    <select key={`${uniqueName}.${valueOrDefault.length}`} name={`${uniqueName}.${valueOrDefault.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${valueOrDefault.length}`, e.target.value, values, onChange, onDelete)}>
-                      <option value=''>none</option>
-                      {availableTypes.map(availableType => {
-                        if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
-
-                        return <option key={availableType} value={availableType.name}>{availableType.name}</option>
-                      })}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </React.Fragment>
-          )
-        }}
-      </SchemaContext>
+      return <ChildrenArrayRenderer value={valueOrDefault} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
     }
 
-    return <SchemaContext>
-      {({ schema, availableTypes, values }) => {
-        if (availableTypes.length === 0) return null
-
-        const valueOrDefault = value ? value.type : ''
-
-        return (
-          <div className={cs('rlpProp', styles.rlpProp)}>
-            <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-              <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-              <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-                <select key={uniqueName} name={uniqueName} value={valueOrDefault} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, values, onChange, onDelete)}>
-                  <option value=''>none</option>
-                  {availableTypes.map(availableType => {
-                    if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
-
-                    return <option key={availableType} value={availableType.name}>{availableType.name}</option>
-                  })}
-                </select>
-              </div>
-            </div>
-          </div>
-        )
-      }}
-    </SchemaContext>
+    return <ChildrenObjectRenderer value={value} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
   }
 
   if (singleFieldTypes.includes(property.type)) {
