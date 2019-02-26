@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { hasChildren } from '../Utils'
+import { hasChildren, findNodeProperties } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
@@ -10,6 +10,10 @@ import styles from './styles.css'
 /* global Prism */
 
 const INDENTATION_SIZE = 2
+
+const convertDisplayNameToRenderName = (name) => {
+  return name.replace(/-/g, '.')
+}
 
 const renderPropertyValue = (property, value) => {
   let valueOrDefault = typeof value !== 'undefined' ? value : property.default
@@ -26,6 +30,10 @@ const renderPropertyValue = (property, value) => {
   }
 
   if (property.type === 'object') {
+    if (valueOrDefault && typeof valueOrDefault === 'string' && valueOrDefault.startsWith('<')) {
+      // this is a JSX node
+      return `{${valueOrDefault}}`
+    }
     return `{${JSON.stringify(valueOrDefault, null, 2)}}`
   }
 
@@ -69,9 +77,11 @@ const renderIndentation = (level) => {
   return spaces.join('')
 }
 
-const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel }) => {
+const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel, availableTypes, htmlTypes, docgenInfo, skipNewLines = false }) => {
   // in case we got a React element
   if (componentName === null) return ''
+
+  const newLine = skipNewLines ? '' : '\n'
 
   if (componentName === '@@TEXT') {
     return `${renderIndentation(indentationLevel)}${values.text}`
@@ -82,45 +92,66 @@ const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel 
   const { properties = {} } = componentSchema
   const { children, ...keys } = properties
 
+  let restValuesWithNodes = {
+    ...values
+  }
+  const nodeProperties = findNodeProperties(componentName, docgenInfo[componentName], htmlTypes).filter(name => name !== 'children')
+  nodeProperties.forEach(name => {
+    if (!values[name] || !values[name].type) {
+      restValuesWithNodes = {
+        ...restValuesWithNodes,
+        [name]: null
+      }
+
+      return
+    }
+    const propComponentType = values[name].type
+    const propValues = values[name][propComponentType]
+    restValuesWithNodes = {
+      ...restValuesWithNodes,
+      [name]: StaticMarkupRenderer({ componentName: propComponentType, schema, values: propValues, indentationLevel: 0, availableTypes, htmlTypes, docgenInfo, skipNewLines })
+    }
+  })
+
   if (hasChildren(values) && properties.children) {
     // if there are multiple children then render them as an array
     if (Array.isArray(values.children)) {
       const childrenMarkup = values.children.map((child, idx) => {
         const displayName = child.type
         const childValues = child[displayName]
-        return StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1 })
+        return StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1, availableTypes, htmlTypes, docgenInfo, skipNewLines })
       })
 
-      return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-        const value = renderPropertyValue(properties[key], values[key])
+      return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+        const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
         if (value === '{undefined}') return null
 
-        return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
+        return `${newLine}${renderIndentation(indentationLevel + 1)}${key}=${value}`
       }).filter(item => item !== null).join('')}>
-${childrenMarkup.join('\n')}
-${renderIndentation(indentationLevel)}</${componentName}>`
+${childrenMarkup.join(newLine)}
+${renderIndentation(indentationLevel)}</${convertDisplayNameToRenderName(componentName)}>`
     }
 
     // otherwise render the children as a single object
     const displayName = values.children.type
     const childValues = values.children[displayName]
-    const childrenMarkup = StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1 })
-    return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-      const value = renderPropertyValue(properties[key], values[key])
+    const childrenMarkup = StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1, availableTypes, htmlTypes, docgenInfo, skipNewLines })
+    return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+      const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
       if (value === '{undefined}') return null
 
       return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
     }).filter(item => item !== null).join('')}>
 ${childrenMarkup}
-${renderIndentation(indentationLevel)}</${componentName}>`
+${renderIndentation(indentationLevel)}</${convertDisplayNameToRenderName(componentName)}>`
   }
 
   // if there are no children then just render the component and props
-  return `${renderIndentation(indentationLevel)}<${componentName}${Object.keys(keys).map(key => {
-    const value = renderPropertyValue(properties[key], values[key])
+  return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+    const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
     if (value === '{undefined}') return null
 
-    return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
+    return `${newLine}${renderIndentation(indentationLevel + 1)}${key}=${value}`
   }).filter(item => item !== null).join('')} />`
 }
 
@@ -156,8 +187,8 @@ export default class ComponentMarkup extends Component {
 
     return (
       <SchemaContext.Consumer>
-        {({ schema, values, rootComponentDisplayName }) => {
-          const componentMarkup = StaticMarkupRenderer({ componentName: rootComponentDisplayName, schema, values: values[rootComponentDisplayName], indentationLevel: 0 })
+        {({ schema, values, rootComponentDisplayName, availableTypes, htmlTypes, docgenInfo }) => {
+          const componentMarkup = StaticMarkupRenderer({ componentName: rootComponentDisplayName, schema, values: values[rootComponentDisplayName], indentationLevel: 0, availableTypes, htmlTypes, docgenInfo })
           return (
             <div ref={ref => this.node = ref} className={cs('codeRoot', styles.codeRoot, className)} {...rest}>
               <pre>

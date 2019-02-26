@@ -19,6 +19,11 @@
   border: 2px solid #e5e5e5;
 }
 
+.rlpEditablePropsTableTreeView {
+  max-height: 400px;
+  overflow: auto;
+}
+
 .rlpEditablePropsTable {
   display: flex;
 }
@@ -29,6 +34,8 @@
 
 .rlpEditablePropsTableMain {
   flex-grow: 1;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .rlpContainerTitle button {

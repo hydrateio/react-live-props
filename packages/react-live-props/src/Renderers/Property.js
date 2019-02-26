@@ -11,67 +11,80 @@ import cs from 'classnames'
 import styles from './styles.css'
 
 const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelete, onAdd }) => {
-  const singleFieldTypes = ['number', 'boolean', 'string']
+  return <SchemaContext.Consumer>
+    {({ docgenInfo, editingComponent }) => {
+      const singleFieldTypes = ['number', 'boolean', 'string']
 
-  if (name === 'children') {
-    const uniqueName = namespaceName(parentName, name)
+      if (name === 'children') {
+        const uniqueName = namespaceName(parentName, name)
 
-    if (property.type === 'array') {
-      const valueOrDefault = value ? (Array.isArray(value) ? value : [value]) : []
-      return <ChildrenArrayRenderer value={valueOrDefault} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
-    }
+        if (property.type === 'array') {
+          const valueOrDefault = value ? (Array.isArray(value) ? value : [value]) : []
+          return <ChildrenArrayRenderer value={valueOrDefault} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
+        }
 
-    return <ChildrenObjectRenderer value={value} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
-  }
+        return <ChildrenObjectRenderer value={value} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
+      }
 
-  if (singleFieldTypes.includes(property.type)) {
-    const currentValue = typeof value !== 'undefined' && value !== null ? value : property.default
-    return <div className={cs('rlpProp', styles.rlpProp)}>
-      <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-        <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-        <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-          <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
+      if (singleFieldTypes.includes(property.type)) {
+        const currentValue = typeof value !== 'undefined' && value !== null ? value : property.default
+        return <div className={cs('rlpProp', styles.rlpProp)}>
+          <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+            <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+            <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+              <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
+            </div>
+          </div>
+          {property.description && (
+            <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
+          )}
         </div>
+      }
+
+      if (property.type === 'array') {
+        if (singleFieldTypes.includes(property.items.type)) {
+          return <PrimitiveArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+        }
+
+        if (property.items.type === 'object') {
+          return <ObjectArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+        }
+
+        return <div className={cs('rlpProp', styles.rlpProp)}>
+          <label>
+            {name}
+            NOT SUPPORTED
+          </label>
+        </div>
+      }
+
+      if (property.type === 'object') {
+        // check to see if it is a node
+
+        if (docgenInfo[editingComponent]) {
+          if (docgenInfo[editingComponent].props[name].type.name === 'node') {
+            const uniqueName = namespaceName(parentName, name)
+            return <ChildrenObjectRenderer value={value} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
+          }
+        }
+
+        return <ObjectRenderer parentName={parentName} name={name} property={property} value={value} docgenInfo={docgenInfo} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
+      }
+
+      const valueOrDefault = value || ''
+      return <div className={cs('rlpProp', styles.rlpProp)}>
+        <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+          <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+          <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+            <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
+          </div>
+        </div>
+        {property.description && (
+          <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
+        )}
       </div>
-      {property.description && (
-        <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
-      )}
-    </div>
-  }
-
-  if (property.type === 'array') {
-    if (singleFieldTypes.includes(property.items.type)) {
-      return <PrimitiveArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
-    }
-
-    if (property.items.type === 'object') {
-      return <ObjectArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
-    }
-
-    return <div className={cs('rlpProp', styles.rlpProp)}>
-      <label>
-        {name}
-        NOT SUPPORTED
-      </label>
-    </div>
-  }
-
-  if (property.type === 'object') {
-    return <ObjectRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
-  }
-
-  const valueOrDefault = value || ''
-  return <div className={cs('rlpProp', styles.rlpProp)}>
-    <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-      <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-      <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-        <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
-      </div>
-    </div>
-    {property.description && (
-      <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
-    )}
-  </div>
+    }}
+  </SchemaContext.Consumer>
 }
 
 PropertyRenderer.propTypes = {
@@ -88,8 +101,8 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
   const newParentName = namespaceName(parentName, name)
 
   return (
-    <SchemaContext>
-      {({ values }) => (
+    <SchemaContext.Consumer>
+      {({ values, docgenInfo }) => (
         <div className={cs('rlpProp', styles.rlpProp)}>
           <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
             <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
@@ -112,7 +125,7 @@ export const ObjectArrayRenderer = ({ parentName, name, property, value, onChang
           </div>
         </div>
       )}
-    </SchemaContext>
+    </SchemaContext.Consumer>
   )
 }
 
@@ -157,7 +170,7 @@ ObjectRenderer.propTypes = {
 }
 
 export const AddHtmlAttributeRenderer = ({ pendingAttributeName, pendingAttributeValue, onAddProperty, onChange }) => (
-  <SchemaContext>
+  <SchemaContext.Consumer>
     {({ schema, values, editingComponent, editingComponentPath }) => (
       <div className={cs('rlpProp', styles.rlpProp)}>
         <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
@@ -174,7 +187,7 @@ export const AddHtmlAttributeRenderer = ({ pendingAttributeName, pendingAttribut
         <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>Add new attribute to the element</legend>
       </div>
     )}
-  </SchemaContext>
+  </SchemaContext.Consumer>
 )
 
 AddHtmlAttributeRenderer.propTypes = {

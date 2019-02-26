@@ -48,6 +48,6 @@ import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
     />
   </svg>} />
 
-<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Text, 'div']} />
+<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Panel.Other, Text, 'div']} initialPropValues={{ header: <Text text='testing' />, color: 'red' }} />
 
 <ReactLiveProps of={Panel} additionalTitleText='Text Children' initialComponentChildren='Testing' />

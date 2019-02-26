@@ -90,7 +90,7 @@ export default class EditablePropsTable extends Component {
 
     return (
       <SchemaContext.Consumer>
-        {({ schema, values, editingComponent, editingComponentPath, htmlTypes }) => {
+        {({ schema, values, editingComponent, editingComponentPath, htmlTypes, docgenInfo }) => {
           const filteredSchema = this.filterProperties(schema[editingComponent])
           const propertyKeys = Object.keys(filteredSchema.properties)
           const currentValue = dotProp.get(values, editingComponentPath)
@@ -108,6 +108,7 @@ export default class EditablePropsTable extends Component {
                     parentName={editingComponentPath}
                     name={key}
                     value={propertyValue}
+                    docgenInfo={docgenInfo}
                     onChange={this._onChange}
                     onDelete={this._onDelete}
                     onAdd={this._onAdd}

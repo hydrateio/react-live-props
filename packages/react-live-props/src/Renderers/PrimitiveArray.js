@@ -12,7 +12,7 @@ const PrimitiveArrayRenderer = ({ parentName, name, property, value, onChange, o
   const newParentName = namespaceName(parentName, name)
 
   return (
-    <SchemaContext>
+    <SchemaContext.Consumer>
       {({ values }) => (
         <div className={cs('rlpProp', styles.rlpProp)}>
           <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
@@ -36,7 +36,7 @@ const PrimitiveArrayRenderer = ({ parentName, name, property, value, onChange, o
           </div>
         </div>
       )}
-    </SchemaContext>
+    </SchemaContext.Consumer>
   )
 }
 

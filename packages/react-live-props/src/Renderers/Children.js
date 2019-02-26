@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { SchemaContext } from '../Context'
 import cs from 'classnames'
-import { buildDefaultValuesForType } from '../Utils'
+import { buildDefaultValuesForType, getDisplayName, getRawDisplayName } from '../Utils'
 
 import styles from './styles.css'
 
@@ -18,7 +18,7 @@ const onChangeType = async (schema, uniqueName, value, values, onChange, onDelet
 }
 
 export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDelete }) => {
-  return <SchemaContext>
+  return <SchemaContext.Consumer>
     {({ schema, availableTypes, values }) => {
       if (availableTypes.length === 0) return null
 
@@ -33,9 +33,9 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
                     <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, `${uniqueName}.${idx}`, e.target.value, values, onChange, onDelete)}>
                       <option value=''>none</option>
                       {availableTypes.map(availableType => {
-                        if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
+                        if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
 
-                        return <option key={availableType} value={availableType.name}>{availableType.name}</option>
+                        return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
                       })}
                     </select>
                   </div>
@@ -51,9 +51,9 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
                 <select key={`${uniqueName}.${value.length}`} name={`${uniqueName}.${value.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${value.length}`, e.target.value, values, onChange, onDelete)}>
                   <option value=''>none</option>
                   {availableTypes.map(availableType => {
-                    if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
+                    if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
 
-                    return <option key={availableType} value={availableType.name}>{availableType.name}</option>
+                    return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
                   })}
                 </select>
               </div>
@@ -62,7 +62,7 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
         </React.Fragment>
       )
     }}
-  </SchemaContext>
+  </SchemaContext.Consumer>
 }
 
 ChildrenArrayRenderer.propTypes = {
@@ -74,7 +74,7 @@ ChildrenArrayRenderer.propTypes = {
 }
 
 export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDelete }) => {
-  return <SchemaContext>
+  return <SchemaContext.Consumer>
     {({ schema, availableTypes, values }) => {
       if (availableTypes.length === 0) return null
 
@@ -88,9 +88,9 @@ export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDe
               <select key={uniqueName} name={uniqueName} value={valueOrDefault} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, values, onChange, onDelete)}>
                 <option value=''>none</option>
                 {availableTypes.map(availableType => {
-                  if (typeof availableType === 'string') return <option key={availableType} value={availableType}>{availableType}</option>
+                  if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
 
-                  return <option key={availableType} value={availableType.name}>{availableType.name}</option>
+                  return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
                 })}
               </select>
             </div>
@@ -98,7 +98,7 @@ export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDe
         </div>
       )
     }}
-  </SchemaContext>
+  </SchemaContext.Consumer>
 }
 
 ChildrenObjectRenderer.propTypes = {

@@ -1,12 +1,16 @@
+import React from 'react'
 import jsf from 'json-schema-faker'
+import { getDisplayName } from './name'
 
 jsf.option({ alwaysFakeOptionals: true, minItems: 1, maxItems: 2 })
 
 export const findSelectedType = (availableTypes, selectedName) => {
+  if (selectedName === 'React-Fragment' || selectedName === 'React.Fragment') return React.Fragment
+
   const matchedItems = availableTypes.filter(type => {
     if (typeof type === 'string') return type === selectedName
 
-    return type.name === selectedName
+    return getDisplayName(type) === selectedName
   })
 
   if (matchedItems.length > 0) return matchedItems[0]
@@ -42,21 +46,26 @@ export const processReactElementToValue = (schema, element) => {
 
   let children
   if (element.props.children) {
-    children = []
-    children = element.props.children.map(child => processReactElementToValue(schema, child))
+    if (Array.isArray(element.props.children)) {
+      children = element.props.children.map(child => processReactElementToValue(schema, child))
+    } else {
+      children = processReactElementToValue(schema, element.props.children)
+    }
   }
 
+  const elementDisplayName = getDisplayName(element.type)
+
   Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
-    if (schema[element.type] && schema[element.type].properties && schema[element.type].properties[prop]) return
+    if (schema[elementDisplayName] && schema[elementDisplayName].properties && schema[elementDisplayName].properties[prop]) return
 
     // default unknown properties to any so they get parsed to JSON if possible
-    schema[element.type].properties[prop] = { type: 'any' }
+    schema[elementDisplayName].properties[prop] = { type: 'any' }
   })
 
   if (children) {
     return {
-      type: element.type,
-      [element.type]: {
+      type: elementDisplayName,
+      [elementDisplayName]: {
         ...element.props,
         children
       }
@@ -64,8 +73,8 @@ export const processReactElementToValue = (schema, element) => {
   }
 
   return {
-    type: element.type,
-    [element.type]: {
+    type: elementDisplayName,
+    [elementDisplayName]: {
       ...element.props
     }
   }
@@ -85,4 +94,18 @@ export const hasChildren = (component) => {
   }
 
   return false
+}
+
+export const findNodeProperties = (component, docgenInfo, htmlTypes) => {
+  if (htmlTypes.includes(component)) return ['children']
+
+  if (!docgenInfo || !docgenInfo.props) return []
+
+  return Object.keys(docgenInfo.props).filter(prop => {
+    if (docgenInfo.props[prop].type.name === 'node') return true
+
+    if (docgenInfo.props[prop].type.name === 'arrayOf' && docgenInfo.props[prop].type.value.name === 'node') return true
+
+    return false
+  })
 }

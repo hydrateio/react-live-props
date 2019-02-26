@@ -10,7 +10,7 @@ import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
 import { SchemaContext } from '../Context'
 import { Expand, Collapse } from '../Components'
-import { buildDefaultValuesForType, processReactElementToValue } from '../Utils'
+import { buildDefaultValuesForType, processReactElementToValue, findNodeProperties, getDisplayName } from '../Utils'
 
 import styles from './styles.css'
 
@@ -24,7 +24,8 @@ export default class ReactLiveProps extends Component {
     hideComponentMarkup: PropTypes.bool,
     hideComponentPreview: PropTypes.bool,
     customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-    initialComponentChildren: PropTypes.node,
+    initialComponentChildren: PropTypes.oneOfType([PropTypes.node, PropTypes.arrayOf(PropTypes.node)]),
+    intialPropValues: PropTypes.object,
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     initialCollapsed: PropTypes.bool
   }
@@ -69,6 +70,7 @@ export default class ReactLiveProps extends Component {
       initialComponentChildren,
       availableTypes,
       initialCollapsed,
+      intialPropValues,
       ...rest
     } = this.props
 
@@ -79,7 +81,8 @@ export default class ReactLiveProps extends Component {
       editingComponent,
       htmlTypes,
       editingComponentPath,
-      availableTypes: availableChildTypes
+      availableTypes: availableChildTypes,
+      docgenInfo: allDocGenInfo
     } = this.state
 
     if (!schema || !values) {
@@ -87,7 +90,7 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes }}>
+      <SchemaContext.Provider value={{ schema, values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes, docgenInfo: allDocGenInfo }}>
         <div
           className={cs('rlpContainer', styles.rlpContainer, className)}
           {...rest}
@@ -113,7 +116,7 @@ export default class ReactLiveProps extends Component {
               )}
 
               <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                {schema[rootComponentDisplayName].properties && schema[rootComponentDisplayName].properties.children && (
+                {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
                   <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
                     <TreeView
                       of={of}
@@ -162,7 +165,8 @@ export default class ReactLiveProps extends Component {
       docgenInfo,
       additionalTitleText,
       availableTypes,
-      initialComponentChildren
+      initialComponentChildren,
+      initialPropValues
     } = this.props
 
     const htmlTypes = []
@@ -174,7 +178,25 @@ export default class ReactLiveProps extends Component {
 
     allDocGenInfo.push(info)
 
-    const availableChildren = [{ name: '@@TEXT' }]
+    allDocGenInfo.push(
+      {
+        description: 'React Fragment',
+        methods: [],
+        props: {
+          children: {
+            description: '',
+            required: false,
+            type: {
+              name: 'arrayOf',
+              value: { name: 'node' }
+            }
+          }
+        },
+        displayName: getDisplayName('React.Fragment')
+      }
+    )
+
+    const availableChildren = [{ name: '@@TEXT' }, { name: 'React.Fragment' }]
     if (availableTypes) {
       availableTypes.forEach(child => {
         availableChildren.push(child)
@@ -200,8 +222,10 @@ export default class ReactLiveProps extends Component {
           }
         }
 
+        type.__docgenInfo.displayName = type.__docgenInfo.displayName.replace(/\./g, '-')
         return type.__docgenInfo
       })
+
       const filteredTypes = typeInfo.filter(type => type !== null)
       if (filteredTypes.filter(type => typeof type === 'undefined').length > 0) {
         throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
@@ -214,6 +238,16 @@ export default class ReactLiveProps extends Component {
       allDocGenInfo.map(typeInfo => {
         typeSchema[typeInfo.displayName] = docgenToJsonSchema(typeInfo)
       })
+
+      typeSchema['@@TEXT'] = {
+        title: 'Text Node',
+        properties: {
+          text: {
+            type: 'string'
+          }
+        },
+        type: 'object'
+      }
 
       const initialValues = await buildDefaultValuesForType(typeSchema, info.displayName)
       const values = {
@@ -239,15 +273,20 @@ export default class ReactLiveProps extends Component {
         }
       }
 
-      typeSchema['@@TEXT'] = {
-        title: 'Text Node',
-        properties: {
-          text: {
-            type: 'string'
+      if (initialPropValues) {
+        Object.keys(initialPropValues).forEach(key => {
+          if (initialPropValues[key] && initialPropValues[key]['$$typeof']) {
+            values[info.displayName][key] = processReactElementToValue(typeSchema, initialPropValues[key])
+          } else {
+            values[info.displayName][key] = initialPropValues[key]
           }
-        },
-        type: 'object'
+        })
       }
+
+      const docgenInfo = {}
+      allDocGenInfo.forEach(docgen => {
+        docgenInfo[docgen.displayName] = docgen
+      })
 
       this.setState({
         schema: {
@@ -259,7 +298,8 @@ export default class ReactLiveProps extends Component {
         editingComponent: info.displayName,
         editingComponentPath: info.displayName,
         htmlTypes,
-        availableTypes: availableChildren
+        availableTypes: availableChildren,
+        docgenInfo
       })
     } catch (err) {
       console.error('ReactLiveProps error resolving JSON Schema', err)
