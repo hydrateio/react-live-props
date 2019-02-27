@@ -36,7 +36,7 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
                           <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values[nodeProp][idx][child.type]} componentDisplayName={getDisplayName(child.type)} onChangeComponent={onChangeComponent} />
                         )
                       })}
-                      {!Array.isArray(values[nodeProp]) && (
+                      {!Array.isArray(values[nodeProp]) && values[nodeProp] && (
                         <RenderComponent componentPath={`${componentPath}.${nodeProp}.${values[nodeProp].type}`} values={values[nodeProp][values[nodeProp].type]} componentDisplayName={getDisplayName(values[nodeProp].type)} onChangeComponent={onChangeComponent} />
                       )}
                     </ul>

@@ -27,7 +27,8 @@ export default class ReactLiveProps extends Component {
     initialComponentChildren: PropTypes.oneOfType([PropTypes.node, PropTypes.arrayOf(PropTypes.node)]),
     intialPropValues: PropTypes.object,
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
-    initialCollapsed: PropTypes.bool
+    initialCollapsed: PropTypes.bool,
+    generateFakePropValues: PropTypes.bool
   }
 
   constructor(props) {
@@ -70,7 +71,8 @@ export default class ReactLiveProps extends Component {
       initialComponentChildren,
       availableTypes,
       initialCollapsed,
-      intialPropValues,
+      initialPropValues,
+      generateFakePropValues,
       ...rest
     } = this.props
 
@@ -166,7 +168,8 @@ export default class ReactLiveProps extends Component {
       additionalTitleText,
       availableTypes,
       initialComponentChildren,
-      initialPropValues
+      initialPropValues,
+      generateFakePropValues = true
     } = this.props
 
     const htmlTypes = []
@@ -222,7 +225,6 @@ export default class ReactLiveProps extends Component {
           }
         }
 
-        type.__docgenInfo.displayName = type.__docgenInfo.displayName.replace(/\./g, '-')
         return type.__docgenInfo
       })
 
@@ -235,8 +237,10 @@ export default class ReactLiveProps extends Component {
 
     try {
       const typeSchema = {}
-      allDocGenInfo.map(typeInfo => {
-        typeSchema[typeInfo.displayName] = docgenToJsonSchema(typeInfo)
+      const docgenInfo = {}
+      allDocGenInfo.forEach(typeInfo => {
+        docgenInfo[getDisplayName(typeInfo)] = typeInfo
+        typeSchema[getDisplayName(typeInfo)] = docgenToJsonSchema(typeInfo)
       })
 
       typeSchema['@@TEXT'] = {
@@ -249,54 +253,58 @@ export default class ReactLiveProps extends Component {
         type: 'object'
       }
 
-      const initialValues = await buildDefaultValuesForType(typeSchema, info.displayName)
+      const safeDisplayName = getDisplayName(info)
+
+      const initialValues = await buildDefaultValuesForType(typeSchema, safeDisplayName, generateFakePropValues)
       const values = {
-        type: info.displayName,
-        [info.displayName]: initialValues
+        type: safeDisplayName,
+        [safeDisplayName]: initialValues
       }
 
-      if (values[info.displayName].children && initialComponentChildren) {
-        if (typeSchema[info.displayName].properties.children.type === 'array') {
-          values[info.displayName].children = []
+      if (values[safeDisplayName].children && initialComponentChildren) {
+        if (typeSchema[safeDisplayName].properties.children.type === 'array') {
+          values[safeDisplayName].children = []
           if (Array.isArray(initialComponentChildren)) {
             initialComponentChildren.forEach(child => {
-              const childValues = processReactElementToValue(typeSchema, child)
-              values[info.displayName].children.push(childValues)
+              const childValues = processReactElementToValue(typeSchema, child, docgenInfo, htmlTypes)
+              values[safeDisplayName].children.push(childValues)
             })
           } else {
-            const childValues = processReactElementToValue(typeSchema, initialComponentChildren)
-            values[info.displayName].children.push(childValues)
+            const childValues = processReactElementToValue(typeSchema, initialComponentChildren, docgenInfo, htmlTypes)
+            values[safeDisplayName].children.push(childValues)
           }
         } else {
-          const childValues = processReactElementToValue(typeSchema, initialComponentChildren)
-          values[info.displayName].children = childValues
+          const childValues = processReactElementToValue(typeSchema, initialComponentChildren, docgenInfo, htmlTypes)
+          values[safeDisplayName].children = childValues
         }
       }
 
       if (initialPropValues) {
         Object.keys(initialPropValues).forEach(key => {
           if (initialPropValues[key] && initialPropValues[key]['$$typeof']) {
-            values[info.displayName][key] = processReactElementToValue(typeSchema, initialPropValues[key])
+            values[safeDisplayName][key] = processReactElementToValue(typeSchema, initialPropValues[key], docgenInfo, htmlTypes)
+          } else if (typeof initialPropValues[key] === 'string' && docgenInfo[safeDisplayName].props[key].type.name === 'node') {
+            values[safeDisplayName][key] = {
+              type: '@@TEXT',
+              '@@TEXT': {
+                text: initialPropValues[key]
+              }
+            }
           } else {
-            values[info.displayName][key] = initialPropValues[key]
+            values[safeDisplayName][key] = initialPropValues[key]
           }
         })
       }
 
-      const docgenInfo = {}
-      allDocGenInfo.forEach(docgen => {
-        docgenInfo[docgen.displayName] = docgen
-      })
-
       this.setState({
         schema: {
           ...typeSchema,
-          title: this.buildComponentTitle(typeSchema[info.displayName].title, additionalTitleText)
+          title: this.buildComponentTitle(typeSchema[safeDisplayName].title, additionalTitleText)
         },
         values,
-        rootComponentDisplayName: info.displayName,
-        editingComponent: info.displayName,
-        editingComponentPath: info.displayName,
+        rootComponentDisplayName: safeDisplayName,
+        editingComponent: safeDisplayName,
+        editingComponentPath: safeDisplayName,
         htmlTypes,
         availableTypes: availableChildren,
         docgenInfo

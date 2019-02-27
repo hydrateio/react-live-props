@@ -51,3 +51,5 @@ import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
 <ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Panel.Other, Text, 'div']} initialPropValues={{ header: <Text text='testing' />, color: 'red' }} />
 
 <ReactLiveProps of={Panel} additionalTitleText='Text Children' initialComponentChildren='Testing' />
+
+<ReactLiveProps of={Panel} additionalTitleText='Multiple Text Children' availableTypes={[Text]} initialComponentChildren={[<Text text="Testing1" />,<Text text="Testing2" />]} />

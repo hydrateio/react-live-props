@@ -32,9 +32,16 @@ const RenderComponent = ({ component, values, availableTypes, docgenInfo, htmlTy
     const propComponentType = values[name].type
     const propValues = values[name][propComponentType]
     const propComponent = findSelectedType(availableTypes, propComponentType)
-    restValuesWithNodes = {
-      ...restValuesWithNodes,
-      [name]: RenderComponent({ component: propComponent, values: { ...propValues, key: `${componentDisplayName}.${name}.${propComponentType}` }, availableTypes, docgenInfo, htmlTypes })
+    if (propComponentType === '@@TEXT') {
+      restValuesWithNodes = {
+        ...restValuesWithNodes,
+        [name]: propValues.text
+      }
+    } else {
+      restValuesWithNodes = {
+        ...restValuesWithNodes,
+        [name]: RenderComponent({ component: propComponent, values: { ...propValues, key: `${componentDisplayName}.${name}.${propComponentType}` }, availableTypes, docgenInfo, htmlTypes })
+      }
     }
   })
 

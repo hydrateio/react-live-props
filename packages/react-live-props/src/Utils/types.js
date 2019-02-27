@@ -18,10 +18,17 @@ export const findSelectedType = (availableTypes, selectedName) => {
   return null
 }
 
-export const buildDefaultValuesForType = async (schema, componentName) => {
+export const buildDefaultValuesForType = async (schema, componentName, generateFakePropValues) => {
   // something in jsf.resolve is mutating the original schema
   // for anyOf properties, so give them a copy of the properties
-  const values = await jsf.resolve(JSON.parse(JSON.stringify(schema[componentName])))
+  let values = {}
+  if (generateFakePropValues) {
+    values = await jsf.resolve(JSON.parse(JSON.stringify(schema[componentName])))
+  } else {
+    Object.keys(schema[componentName].properties).forEach(prop => {
+      values[prop] = null
+    })
+  }
 
   if (schema[componentName].properties.children) {
     if (schema[componentName].properties.children.type === 'array') {
@@ -34,7 +41,7 @@ export const buildDefaultValuesForType = async (schema, componentName) => {
   return values
 }
 
-export const processReactElementToValue = (schema, element) => {
+export const processReactElementToValue = (schema, element, allDocgenInfo, htmlTypes) => {
   if (typeof element === 'string') {
     return {
       type: '@@TEXT',
@@ -44,16 +51,22 @@ export const processReactElementToValue = (schema, element) => {
     }
   }
 
-  let children
-  if (element.props.children) {
-    if (Array.isArray(element.props.children)) {
-      children = element.props.children.map(child => processReactElementToValue(schema, child))
-    } else {
-      children = processReactElementToValue(schema, element.props.children)
-    }
-  }
+  if (element.type === '@@TEXT') return element
 
   const elementDisplayName = getDisplayName(element.type)
+  const nodeProps = findNodeProperties(element, allDocgenInfo[elementDisplayName], htmlTypes)
+  const nodeValues = {}
+  if (nodeProps.length > 0) {
+    nodeProps.forEach(nodeProp => {
+      if (!element.props[nodeProp]) return
+
+      if (Array.isArray(element.props[nodeProp])) {
+        nodeValues[nodeProp] = element.props[nodeProp].map(child => processReactElementToValue(schema, child, allDocgenInfo, htmlTypes))
+      } else {
+        nodeValues[nodeProp] = processReactElementToValue(schema, element.props[nodeProp], allDocgenInfo, htmlTypes)
+      }
+    })
+  }
 
   Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
     if (schema[elementDisplayName] && schema[elementDisplayName].properties && schema[elementDisplayName].properties[prop]) return
@@ -62,20 +75,11 @@ export const processReactElementToValue = (schema, element) => {
     schema[elementDisplayName].properties[prop] = { type: 'any' }
   })
 
-  if (children) {
-    return {
-      type: elementDisplayName,
-      [elementDisplayName]: {
-        ...element.props,
-        children
-      }
-    }
-  }
-
   return {
     type: elementDisplayName,
     [elementDisplayName]: {
-      ...element.props
+      ...element.props,
+      ...nodeValues
     }
   }
 }

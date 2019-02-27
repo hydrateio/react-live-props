@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { hasChildren, findNodeProperties, convertSafeDisplayNameToRaw } from '../Utils'
+import { hasChildren, findNodeProperties, convertSafeDisplayNameToRaw, tryConvertTypeToString } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
@@ -14,7 +14,12 @@ const INDENTATION_SIZE = 2
 const renderPropertyValue = (property, value) => {
   let valueOrDefault = typeof value !== 'undefined' ? value : property.default
   if (property.type === 'string') {
-    return `"${valueOrDefault}"`
+    // check to make sure this isn't a complex data type
+    const parsedValue = tryConvertTypeToString(valueOrDefault)
+
+    if (parsedValue === valueOrDefault) return `"${valueOrDefault}"`
+
+    return `{${parsedValue}}`
   }
 
   if (property.type === 'number') {
