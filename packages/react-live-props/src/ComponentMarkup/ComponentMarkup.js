@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { hasChildren, findNodeProperties } from '../Utils'
+import { hasChildren, findNodeProperties, convertSafeDisplayNameToRaw } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
@@ -10,10 +10,6 @@ import styles from './styles.css'
 /* global Prism */
 
 const INDENTATION_SIZE = 2
-
-const convertDisplayNameToRenderName = (name) => {
-  return name.replace(/-/g, '.')
-}
 
 const renderPropertyValue = (property, value) => {
   let valueOrDefault = typeof value !== 'undefined' ? value : property.default
@@ -122,32 +118,32 @@ const StaticMarkupRenderer = ({ componentName, schema, values, indentationLevel,
         return StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1, availableTypes, htmlTypes, docgenInfo, skipNewLines })
       })
 
-      return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+      return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
         const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
         if (value === '{undefined}') return null
 
         return `${newLine}${renderIndentation(indentationLevel + 1)}${key}=${value}`
       }).filter(item => item !== null).join('')}>
 ${childrenMarkup.join(newLine)}
-${renderIndentation(indentationLevel)}</${convertDisplayNameToRenderName(componentName)}>`
+${renderIndentation(indentationLevel)}</${convertSafeDisplayNameToRaw(componentName)}>`
     }
 
     // otherwise render the children as a single object
     const displayName = values.children.type
     const childValues = values.children[displayName]
     const childrenMarkup = StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1, availableTypes, htmlTypes, docgenInfo, skipNewLines })
-    return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+    return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
       const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
       if (value === '{undefined}') return null
 
       return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
     }).filter(item => item !== null).join('')}>
 ${childrenMarkup}
-${renderIndentation(indentationLevel)}</${convertDisplayNameToRenderName(componentName)}>`
+${renderIndentation(indentationLevel)}</${convertSafeDisplayNameToRaw(componentName)}>`
   }
 
   // if there are no children then just render the component and props
-  return `${renderIndentation(indentationLevel)}<${convertDisplayNameToRenderName(componentName)}${Object.keys(keys).map(key => {
+  return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
     const value = renderPropertyValue(properties[key], restValuesWithNodes[key])
     if (value === '{undefined}') return null
 
