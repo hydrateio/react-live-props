@@ -22,6 +22,7 @@
 .rlpEditablePropsTableTreeView {
   max-height: 400px;
   overflow: auto;
+  min-width: 200px;
 }
 
 .rlpEditablePropsTable {
@@ -29,7 +30,9 @@
 }
 
 .rlpEditablePropsTableSpacer {
-  width: 24px;
+  width: 4px;
+  margin: 0px 10px;
+  background-color: #e5e5e5;
 }
 
 .rlpEditablePropsTableMain {

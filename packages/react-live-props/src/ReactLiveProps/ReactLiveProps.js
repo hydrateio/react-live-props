@@ -110,23 +110,30 @@ export default class ReactLiveProps extends Component {
           {!this.state.collapsed && (
             <React.Fragment>
               {!hideComponentPreview && (
-                <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
-                  <ComponentPreview
-                    component={of}
-                  />
-                </div>
-              )}
-
-              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
-                  <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
-                    <TreeView
-                      of={of}
-                      onChangeComponent={this._editComponent}
+                <React.Fragment>
+                  <h3>Preview</h3>
+                  <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
+                    <ComponentPreview
+                      component={of}
                     />
                   </div>
+                </React.Fragment>
+              )}
+
+              <h3>Component Props</h3>
+              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
+                {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
+                  <React.Fragment>
+                    <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
+                      <TreeView
+                        of={of}
+                        onChangeComponent={this._editComponent}
+                      />
+                    </div>
+                    <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
+                  </React.Fragment>
                 )}
-                <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
+
                 <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
                   <EditablePropsTable
                     editableProperties={editableProperties}
@@ -138,21 +145,27 @@ export default class ReactLiveProps extends Component {
               </div>
 
               {!hideComponentMarkup && (
-                <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
-                  <ComponentMarkup
-                    component={of}
-                  />
-                </div>
+                <React.Fragment>
+                  <h3>Markup</h3>
+                  <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
+                    <ComponentMarkup
+                      component={of}
+                    />
+                  </div>
+                </React.Fragment>
               )}
 
               {CustomComponentMarkup && (
-                <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
-                  <CustomComponentMarkup>
-                    <ComponentPreview
-                      component={of}
-                    />
-                  </CustomComponentMarkup>
-                </div>
+                <React.Fragment>
+                  <h3>Custom Markup</h3>
+                  <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
+                    <CustomComponentMarkup>
+                      <ComponentPreview
+                        component={of}
+                      />
+                    </CustomComponentMarkup>
+                  </div>
+                </React.Fragment>
               )}
             </React.Fragment>
           )}
