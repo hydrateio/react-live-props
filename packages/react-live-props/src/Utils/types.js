@@ -97,6 +97,8 @@ export const hasChildren = (component) => {
     return Object.keys(component.children).length > 0
   }
 
+  if (typeof component.children === 'string') return true
+
   return false
 }
 

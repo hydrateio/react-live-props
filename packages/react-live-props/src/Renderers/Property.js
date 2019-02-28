@@ -42,6 +42,16 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
       }
 
       if (property.type === 'array') {
+        // check to see if it is a node
+
+        if (docgenInfo[editingComponent]) {
+          if (docgenInfo[editingComponent].props[name].type.name === 'arrayOf' && docgenInfo[editingComponent].props[name].type.value.name === 'node') {
+            const valueOrDefault = value ? (Array.isArray(value) ? value : [value]) : []
+            const uniqueName = namespaceName(parentName, name)
+            return <ChildrenArrayRenderer value={valueOrDefault} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
+          }
+        }
+
         if (singleFieldTypes.includes(property.items.type)) {
           return <PrimitiveArrayRenderer parentName={parentName} name={name} property={property} value={value} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
         }

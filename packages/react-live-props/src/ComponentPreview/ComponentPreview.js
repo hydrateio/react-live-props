@@ -21,7 +21,7 @@ const RenderComponent = ({ component, values, availableTypes, docgenInfo, htmlTy
   }
   const nodeProperties = findNodeProperties(componentDisplayName, docgenInfo[componentDisplayName], htmlTypes).filter(name => name !== 'children')
   nodeProperties.forEach(name => {
-    if (!values[name] || !values[name].type) {
+    if (!values[name]) {
       restValuesWithNodes = {
         ...restValuesWithNodes,
         [name]: null
@@ -29,6 +29,34 @@ const RenderComponent = ({ component, values, availableTypes, docgenInfo, htmlTy
 
       return
     }
+
+    if (!Array.isArray(values[name]) && !values[name].type) {
+      restValuesWithNodes = {
+        ...restValuesWithNodes,
+        [name]: null
+      }
+
+      return
+    }
+
+    if (Array.isArray(values[name])) {
+      restValuesWithNodes = {
+        ...restValuesWithNodes,
+        [name]: values[name].map(childItem => {
+          const propComponentType = childItem.type
+          const propValues = childItem[propComponentType]
+          const propComponent = findSelectedType(availableTypes, propComponentType)
+          if (propComponentType === '@@TEXT') {
+            return propValues.text
+          } else {
+            return RenderComponent({ component: propComponent, values: { ...propValues, key: `${componentDisplayName}.${name}.${propComponentType}` }, availableTypes, docgenInfo, htmlTypes })
+          }
+        })
+      }
+
+      return
+    }
+
     const propComponentType = values[name].type
     const propValues = values[name][propComponentType]
     const propComponent = findSelectedType(availableTypes, propComponentType)
@@ -61,7 +89,11 @@ const RenderComponent = ({ component, values, availableTypes, docgenInfo, htmlTy
       return React.createElement(component, restValuesWithNodes, childComponents)
     }
 
-    const childDisplayName = children.type
+    if (typeof children === 'string') {
+      return React.createElement(component, restValuesWithNodes, children)
+    }
+
+    const childDisplayName = getDisplayName(children.type)
     const childValues = children[childDisplayName]
 
     if (childDisplayName === '@@TEXT') {

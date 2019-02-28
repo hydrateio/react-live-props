@@ -14,6 +14,8 @@ import { buildDefaultValuesForType, processReactElementToValue, findNodeProperti
 
 import styles from './styles.css'
 
+const DEFAULT_HTML_TYPES = ['p', 'a', 'em', 'span', 'strong', 'div', 'svg', 'path', 'ul', 'li', 'b', 'ol', 'blockquote', 'cite', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img']
+
 export default class ReactLiveProps extends Component {
   static propTypes = {
     of: PropTypes.func.isRequired,
@@ -185,7 +187,7 @@ export default class ReactLiveProps extends Component {
       generateFakePropValues = true
     } = this.props
 
-    const htmlTypes = []
+    const htmlTypes = [...DEFAULT_HTML_TYPES]
     const allDocGenInfo = []
     const info = docgenInfo || of.__docgenInfo
     if (!info) {
@@ -212,15 +214,20 @@ export default class ReactLiveProps extends Component {
       }
     )
 
-    const availableChildren = [{ name: '@@TEXT' }, { name: 'React.Fragment' }]
+    const availableChildren = [{ name: '@@TEXT' }, { name: 'React.Fragment' }, ...DEFAULT_HTML_TYPES]
     if (availableTypes) {
       availableTypes.forEach(child => {
+        if (availableChildren.includes(child)) return
+
         availableChildren.push(child)
       })
 
-      const typeInfo = availableTypes.map(type => {
+      const typeInfo = DEFAULT_HTML_TYPES.concat(availableTypes).map(type => {
         if (typeof type === 'string') {
-          htmlTypes.push(type)
+          if (!htmlTypes.includes(type)) {
+            htmlTypes.push(type)
+          }
+
           return {
             description: '',
             methods: [],
@@ -236,6 +243,10 @@ export default class ReactLiveProps extends Component {
             },
             displayName: type
           }
+        }
+
+        if (!type.__docgenInfo) {
+          console.error('Docgen info missing for type', type)
         }
 
         return type.__docgenInfo
@@ -296,6 +307,23 @@ export default class ReactLiveProps extends Component {
         Object.keys(initialPropValues).forEach(key => {
           if (initialPropValues[key] && initialPropValues[key]['$$typeof']) {
             values[safeDisplayName][key] = processReactElementToValue(typeSchema, initialPropValues[key], docgenInfo, htmlTypes)
+          } else if (Array.isArray(initialPropValues[key])) {
+            values[safeDisplayName][key] = initialPropValues[key].map(item => {
+              if (item['$$typeof']) {
+                return processReactElementToValue(typeSchema, item, docgenInfo, htmlTypes)
+              }
+
+              if (typeof item === 'string') {
+                return {
+                  type: '@@TEXT',
+                  '@@TEXT': {
+                    text: item
+                  }
+                }
+              }
+
+              return item
+            })
           } else if (typeof initialPropValues[key] === 'string' && docgenInfo[safeDisplayName].props[key].type.name === 'node') {
             values[safeDisplayName][key] = {
               type: '@@TEXT',
