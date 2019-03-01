@@ -121,7 +121,7 @@ export default class ReactLiveProps extends Component {
             <React.Fragment>
               {!hideComponentPreview && (
                 <React.Fragment>
-                  <h3>Preview</h3>
+                  <h6>Preview</h6>
                   <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
                     <ComponentPreview
                       component={of}
@@ -130,7 +130,7 @@ export default class ReactLiveProps extends Component {
                 </React.Fragment>
               )}
 
-              <h3>Component Props</h3>
+              <h6>Component Props</h6>
               <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
                 {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
                   <React.Fragment>
@@ -156,7 +156,7 @@ export default class ReactLiveProps extends Component {
 
               {!hideComponentMarkup && (
                 <React.Fragment>
-                  <h3>Markup</h3>
+                  <h6>Markup</h6>
                   <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
                     <ComponentMarkup
                       component={of}
@@ -167,7 +167,7 @@ export default class ReactLiveProps extends Component {
 
               {CustomComponentMarkup && (
                 <React.Fragment>
-                  <h3>Custom Markup</h3>
+                  <h6>Custom Markup</h6>
                   <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
                     <CustomComponentMarkup>
                       <ComponentPreview
