@@ -14,7 +14,7 @@
   margin-bottom: 12px;
 }
 
-.rlpComponentPreview {
+.rlpComponentPreview, .rlpEditablePropsTable {
   padding: 12px;
   border: 2px solid #e5e5e5;
 }

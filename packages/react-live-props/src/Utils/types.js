@@ -53,6 +53,11 @@ export const processReactElementToValue = (schema, element, allDocgenInfo, htmlT
 
   if (element.type === '@@TEXT') return element
 
+  if (!element.type) {
+    console.error('Missing type information for', element)
+    throw new Error('Missing type information for element')
+  }
+
   const elementDisplayName = getDisplayName(element.type)
   const nodeProps = findNodeProperties(element, allDocgenInfo[elementDisplayName], htmlTypes)
   const nodeValues = {}
@@ -69,10 +74,15 @@ export const processReactElementToValue = (schema, element, allDocgenInfo, htmlT
   }
 
   Object.keys(element.props).filter(name => name !== 'children').forEach(prop => {
-    if (schema[elementDisplayName] && schema[elementDisplayName].properties && schema[elementDisplayName].properties[prop]) return
+    try {
+      if (schema[elementDisplayName] && schema[elementDisplayName].properties && schema[elementDisplayName].properties[prop]) return
 
-    // default unknown properties to any so they get parsed to JSON if possible
-    schema[elementDisplayName].properties[prop] = { type: 'any' }
+      // default unknown properties to any so they get parsed to JSON if possible
+      schema[elementDisplayName].properties[prop] = { type: 'any' }
+    } catch (e) {
+      console.error('Failed to default a prop to "any" for', prop, element)
+      throw new Error("Error defaulting a missing prop to 'any'")
+    }
   })
 
   return {
@@ -114,4 +124,12 @@ export const findNodeProperties = (component, docgenInfo, htmlTypes) => {
 
     return false
   })
+}
+
+export const recurseDocgenForProp = (parentName, docgenInfo) => {
+  return parentName.split('.').reduce((docgenForName, namePart) => {
+    if (!docgenForName || !docgenForName[namePart]) return null
+
+    return docgenForName[namePart].props
+  }, docgenInfo)
 }

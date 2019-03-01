@@ -3,7 +3,7 @@ import PrimitiveArrayRenderer from './PrimitiveArray'
 import FieldRenderer from './Field'
 import { AddButton, DeleteButton } from '../Components'
 import { SchemaContext } from '../Context'
-import { namespaceName, tryParseStringAsType, tryConvertTypeToString } from '../Utils'
+import { namespaceName, tryParseStringAsType, tryConvertTypeToString, recurseDocgenForProp } from '../Utils'
 import { ChildrenObjectRenderer, ChildrenArrayRenderer } from './Children'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
@@ -44,8 +44,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
       if (property.type === 'array') {
         // check to see if it is a node
 
-        if (docgenInfo[editingComponent]) {
-          if (docgenInfo[editingComponent].props[name].type.name === 'arrayOf' && docgenInfo[editingComponent].props[name].type.value.name === 'node') {
+        const docgenForProp = recurseDocgenForProp(parentName, docgenInfo)
+
+        if (docgenForProp) {
+          if (docgenForProp[name].type.name === 'arrayOf' && docgenForProp[name].type.value.name === 'node') {
             const valueOrDefault = value ? (Array.isArray(value) ? value : [value]) : []
             const uniqueName = namespaceName(parentName, name)
             return <ChildrenArrayRenderer value={valueOrDefault} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
@@ -70,9 +72,10 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
 
       if (property.type === 'object') {
         // check to see if it is a node
+        const docgenForProp = recurseDocgenForProp(parentName, docgenInfo)
 
-        if (docgenInfo[editingComponent]) {
-          if (docgenInfo[editingComponent].props[name].type.name === 'node') {
+        if (docgenForProp) {
+          if (docgenForProp[name].type.name === 'node') {
             const uniqueName = namespaceName(parentName, name)
             return <ChildrenObjectRenderer value={value} uniqueName={uniqueName} name={name} onChange={onChange} onDelete={onDelete} />
           }

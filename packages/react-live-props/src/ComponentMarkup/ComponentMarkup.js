@@ -40,6 +40,14 @@ const renderPropertyValue = (property, value, propDocgenInfo) => {
 
   if (property.type === 'array') {
     if (propDocgenInfo.type.name === 'arrayOf' && propDocgenInfo.type.value.name === 'node') {
+      if (valueOrDefault === null) {
+        return '{null}'
+      }
+
+      if (typeof valueOrDefault === 'undefined') {
+        return '{undefined}'
+      }
+
       return `{[${valueOrDefault.join(',\n')}]}`
     }
 
@@ -162,7 +170,10 @@ ${renderIndentation(indentationLevel)}</${convertSafeDisplayNameToRaw(componentN
 
     if (typeof values.children === 'string') {
       return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
+        if (typeof restValuesWithNodes[key] === 'undefined') return null
+
         const value = renderPropertyValue(properties[key], restValuesWithNodes[key], docgenInfo[componentName].props[key])
+
         if (value === '{undefined}') return null
 
         return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
@@ -176,7 +187,10 @@ ${renderIndentation(indentationLevel)}</${convertSafeDisplayNameToRaw(componentN
     const childValues = values.children[displayName]
     const childrenMarkup = StaticMarkupRenderer({ componentName: displayName, schema, values: childValues, indentationLevel: indentationLevel + 1, availableTypes, htmlTypes, docgenInfo, skipNewLines })
     return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
+      if (typeof restValuesWithNodes[key] === 'undefined') return null
+
       const value = renderPropertyValue(properties[key], restValuesWithNodes[key], docgenInfo[componentName].props[key])
+
       if (value === '{undefined}') return null
 
       return `\n${renderIndentation(indentationLevel + 1)}${key}=${value}`
@@ -187,7 +201,10 @@ ${renderIndentation(indentationLevel)}</${convertSafeDisplayNameToRaw(componentN
 
   // if there are no children then just render the component and props
   return `${renderIndentation(indentationLevel)}<${convertSafeDisplayNameToRaw(componentName)}${Object.keys(keys).map(key => {
+    if (typeof restValuesWithNodes[key] === 'undefined') return null
+
     const value = renderPropertyValue(properties[key], restValuesWithNodes[key], docgenInfo[componentName].props[key])
+
     if (value === '{undefined}') return null
 
     return `${newLine}${renderIndentation(indentationLevel + 1)}${key}=${value}`

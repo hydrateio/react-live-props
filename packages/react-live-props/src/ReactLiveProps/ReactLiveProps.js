@@ -14,7 +14,7 @@ import { buildDefaultValuesForType, processReactElementToValue, findNodeProperti
 
 import styles from './styles.css'
 
-const DEFAULT_HTML_TYPES = ['p', 'a', 'em', 'span', 'strong', 'div', 'svg', 'path', 'ul', 'li', 'b', 'ol', 'blockquote', 'cite', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img']
+const DEFAULT_HTML_TYPES = ['p', 'a', 'em', 'span', 'strong', 'div', 'svg', 'path', 'ul', 'li', 'b', 'ol', 'blockquote', 'cite', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'caption', 'table', 'tbody', 'thead', 'tr', 'td', 'th', 'tfoot']
 
 export default class ReactLiveProps extends Component {
   static propTypes = {
@@ -39,7 +39,9 @@ export default class ReactLiveProps extends Component {
     this.state = {
       schema: null,
       values: null,
-      collapsed: this.props.initialCollapsed || false
+      collapsed: this.props.initialCollapsed || false,
+      hasError: false,
+      errorMessage: null
     }
   }
 
@@ -88,6 +90,12 @@ export default class ReactLiveProps extends Component {
       availableTypes: availableChildTypes,
       docgenInfo: allDocGenInfo
     } = this.state
+
+    if (this.state.hasError) {
+      return <p className={cs('rlpErrorMessage', styles.rlpErrorMessage)}>
+        {this.state.errorMessage}
+      </p>
+    }
 
     if (!schema || !values) {
       return null
@@ -263,8 +271,13 @@ export default class ReactLiveProps extends Component {
       const typeSchema = {}
       const docgenInfo = {}
       allDocGenInfo.forEach(typeInfo => {
-        docgenInfo[getDisplayName(typeInfo)] = typeInfo
-        typeSchema[getDisplayName(typeInfo)] = docgenToJsonSchema(typeInfo)
+        try {
+          docgenInfo[getDisplayName(typeInfo)] = typeInfo
+          typeSchema[getDisplayName(typeInfo)] = docgenToJsonSchema(typeInfo)
+        } catch (e) {
+          console.error('Error parsing schema for type', typeInfo, e)
+          throw new Error('Error parsing schema for type ', typeInfo.displayName)
+        }
       })
 
       typeSchema['@@TEXT'] = {
@@ -305,34 +318,53 @@ export default class ReactLiveProps extends Component {
 
       if (initialPropValues) {
         Object.keys(initialPropValues).forEach(key => {
-          if (initialPropValues[key] && initialPropValues[key]['$$typeof']) {
-            values[safeDisplayName][key] = processReactElementToValue(typeSchema, initialPropValues[key], docgenInfo, htmlTypes)
-          } else if (Array.isArray(initialPropValues[key])) {
-            values[safeDisplayName][key] = initialPropValues[key].map(item => {
-              if (item['$$typeof']) {
-                return processReactElementToValue(typeSchema, item, docgenInfo, htmlTypes)
-              }
+          try {
+            if (initialPropValues[key] && initialPropValues[key]['$$typeof']) {
+              values[safeDisplayName][key] = processReactElementToValue(typeSchema, initialPropValues[key], docgenInfo, htmlTypes)
+            } else if (Array.isArray(initialPropValues[key])) {
+              values[safeDisplayName][key] = initialPropValues[key].map(item => {
+                if (item['$$typeof']) {
+                  return processReactElementToValue(typeSchema, item, docgenInfo, htmlTypes)
+                }
 
-              if (typeof item === 'string') {
-                return {
-                  type: '@@TEXT',
-                  '@@TEXT': {
-                    text: item
+                if (typeof item === 'string') {
+                  return {
+                    type: '@@TEXT',
+                    '@@TEXT': {
+                      text: item
+                    }
+                  }
+                }
+
+                return item
+              })
+            } else if (typeof initialPropValues[key] === 'string') {
+              // default any missing properties to any
+              if (!docgenInfo[safeDisplayName].props[key]) {
+                typeSchema[safeDisplayName].properties[key] = { type: 'any' }
+                docgenInfo[safeDisplayName].props[key] = {
+                  type: {
+                    name: 'any'
                   }
                 }
               }
 
-              return item
-            })
-          } else if (typeof initialPropValues[key] === 'string' && docgenInfo[safeDisplayName].props[key].type.name === 'node') {
-            values[safeDisplayName][key] = {
-              type: '@@TEXT',
-              '@@TEXT': {
-                text: initialPropValues[key]
+              if (docgenInfo[safeDisplayName].props[key].type.name === 'node') {
+                values[safeDisplayName][key] = {
+                  type: '@@TEXT',
+                  '@@TEXT': {
+                    text: initialPropValues[key]
+                  }
+                }
+              } else {
+                values[safeDisplayName][key] = initialPropValues[key]
               }
+            } else {
+              values[safeDisplayName][key] = initialPropValues[key]
             }
-          } else {
-            values[safeDisplayName][key] = initialPropValues[key]
+          } catch (e) {
+            console.error('Failed to parse initialPropValue', key, docgenInfo[safeDisplayName], e)
+            throw new Error('Failed to parse initialPropValue ' + key)
           }
         })
       }
@@ -352,7 +384,10 @@ export default class ReactLiveProps extends Component {
       })
     } catch (err) {
       console.error('ReactLiveProps error resolving JSON Schema', err)
-      throw err
+      this.setState({
+        hasError: true,
+        errorMessage: err.message
+      })
     }
   }
 
