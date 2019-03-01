@@ -85,17 +85,21 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
       }
 
       const valueOrDefault = value || ''
-      return <div className={cs('rlpProp', styles.rlpProp)}>
-        <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-          <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
-          <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-            <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value))} />
+      return <SchemaContext.Consumer>
+        {({ values }) => (
+          <div className={cs('rlpProp', styles.rlpProp)}>
+            <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+              <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
+              <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+                <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value), values)} />
+              </div>
+            </div>
+            {property.description && (
+              <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
+            )}
           </div>
-        </div>
-        {property.description && (
-          <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{property.description}</legend>
         )}
-      </div>
+      </SchemaContext.Consumer>
     }}
   </SchemaContext.Consumer>
 }

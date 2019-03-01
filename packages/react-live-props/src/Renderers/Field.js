@@ -8,52 +8,52 @@ const FieldRenderer = ({ parentName, name, type, value, onChange, options }) => 
 
   if (options) {
     return (
-      <SchemaContext>
+      <SchemaContext.Consumer>
         {({ values }) => (
           <select key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value, values)}>
             {options.map(option => <option key={option} value={option}>{option}</option>)}
           </select>
         )}
-      </SchemaContext>
+      </SchemaContext.Consumer>
     )
   }
 
   if (type === 'boolean') {
     return (
-      <SchemaContext>
+      <SchemaContext.Consumer>
         {({ values }) => (
           <input type='checkbox' key={uniqueName} name={uniqueName} checked={value} onChange={(e) => onChange(uniqueName, e.target.checked, values)} />
         )}
-      </SchemaContext>
+      </SchemaContext.Consumer>
     )
   }
 
   if (type === 'number') {
     return (
-      <SchemaContext>
+      <SchemaContext.Consumer>
         {({ values }) => (
           <input type='number' key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value, values)} />
         )}
-      </SchemaContext>
+      </SchemaContext.Consumer>
     )
   }
 
   if (type === 'string') {
     return (
-      <SchemaContext>
+      <SchemaContext.Consumer>
         {({ values }) => (
           <input type='text' key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value, values)} />
         )}
-      </SchemaContext>
+      </SchemaContext.Consumer>
     )
   }
 
   return (
-    <SchemaContext>
+    <SchemaContext.Consumer>
       {({ values }) => (
         <input type='text' key={uniqueName} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value, values)} />
       )}
-    </SchemaContext>
+    </SchemaContext.Consumer>
   )
 }
 
