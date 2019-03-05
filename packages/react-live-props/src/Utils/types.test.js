@@ -57,7 +57,7 @@ describe('buildDefaultValuesForType', () => {
         type: 'object'
       }
     }
-    buildDefaultValuesForType(schema, 'ComponentName').then(data => {
+    buildDefaultValuesForType(schema, 'ComponentName', true).then(data => {
       const prop1Correct = typeof data.prop1 === 'string'
       const prop2Correct = typeof data.prop2 === 'boolean'
       const prop3Correct = typeof data.prop3 === 'number'
@@ -127,7 +127,7 @@ describe('hasChildren', () => {
   })
 
   test('returns false if component.children is a string', () => {
-    expect(hasChildren({ children: 'test' })).toBe(false)
+    expect(hasChildren({ children: 'test' })).toBe(true)
   })
 
   test('returns false if component.children is a bool', () => {
