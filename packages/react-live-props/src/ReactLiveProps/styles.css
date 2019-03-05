@@ -50,3 +50,7 @@
   background-color: transparent;
   border: none;
 }
+
+.rlpComponentMarkup code {
+  font-size: 14px;
+}
