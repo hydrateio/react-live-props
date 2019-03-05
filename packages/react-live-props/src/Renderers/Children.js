@@ -11,7 +11,7 @@ const buildSortedChildrenList = (availableTypes, htmlTypes) => {
   const systemTypes = getReactTypes()
 
   return [
-    { safeName: '__divider__', displayName: '----Components----' },
+    { safeName: '__divider__components__', displayName: '----Components----' },
     ...componentTypes.sort((a, b) => {
       return getDisplayName(a) - getDisplayName(b)
     }).map(type => {
@@ -20,25 +20,25 @@ const buildSortedChildrenList = (availableTypes, htmlTypes) => {
         displayName: getRawDisplayName(type)
       }
     }),
-    { safeName: '__divider__', displayName: '----React Components----' },
+    { safeName: '__divider__system__', displayName: '----React Components----' },
     ...systemTypes.sort().map(type => {
       return {
         safeName: getDisplayName(type),
         displayName: getRawDisplayName(type)
       }
     }),
-    { safeName: '__divider__', displayName: '----HTML Elements----' },
+    { safeName: '__divider__html__', displayName: '----HTML Elements----' },
     ...htmlTypes.sort().map(type => {
       return {
-        safeName: getDisplayName(type),
-        displayName: getRawDisplayName(type)
+        safeName: type,
+        displayName: type
       }
     })
   ]
 }
 
 const onChangeType = async (schema, uniqueName, value, values, onChange, onDelete) => {
-  if (value === '__divider__') return
+  if (value.startsWith('__divider__')) return
 
   if (value === '') {
     // this is a delete
@@ -66,7 +66,7 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
                     <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, `${uniqueName}.${idx}`, e.target.value, values, onChange, onDelete)}>
                       <option value=''>none/remove</option>
                       {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
-                        return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
+                        return <option key={type.safeName} value={type.safeName}>{type.displayName}</option>
                       })}
                     </select>
                   </div>
@@ -82,7 +82,7 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
                 <select key={`${uniqueName}.${value.length}`} name={`${uniqueName}.${value.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${value.length}`, e.target.value, values, onChange, onDelete)}>
                   <option value=''>none/remove</option>
                   {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
-                    return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
+                    return <option key={type.safeName} value={type.safeName}>{type.displayName}</option>
                   })}
                 </select>
               </div>
@@ -117,7 +117,7 @@ export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDe
               <select key={uniqueName} name={uniqueName} value={valueOrDefault} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, values, onChange, onDelete)}>
                 <option value=''>none/remove</option>
                 {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
-                  return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
+                  return <option key={type.safeName} value={type.safeName}>{type.displayName}</option>
                 })}
               </select>
             </div>
