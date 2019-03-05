@@ -112,13 +112,17 @@ export default class ReactLiveProps extends Component {
           className={cs('rlpContainer', styles.rlpContainer, className)}
           {...rest}
         >
-          <h2 className={cs('rlpContainerTitle', styles.rlpContainerTitle)}>
+          <h2
+            className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
+            aria-role='button'
+            onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)}
+          >
             {schema.title}
             {this.state.collapsed && (
-              <Expand onClick={() => this.onToggleExpandCollapse(false)} />
+              <Expand />
             )}
             {!this.state.collapsed && (
-              <Collapse onClick={() => this.onToggleExpandCollapse(true)} />
+              <Collapse />
             )}
           </h2>
 
