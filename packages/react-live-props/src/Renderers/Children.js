@@ -2,11 +2,44 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { SchemaContext } from '../Context'
 import cs from 'classnames'
-import { buildDefaultValuesForType, getDisplayName, getRawDisplayName } from '../Utils'
+import { buildDefaultValuesForType, getDisplayName, getRawDisplayName, getReactTypes, getComponentTypes } from '../Utils'
 
 import styles from './styles.css'
 
+const buildSortedChildrenList = (availableTypes, htmlTypes) => {
+  const componentTypes = getComponentTypes(availableTypes, htmlTypes)
+  const systemTypes = getReactTypes()
+
+  return [
+    { safeName: '__divider__', displayName: '----Components----' },
+    ...componentTypes.sort((a, b) => {
+      return getDisplayName(a) - getDisplayName(b)
+    }).map(type => {
+      return {
+        safeName: getDisplayName(type),
+        displayName: getRawDisplayName(type)
+      }
+    }),
+    { safeName: '__divider__', displayName: '----React Components----' },
+    ...systemTypes.sort().map(type => {
+      return {
+        safeName: getDisplayName(type),
+        displayName: getRawDisplayName(type)
+      }
+    }),
+    { safeName: '__divider__', displayName: '----HTML Elements----' },
+    ...htmlTypes.sort().map(type => {
+      return {
+        safeName: getDisplayName(type),
+        displayName: getRawDisplayName(type)
+      }
+    })
+  ]
+}
+
 const onChangeType = async (schema, uniqueName, value, values, onChange, onDelete) => {
+  if (value === '__divider__') return
+
   if (value === '') {
     // this is a delete
     onDelete(uniqueName, values)
@@ -19,7 +52,7 @@ const onChangeType = async (schema, uniqueName, value, values, onChange, onDelet
 
 export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDelete }) => {
   return <SchemaContext.Consumer>
-    {({ schema, availableTypes, values }) => {
+    {({ schema, availableTypes, values, htmlTypes }) => {
       if (availableTypes.length === 0) return null
 
       return (
@@ -31,11 +64,9 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
                   <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
                   <div className={cs('rlpPropInput', styles.rlpPropInput)}>
                     <select key={`${uniqueName}.${idx}`} name={`${uniqueName}.${idx}`} value={child.type} onChange={(e) => onChangeType(schema, `${uniqueName}.${idx}`, e.target.value, values, onChange, onDelete)}>
-                      <option value=''>none</option>
-                      {availableTypes.map(availableType => {
-                        if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
-
-                        return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
+                      <option value=''>none/remove</option>
+                      {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
+                        return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
                       })}
                     </select>
                   </div>
@@ -49,11 +80,9 @@ export const ChildrenArrayRenderer = ({ value, uniqueName, name, onChange, onDel
               <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
               <div className={cs('rlpPropInput', styles.rlpPropInput)}>
                 <select key={`${uniqueName}.${value.length}`} name={`${uniqueName}.${value.length}`} value='' onChange={(e) => onChangeType(schema, `${uniqueName}.${value.length}`, e.target.value, values, onChange, onDelete)}>
-                  <option value=''>none</option>
-                  {availableTypes.map(availableType => {
-                    if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
-
-                    return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
+                  <option value=''>none/remove</option>
+                  {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
+                    return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
                   })}
                 </select>
               </div>
@@ -75,7 +104,7 @@ ChildrenArrayRenderer.propTypes = {
 
 export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDelete }) => {
   return <SchemaContext.Consumer>
-    {({ schema, availableTypes, values }) => {
+    {({ schema, availableTypes, values, htmlTypes }) => {
       if (availableTypes.length === 0) return null
 
       const valueOrDefault = value ? value.type : ''
@@ -86,11 +115,9 @@ export const ChildrenObjectRenderer = ({ value, uniqueName, name, onChange, onDe
             <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
             <div className={cs('rlpPropInput', styles.rlpPropInput)}>
               <select key={uniqueName} name={uniqueName} value={valueOrDefault} onChange={(e) => onChangeType(schema, uniqueName, e.target.value, values, onChange, onDelete)}>
-                <option value=''>none</option>
-                {availableTypes.map(availableType => {
-                  if (typeof availableType === 'string') return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
-
-                  return <option key={getDisplayName(availableType)} value={getDisplayName(availableType)}>{getRawDisplayName(availableType)}</option>
+                <option value=''>none/remove</option>
+                {buildSortedChildrenList(availableTypes, htmlTypes).map(type => {
+                  return <option key={type.safeDisplayName} value={type.safeDisplayName}>{type.displayName}</option>
                 })}
               </select>
             </div>

@@ -54,6 +54,8 @@ export default class AdvancedComponent extends Component {
       prop2: PropTypes.number
     }),
 
+    nestedArrays: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+
     anything: PropTypes.any
   }
 

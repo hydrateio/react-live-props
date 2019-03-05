@@ -133,3 +133,17 @@ export const recurseDocgenForProp = (parentName, docgenInfo) => {
     return docgenForName[namePart].props
   }, docgenInfo)
 }
+
+export const getComponentTypes = (availableTypes, htmlTypes) => {
+  return availableTypes.filter(type => {
+    if (htmlTypes.includes(type)) return false
+
+    if (type.name && (type.name === '@@TEXT' || type.name === 'React.Fragment')) return false
+
+    return true
+  })
+}
+
+export const getReactTypes = () => {
+  return ['@@TEXT', 'React.Fragment']
+}

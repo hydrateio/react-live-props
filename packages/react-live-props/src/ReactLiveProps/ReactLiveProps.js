@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import docgenToJsonSchema from 'react-docgen-to-json-schema'
 import cs from 'classnames'
 
+import PropsTable from '../PropsTable'
 import EditablePropsTable from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
@@ -25,7 +26,9 @@ export default class ReactLiveProps extends Component {
     additionalTitleText: PropTypes.string,
     hideComponentMarkup: PropTypes.bool,
     hideComponentPreview: PropTypes.bool,
+    hidePropsTable: PropTypes.bool,
     customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    customComponentMarkupHeaderText: PropTypes.string,
     initialComponentChildren: PropTypes.oneOfType([PropTypes.node, PropTypes.arrayOf(PropTypes.node)]),
     intialPropValues: PropTypes.object,
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
@@ -77,6 +80,8 @@ export default class ReactLiveProps extends Component {
       initialCollapsed,
       initialPropValues,
       generateFakePropValues,
+      customComponentMarkupHeaderText = 'Custom Component Markup',
+      hidePropsTable,
       ...rest
     } = this.props
 
@@ -119,63 +124,66 @@ export default class ReactLiveProps extends Component {
 
           {!this.state.collapsed && (
             <React.Fragment>
-              {!hideComponentPreview && (
-                <React.Fragment>
-                  <h6>Preview</h6>
-                  <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
-                    <ComponentPreview
-                      component={of}
-                    />
-                  </div>
-                </React.Fragment>
+              {!hidePropsTable && (
+                <div className={cs('rlpSection', 'rlpPropsTableMain', styles.rlpSection, styles.rlpPropsTableMain)}>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Props Table</h6>
+                  <PropsTable />
+                </div>
               )}
 
-              <h6>Component Props</h6>
-              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
-                  <React.Fragment>
-                    <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
-                      <TreeView
-                        of={of}
-                        onChangeComponent={this._editComponent}
-                      />
-                    </div>
-                    <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
-                  </React.Fragment>
-                )}
-
-                <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
-                  <EditablePropsTable
-                    editableProperties={editableProperties}
-                    blacklistedProperties={blacklistedProperties}
-                    onChange={this._onChange}
-                    onAddProperty={this._onAddProperty}
+              {!hideComponentPreview && (
+                <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Preview</h6>
+                  <ComponentPreview
+                    component={of}
                   />
+                </div>
+              )}
+
+              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
+                <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Props Editor</h6>
+                <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
+                  {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
+                    <React.Fragment>
+                      <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
+                        <TreeView
+                          of={of}
+                          onChangeComponent={this._editComponent}
+                        />
+                      </div>
+                      <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
+                    </React.Fragment>
+                  )}
+
+                  <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
+                    <EditablePropsTable
+                      editableProperties={editableProperties}
+                      blacklistedProperties={blacklistedProperties}
+                      onChange={this._onChange}
+                      onAddProperty={this._onAddProperty}
+                    />
+                  </div>
                 </div>
               </div>
 
               {!hideComponentMarkup && (
-                <React.Fragment>
-                  <h6>Markup</h6>
-                  <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
-                    <ComponentMarkup
-                      component={of}
-                    />
-                  </div>
-                </React.Fragment>
+                <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Markup</h6>
+                  <ComponentMarkup
+                    component={of}
+                  />
+                </div>
               )}
 
               {CustomComponentMarkup && (
-                <React.Fragment>
-                  <h6>Custom Markup</h6>
-                  <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
-                    <CustomComponentMarkup>
-                      <ComponentPreview
-                        component={of}
-                      />
-                    </CustomComponentMarkup>
-                  </div>
-                </React.Fragment>
+                <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{customComponentMarkupHeaderText}</h6>
+                  <CustomComponentMarkup>
+                    <ComponentPreview
+                      component={of}
+                    />
+                  </CustomComponentMarkup>
+                </div>
               )}
             </React.Fragment>
           )}

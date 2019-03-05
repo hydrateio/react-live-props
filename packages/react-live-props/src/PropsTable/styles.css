@@ -1,0 +1,52 @@
+.rlpPropsTable table {
+  width: 100%;
+  box-shadow: 0 0 0 1px #CED4DE;
+  border-radius: 4px;
+  border-collapse: collapse;
+  border-style: hidden;
+  border-spacing: 0px;
+}
+
+.rlpPropsTable thead {
+  background: #EEF1F5
+}
+
+.rlpPropsTable tbody > tr {
+  border-top: 1px solid #CED4DE;
+}
+
+.rlpPropsTable th,
+.rlpPropsTable td {
+  padding: 16px;
+}
+
+.rlpRequired {
+  margin-left: 8px;
+  font-weight: bold;
+}
+
+.rlpPropName {}
+
+.rlpTypeName {}
+
+.rlpDescription {
+  width: 50%;
+}
+
+.rlpNoAvailableProperties {
+  padding: 16px;
+}
+
+.rlpComponentSelector {
+  margin: 8px 0px;
+}
+
+.rlpTypeNameAction {
+  float: right;
+  background-color: transparent;
+  border: none;
+}
+
+.rlpPropertyTypeDetails {
+  margin-top: 8px;
+}

@@ -29,6 +29,9 @@ export const Text = ({ text }) => (
 )
 
 Text.propTypes = {
+  /**
+   * The text that will be rendered within the container
+   */
   text: PropTypes.string.isRequired,
 }
 
