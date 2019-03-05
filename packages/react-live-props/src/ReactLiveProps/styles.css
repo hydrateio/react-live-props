@@ -18,7 +18,7 @@
   margin-bottom: 12px;
 }
 
-.rlpComponentPreview, .rlpEditablePropsTable, .rlpPropsTableMain, .rlpCustomComponentMarkup {
+.rlpComponentPreview, .rlpEditablePropsTable, .rlpPropsTableMain, .rlpCustomComponentMarkup, .rlpComponentMarkup {
   padding: 12px;
   border: 2px solid #e5e5e5;
 }
