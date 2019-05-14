@@ -221,7 +221,12 @@ export default class EditablePropsTable extends Component {
     // dotProp mutates the value, so we need to clone before using dotProp
     const clonedValues = cloneDeep(values)
 
-    const prop = dotProp.get(clonedValues, name)
+    let prop = dotProp.get(clonedValues, name)
+
+    if (!prop) {
+      prop = []
+      dotProp.set(clonedValues, name, prop)
+    }
 
     if (type === 'string') {
       prop.push('')

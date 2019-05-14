@@ -8,7 +8,7 @@ class FieldRenderer extends React.Component {
   static propTypes = {
     parentName: PropTypes.string.isRequired,
     name: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    type: PropTypes.string.isRequired,
+    type: PropTypes.string,
     value: PropTypes.any,
     onChange: PropTypes.func.isRequired,
     options: PropTypes.array,
@@ -56,7 +56,7 @@ class FieldRenderer extends React.Component {
       return (
         <SchemaContext.Consumer>
           {({ values }) => (
-            <input type='number' key={uniqueName} className={className} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, e.target.value, values)} />
+            <input type='number' key={uniqueName} className={className} name={uniqueName} value={value} onChange={(e) => onChange(uniqueName, parseInt(e.target.value, 10), values)} />
           )}
         </SchemaContext.Consumer>
       )
