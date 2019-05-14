@@ -32,7 +32,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
           <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
             <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
             <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-              <FieldRenderer parentName={parentName} name={name} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
+              <FieldRenderer parentName={parentName} name={name} className={cs('rlpPropField', styles.rlpPropField)} type={property.type} value={currentValue} onChange={onChange} options={property.enum} onDelete={onDelete} onAdd={onAdd} />
             </div>
           </div>
           {property.description && (
@@ -91,7 +91,7 @@ const PropertyRenderer = ({ parentName, name, property, value, onChange, onDelet
             <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
               <strong className={cs('rlpPropName', styles.rlpPropName)}>{name}</strong>
               <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-                <input type='text' name={name} value={tryConvertTypeToString(valueOrDefault)} onChange={(e) => onChange(namespaceName(parentName, name), tryParseStringAsType(e.target.value), values)} />
+                <FieldRenderer parentName={parentName} name={name} className={cs('rlpPropField', styles.rlpPropField)} type={property.type} value={valueOrDefault} onChange={onChange} onDelete={onDelete} onAdd={onAdd} />
               </div>
             </div>
             {property.description && (

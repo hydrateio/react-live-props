@@ -43,8 +43,20 @@
   margin-right: 12px;
 }
 
-.rlpPropInput input,
-.rlpPropInput select {
+.rlpPropInput input {
   width: 100%;
   font-weight: normal;
+}
+
+select.rlpPropField {
+  width: 100%;
+  font-weight: normal;
+}
+
+.rlpPropField select {
+  width: 120px;
+}
+
+.rlpPropField input {
+  width: calc(100% - 120px);
 }
