@@ -1,0 +1,62 @@
+.rlpProp {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.rlpProp label {
+  display: block;
+}
+
+.rlpPropDescription {
+  font-weight: normal;
+  font-size: 14px;
+  border-bottom: none;
+  margin-bottom: 0px;
+}
+
+.rlpPropHeader,
+.rlpPropListItem {
+  display: flex;
+  align-items: flex-start;
+}
+
+.rlpPropListItem {
+  justify-content: center;
+  align-items: center;
+}
+
+.rlpPropInput,
+.rlpPropHeaderAction,
+.rlpPropListItemInput  {
+  flex-grow: 1;
+}
+
+.rlpPropHeaderAction {
+  text-align: right;
+}
+
+.rlpPropInput {
+  margin-left: 12px;
+}
+
+.rlpPropListItemInput {
+  margin-right: 12px;
+}
+
+.rlpPropInput input {
+  width: 100%;
+  font-weight: normal;
+}
+
+select.rlpPropField {
+  width: 100%;
+  font-weight: normal;
+}
+
+.rlpPropField select {
+  width: 120px;
+}
+
+.rlpPropField input {
+  width: calc(100% - 120px);
+}

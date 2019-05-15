@@ -1,69 +1,247 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import Form from 'react-jsonschema-form'
 import cs from 'classnames'
+import dotProp from 'dot-prop'
+import cloneDeep from 'lodash.clonedeep'
+import { PropertyRenderer, AddHtmlAttributeRenderer } from '../Renderers'
+import { SchemaContext } from '../Context'
 
 import styles from './styles.css'
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
-    schema: PropTypes.object.isRequired,
-    values: PropTypes.object.isRequired,
     onChange: PropTypes.func.isRequired,
     className: PropTypes.string,
     editableProperties: PropTypes.arrayOf(PropTypes.string),
-    uiSchema: PropTypes.object
+    blacklistedProperties: PropTypes.arrayOf(PropTypes.string),
+    onAddProperty: PropTypes.func
   }
 
-  static getDerivedStateFromProps(props, state) {
-    const editableProperties = props.editableProperties || Object.keys(props.schema.properties)
+  state = {
+    pendingAttributeName: '',
+    pendingAttributeValue: ''
+  }
+
+  filterProperties(schema) {
+    const blacklistedProperties = this.props.blacklistedProperties || []
+
+    const editableProperties = this.props.editableProperties || Object.keys(schema.properties)
 
     const editablePropertyDefs = {}
     editableProperties.forEach(key => {
-      editablePropertyDefs[key] = props.schema.properties[key]
+      if (blacklistedProperties.includes(key)) return
+
+      editablePropertyDefs[key] = schema.properties[key]
     })
 
-    const schema = {
-      ...props.schema,
-      properties: editablePropertyDefs
+    if (schema && schema.properties) {
+      const keys = Object.keys(schema.properties)
+      const editableKeys = Object.keys(editablePropertyDefs)
+
+      if (keys.length === editableKeys.length) return schema
     }
+
     return {
-      ...state,
-      schema
+      ...schema,
+      properties: editablePropertyDefs
     }
   }
 
-  state = {}
+  shouldComponentUpdate(nextProps, nextState) {
+    let shouldUpdate = false
+
+    Object.entries(this.props).forEach(([key, val]) => {
+      if (nextProps[key] !== val) {
+        shouldUpdate = true
+      }
+    })
+    Object.entries(this.state).forEach(([key, val]) => {
+      if (nextState[key] !== val) {
+        shouldUpdate = true
+      }
+    })
+
+    if (Object.entries(this.props).length !== Object.entries(nextProps).length) {
+      shouldUpdate = true
+    }
+
+    if (Object.entries(this.state).length !== Object.entries(nextState).length) {
+      shouldUpdate = true
+    }
+
+    return shouldUpdate
+  }
+
+  state = {
+    pendingAttributeName: '',
+    pendingAttributeValue: ''
+  }
 
   render() {
     const {
-      schema,
-      values,
       onChange,
       className,
-      uiSchema,
       editableProperties,
+      blacklistedProperties,
+      onAddProperty,
       ...rest
     } = this.props
 
     return (
-      <div
-        className={cs(styles.container, className)}
-        {...rest}
-      >
-        <Form
-          schema={this.state.schema}
-          uiSchema={uiSchema}
-          formData={values}
-          onChange={this._onChange}
-          onSubmit={this._onChange}
-        />
-      </div>
+      <SchemaContext.Consumer>
+        {({ schema, values, editingComponent, editingComponentPath, htmlTypes, docgenInfo }) => {
+          const filteredSchema = this.filterProperties(schema[editingComponent])
+          const propertyKeys = Object.keys(filteredSchema.properties)
+          const currentValue = dotProp.get(values, editingComponentPath)
+
+          return (
+            <div
+              className={cs('rlpEditableProps', styles.rlpEditableProps, className)}
+              {...rest}
+            >
+              {propertyKeys.map((key, idx) => {
+                const propertyValue = currentValue ? currentValue[key] : null
+                return (
+                  <PropertyRenderer
+                    key={`${key}.${idx}`}
+                    parentName={editingComponentPath}
+                    name={key}
+                    value={propertyValue}
+                    docgenInfo={docgenInfo}
+                    onChange={this._onChange}
+                    onDelete={this._onDelete}
+                    onAdd={this._onAdd}
+                    property={filteredSchema.properties[key]}
+                  />
+                )
+              })}
+
+              {htmlTypes.includes(editingComponent) && (
+                <AddHtmlAttributeRenderer pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
+              )}
+            </div>
+          )
+        }}
+      </SchemaContext.Consumer>
     )
   }
 
-  _onChange = (e) => {
-    this.props.onChange(e.formData)
+  _onChangeProperty = (state) => {
+    this.setState(state)
+  }
+
+  _onAddProperty = (editingComponent, editingComponentPath, schema, values, name, value) => {
+    let propertySchema
+    const valueType = typeof value
+    if (Array.isArray(value)) {
+      propertySchema = {
+        type: 'array',
+        items: { type: 'string' }
+      }
+    } else if (valueType === 'object') {
+      const childProperties = {}
+      Object.keys(value).forEach(childProp => {
+        childProperties[childProp] = { type: 'string' }
+      })
+
+      propertySchema = {
+        type: 'object',
+        properties: childProperties
+      }
+    } else if (valueType === 'boolean') {
+      propertySchema = {
+        type: 'boolean'
+      }
+    } else if (valueType === 'number') {
+      propertySchema = {
+        type: 'number'
+      }
+    } else {
+      propertySchema = {
+        type: 'string'
+      }
+    }
+
+    const newSchema = {
+      ...schema,
+      [editingComponent]: {
+        ...schema[editingComponent],
+        properties: {
+          ...schema[editingComponent].properties,
+          [name]: propertySchema
+        }
+      }
+    }
+
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(values)
+
+    const compPropValues = dotProp.get(clonedValues, editingComponentPath)
+    compPropValues[name] = value
+
+    this.setState({
+      pendingAttributeName: '',
+      pendingAttributeValue: ''
+    }, () => {
+      this.props.onAddProperty(clonedValues, newSchema)
+    })
+  }
+
+  _onChange = (name, newValue, values) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(values)
+
+    dotProp.set(clonedValues, name, newValue)
+
+    this.props.onChange(clonedValues)
+  }
+
+  _onDelete = (name, values) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(values)
+
+    const nameParts = name.split('.')
+    const lastProp = nameParts.pop()
+    try {
+      const index = parseInt(lastProp, 10)
+      // the property is an array index
+      const array = dotProp.get(clonedValues, nameParts.join('.'))
+      array.splice(index, 1)
+      dotProp.set(clonedValues, nameParts.join('.'), array)
+    } catch (e) {
+      // the property is not an array index
+      dotProp.delete(clonedValues, name)
+    }
+
+    this.props.onChange(clonedValues)
+  }
+
+  _onAdd = (name, type, values) => {
+    // dotProp mutates the value, so we need to clone before using dotProp
+    const clonedValues = cloneDeep(values)
+
+    let prop = dotProp.get(clonedValues, name)
+
+    if (!prop) {
+      prop = []
+      dotProp.set(clonedValues, name, prop)
+    }
+
+    if (type === 'string') {
+      prop.push('')
+    } else if (type === 'number') {
+      prop.push(0)
+    } else if (type === 'boolean') {
+      prop.push(false)
+    } else if (type === 'object') {
+      prop.push({})
+    } else if (type === 'array') {
+      prop.push([])
+    } else {
+      prop.push(null)
+    }
+
+    this.props.onChange(clonedValues)
   }
 }
