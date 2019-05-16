@@ -33,7 +33,10 @@ export default class ReactLiveProps extends Component {
     intialPropValues: PropTypes.object,
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     initialCollapsed: PropTypes.bool,
-    generateFakePropValues: PropTypes.bool
+    hideHeader: PropTypes.bool,
+    generateFakePropValues: PropTypes.bool,
+    componentPreviewHeaderText: PropTypes.string,
+    propsEditorHeaderText: PropTypes.string
   }
 
   constructor(props) {
@@ -82,6 +85,9 @@ export default class ReactLiveProps extends Component {
       generateFakePropValues,
       customComponentMarkupHeaderText = 'Custom Component Markup',
       hidePropsTable,
+      hideHeader,
+      componentPreviewHeaderText = 'Component Preview',
+      propsEditorHeaderText = 'Props Editor',
       ...rest
     } = this.props
 
@@ -112,21 +118,23 @@ export default class ReactLiveProps extends Component {
           className={cs('rlpContainer', styles.rlpContainer, className)}
           {...rest}
         >
-          <h2
-            className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
-            role='button'
-            aria-label='Expand/Collapse the ReactLiveProps playground'
-            aria-expanded={!this.state.collapsed}
-            onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)}
-          >
-            {schema.title}
-            {this.state.collapsed && (
-              <Expand onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
-            )}
-            {!this.state.collapsed && (
-              <Collapse onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
-            )}
-          </h2>
+          {!hideHeader && (
+            <h2
+              className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
+              role='button'
+              aria-label='Expand/Collapse the ReactLiveProps playground'
+              aria-expanded={!this.state.collapsed}
+              onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)}
+            >
+              {schema.title}
+              {this.state.collapsed && (
+                <Expand onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
+              )}
+              {!this.state.collapsed && (
+                <Collapse onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
+              )}
+            </h2>
+          )}
 
           {!this.state.collapsed && (
             <React.Fragment>
@@ -139,7 +147,7 @@ export default class ReactLiveProps extends Component {
 
               {!hideComponentPreview && (
                 <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Preview</h6>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{componentPreviewHeaderText}</h6>
                   <ComponentPreview
                     component={of}
                   />
@@ -147,7 +155,7 @@ export default class ReactLiveProps extends Component {
               )}
 
               <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Props Editor</h6>
+                <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{propsEditorHeaderText}</h6>
                 <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
                   {findNodeProperties(of, allDocGenInfo[rootComponentDisplayName], htmlTypes).length > 0 && (
                     <React.Fragment>
