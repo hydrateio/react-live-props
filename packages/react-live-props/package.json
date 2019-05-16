@@ -1,6 +1,6 @@
 {
   "name": "react-live-props",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Live playground for interacting with props on React components.",
   "author": "Hydrate <dev@hydrate.io> (https://hydrate.io)",
   "license": "MIT",
