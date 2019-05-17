@@ -64,6 +64,7 @@
     "lodash.clonedeep": "^4.5.0",
     "react-color": "^2.17.0",
     "react-docgen-to-json-schema": "0.2.0",
+    "react-element-to-jsx-string": "^14.0.2",
     "react-icons": "^3.4.0"
   }
 }

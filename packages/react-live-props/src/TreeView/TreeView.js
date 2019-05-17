@@ -9,18 +9,18 @@ import styles from './styles.css'
 const RenderComponent = ({ values, componentDisplayName, onChangeComponent, componentPath }) => {
   return (
     <SchemaContext.Consumer>
-      {({ htmlTypes, docgenInfo, editingComponentPath }) => {
+      {({ docgenInfo, editingComponentPath }) => {
         const isSelected = editingComponentPath === componentPath
         return (
           <React.Fragment>
             <li>
               <p><a href='javascript:void(0)' className={isSelected ? cs('rlpTreeViewSelected', styles.rlpTreeViewSelected) : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{convertSafeDisplayNameToRaw(componentDisplayName)}</a></p>
             </li>
-            {findNodeProperties(componentDisplayName, docgenInfo[componentDisplayName], htmlTypes).map((nodeProp, nodeIdx) => {
-              if (values && values[nodeProp]) {
-                if (Array.isArray(values[nodeProp]) && values[nodeProp].length === 0) return null
+            {findNodeProperties(docgenInfo[componentDisplayName].props).map((nodeProp, nodeIdx) => {
+              if (values && values.props[nodeProp]) {
+                if (Array.isArray(values.props[nodeProp]) && values.props[nodeProp].length === 0) return null
 
-                if (Object.keys(values[nodeProp]).length === 0) return null
+                if (Object.keys(values.props[nodeProp]).length === 0) return null
               } else {
                 return null
               }
@@ -30,14 +30,14 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
                   <div className={cs('rlpTreeViewPropContainer', styles.rlpTreeViewPropContainer)}>
                     <p>{nodeProp}</p>
                     <ul>
-                      {Array.isArray(values[nodeProp]) && values[nodeProp].map((child, idx) => {
+                      {Array.isArray(values.props[nodeProp]) && values.props[nodeProp].map((child, idx) => {
                         const newPath = `${componentPath}.${nodeProp}.${idx}.${child.type}`
                         return (
-                          <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values[nodeProp][idx][child.type]} componentDisplayName={getDisplayName(child.type)} onChangeComponent={onChangeComponent} />
+                          <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values.props[nodeProp][idx]} componentDisplayName={getDisplayName(child.type)} onChangeComponent={onChangeComponent} />
                         )
                       })}
-                      {!Array.isArray(values[nodeProp]) && values[nodeProp] && (
-                        <RenderComponent componentPath={`${componentPath}.${nodeProp}.${values[nodeProp].type}`} values={values[nodeProp][values[nodeProp].type]} componentDisplayName={getDisplayName(values[nodeProp].type)} onChangeComponent={onChangeComponent} />
+                      {!Array.isArray(values.props[nodeProp]) && values.props[nodeProp] && (
+                        <RenderComponent componentPath={`${componentPath}.${nodeProp}.${values.props[nodeProp].type}`} values={values.props[nodeProp]} componentDisplayName={getDisplayName(values.props[nodeProp].type)} onChangeComponent={onChangeComponent} />
                       )}
                     </ul>
                   </div>
@@ -69,11 +69,11 @@ class TreeView extends React.Component {
     const { of, className, onChangeComponent, ...rest } = this.props
 
     return <SchemaContext.Consumer>
-      {({ values, rootComponentDisplayName }) => {
+      {({ values, rootComponentDisplayName, docgenInfo }) => {
         return (
           <div className={cs('rlpTreeView', styles.rlpTreeView, className)} {...rest}>
             <ul>
-              <RenderComponent values={values[rootComponentDisplayName]} componentPath={rootComponentDisplayName} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
+              <RenderComponent values={values} componentPath={rootComponentDisplayName} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
             </ul>
           </div>
         )

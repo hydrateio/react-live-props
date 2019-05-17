@@ -112,15 +112,11 @@ export const hasChildren = (component) => {
   return false
 }
 
-export const findNodeProperties = (component, docgenInfo, htmlTypes) => {
-  if (htmlTypes.includes(component)) return ['children']
+export const findNodeProperties = (props) => {
+  return Object.keys(props).filter(prop => {
+    if (props[prop].type.name === 'node') return true
 
-  if (!docgenInfo || !docgenInfo.props) return []
-
-  return Object.keys(docgenInfo.props).filter(prop => {
-    if (docgenInfo.props[prop].type.name === 'node') return true
-
-    if (docgenInfo.props[prop].type.name === 'arrayOf' && docgenInfo.props[prop].type.value.name === 'node') return true
+    if (props[prop].type.name === 'arrayOf' && props[prop].type.value.name === 'node') return true
 
     return false
   })
