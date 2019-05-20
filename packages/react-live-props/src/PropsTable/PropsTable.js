@@ -1,7 +1,6 @@
 import React from 'react'
 import cs from 'classnames'
 import { SchemaContext } from '../Context'
-import { getComponentTypes, getDisplayName } from '../Utils'
 import { Expand, Collapse } from '../Components'
 
 import styles from './styles.css'
@@ -63,28 +62,11 @@ class PropsTable extends React.Component {
     return (
       <div className={cs('rlpPropsTable', styles.rlpPropsTable)}>
         <SchemaContext.Consumer>
-          {({ rootComponentDisplayName, docgenInfo, availableTypes, htmlTypes }) => {
+          {({ rootComponentDisplayName, docgenInfo }) => {
             const currentComponent = this.state.selectedComponentDisplayName || rootComponentDisplayName
             const componentProps = docgenInfo[currentComponent].props
-            const otherComponentTypes = getComponentTypes(availableTypes, htmlTypes)
             return (
               <React.Fragment>
-                {otherComponentTypes.length > 0 && (
-                  <div className={cs('rlpComponentSelector', styles.rlpComponentSelector)}>
-                    <label>
-                      <span>Selected Component</span>
-                      <select value={currentComponent} onChange={this.updateComponent}>
-                        <option value={rootComponentDisplayName}>{rootComponentDisplayName}</option>
-                        {otherComponentTypes.map(type => {
-                          const componentDisplayName = getDisplayName(type)
-                          return (
-                            <option key={componentDisplayName} value={componentDisplayName}>{componentDisplayName}</option>
-                          )
-                        })}
-                      </select>
-                    </label>
-                  </div>
-                )}
                 {componentProps && Object.keys(componentProps).length > 0 && (
                   <table>
                     <thead>

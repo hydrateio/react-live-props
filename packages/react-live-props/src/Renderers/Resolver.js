@@ -6,59 +6,12 @@ export const RendererContext = React.createContext({})
 const RendererResolver = ({ type, value, ...rest }) => {
   return (
     <RendererContext.Consumer>
-      {({
-        enum: EnumFieldRenderer,
-        string: StringFieldRenderer,
-        bool: BoolFieldRenderer,
-        number: NumberFieldRenderer,
-        shape: ShapeFieldRenderer,
-        arrayOf: ArrayFieldRenderer,
-        any: AnyFieldRenderer
-      }) => {
-        if (type.name === 'enum') {
-          return <EnumFieldRenderer {...rest} value={value} />
-        }
+      {(renderers) => {
+        if (renderers[type.name]) {
+          const Renderer = renderers[type.name]
+          const valueOrDefault = Renderer.getValueWithDefault ? Renderer.getValueWithDefault(value) : value
 
-        if (type.name === 'any') {
-          return <AnyFieldRenderer {...rest} value={value} />
-        }
-
-        if (type.name === 'string') {
-          return <StringFieldRenderer {...rest} value={value} />
-        }
-
-        if (type.name === 'bool') {
-          return <BoolFieldRenderer {...rest} value={value} />
-        }
-
-        if (type.name === 'number') {
-          return <NumberFieldRenderer {...rest} value={value} />
-        }
-
-        if (type.name === 'shape') {
-          const valueOrDefault = value || {}
-
-          console.log('rendering shape', rest.name, value, valueOrDefault)
-
-          return (
-            <ShapeFieldRenderer
-              {...rest}
-              type={type.value}
-              value={valueOrDefault}
-            />
-          )
-        }
-
-        if (type.name === 'arrayOf') {
-          const valueOrDefault = value || []
-
-          return (
-            <ArrayFieldRenderer
-              {...rest}
-              value={valueOrDefault}
-              type={type.value}
-            />
-          )
+          return <Renderer {...rest} type={type.value} value={valueOrDefault} />
         }
 
         console.log('UNSUPPORTED', type)

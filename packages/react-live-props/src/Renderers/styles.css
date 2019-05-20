@@ -14,23 +14,6 @@
   margin-bottom: 0px;
 }
 
-.rlpPropHeader,
-.rlpPropListItem {
-  display: flex;
-  align-items: flex-start;
-}
-
-.rlpPropListItem {
-  justify-content: center;
-  align-items: center;
-}
-
-.rlpPropInput,
-.rlpPropHeaderAction,
-.rlpPropListItemInput  {
-  flex-grow: 1;
-}
-
 .rlpPropHeaderAction {
   text-align: right;
 }
@@ -48,6 +31,7 @@
   font-weight: normal;
 }
 
+textarea.rlpPropField,
 select.rlpPropField {
   width: 100%;
   font-weight: normal;

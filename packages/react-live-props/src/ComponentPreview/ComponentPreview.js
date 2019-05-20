@@ -4,8 +4,6 @@ import { SchemaContext } from '../Context'
 
 import cs from 'classnames'
 
-import styles from './styles.css'
-
 export default class ComponentPreview extends Component {
   static propTypes = {
     className: PropTypes.string

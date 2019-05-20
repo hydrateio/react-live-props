@@ -1,6 +1,6 @@
-import { ArrayFieldRenderer, BoolFieldRenderer, EnumFieldRenderer, NumberFieldRenderer, ShapeFieldRenderer, StringFieldRenderer, AnyFieldRenderer } from './types'
+import { ArrayFieldRenderer, BoolFieldRenderer, EnumFieldRenderer, NumberFieldRenderer, ShapeFieldRenderer, StringFieldRenderer, AnyFieldRenderer, NodeFieldRenderer } from './types'
 
-export { default as PropertyRenderer, ObjectArrayRenderer, ObjectRenderer, AddHtmlAttributeRenderer } from './Property'
+export { default as PropertyRenderer } from './Property'
 export { RendererContext } from './Resolver'
 
 const Renderers = {
@@ -10,6 +10,7 @@ const Renderers = {
   number: NumberFieldRenderer,
   shape: ShapeFieldRenderer,
   string: StringFieldRenderer,
-  any: AnyFieldRenderer
+  any: AnyFieldRenderer,
+  node: NodeFieldRenderer
 }
 export { Renderers }

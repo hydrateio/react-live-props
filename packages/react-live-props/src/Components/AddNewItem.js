@@ -1,5 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import SaveButton from './SaveButton'
+import cs from 'classnames'
+
+import styles from './AddNewItem.css'
 
 class AddNewItem extends React.Component {
   static propTypes = {
@@ -15,10 +19,6 @@ class AddNewItem extends React.Component {
     this.state = {
       currentValue: this.props.defaultValue
     }
-  }
-
-  componentDidMount() {
-    console.log('mounting add new item')
   }
 
   onChange = (name, newValue) => {
@@ -38,9 +38,11 @@ class AddNewItem extends React.Component {
     const Children = this.props.children
 
     return (
-      <div>
-        <Children {...this.props} onChange={this.onChange} currentValue={this.state.currentValue} />
-        <button type='button' onClick={this.onAdd}>Add</button>
+      <div className={cs('rlpAddNewItem', styles.addNewItem)}>
+        <SaveButton onClick={this.onAdd} />
+        <div className={styles.addNewItemContents}>
+          <Children {...this.props} onChange={this.onChange} currentValue={this.state.currentValue} />
+        </div>
       </div>
     )
   }

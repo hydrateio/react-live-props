@@ -1,8 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import cs from 'classnames'
 import RenderResolver from '../Resolver'
-import PropWrapper from '../PropWrapper'
-import AddNewItem from '../AddNewItem'
+import { AddNewItem, DeleteButton, PropWrapper } from '../../Components'
+
+import arrayStyles from './Array.css'
 
 const ArrayFieldRenderer = ({ name, type, property, value, onChange, styles }) => {
   const valueOrDefault = value || []
@@ -11,23 +13,37 @@ const ArrayFieldRenderer = ({ name, type, property, value, onChange, styles }) =
     <React.Fragment>
       {valueOrDefault.map((item, idx) => (
         <PropWrapper styles={styles} name={idx} key={`${name}-${idx}`}>
-          <RenderResolver
-            name={name}
-            type={type}
-            property={property}
-            onChange={(name, updatedValue) => {
-              const updatedValues = value.map((origValue, itemIndex) => {
-                if (itemIndex === idx) {
-                  return updatedValue
-                }
+          <div className={cs('rlpArrayItem', arrayStyles.arrayItem)}>
+            <DeleteButton
+              onClick={() => {
+                const updatedValues = value.filter((_, itemIndex) => {
+                  if (itemIndex === idx) return false
 
-                return origValue
-              })
-              onChange(name, updatedValues)
-            }}
-            value={item}
-            styles={styles}
-          />
+                  return true
+                })
+                onChange(name, updatedValues)
+              }}
+            />
+            <div>
+              <RenderResolver
+                name={name}
+                type={type}
+                property={property}
+                onChange={(name, updatedValue) => {
+                  const updatedValues = value.map((origValue, itemIndex) => {
+                    if (itemIndex === idx) {
+                      return updatedValue
+                    }
+
+                    return origValue
+                  })
+                  onChange(name, updatedValues)
+                }}
+                value={item}
+                styles={styles}
+              />
+            </div>
+          </div>
         </PropWrapper>
       ))}
       <PropWrapper styles={styles} name={valueOrDefault.length}>
@@ -61,6 +77,12 @@ ArrayFieldRenderer.propTypes = {
   type: PropTypes.shape({
     name: PropTypes.string
   })
+}
+
+ArrayFieldRenderer.getValueWithDefault = (value) => {
+  if (value) return value
+
+  return []
 }
 
 export default ArrayFieldRenderer

@@ -2,10 +2,69 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import cs from 'classnames'
-import { PropertyRenderer, AddHtmlAttributeRenderer, RendererContext, Renderers } from '../Renderers'
+import { PropertyRenderer, RendererContext, Renderers } from '../Renderers'
+import { AddHtmlAttribute } from '../Components'
 import { SchemaContext } from '../Context'
 
 import styles from './styles.css'
+
+const updateComponentTree = (rootComponent, editingComponentPath, propName, newValue) => {
+  const editedComponent = editingComponentPath.reduce(
+    (prev, current) => {
+      return prev[current]
+    },
+    rootComponent
+  )
+  const updatedComponent = React.cloneElement(editedComponent, {
+    [propName]: newValue
+  })
+
+  const componentList = []
+  let workingComponent = rootComponent
+  let currentPropValue = rootComponent
+  let workingPath = []
+  editingComponentPath.forEach((pathItem) => {
+    currentPropValue = currentPropValue[pathItem]
+    workingPath.push(pathItem)
+
+    if (currentPropValue['$$typeof']) {
+      componentList.push({
+        component: workingComponent,
+        path: workingPath
+      })
+
+      workingComponent = currentPropValue
+      workingPath = []
+    }
+  })
+
+  let currentUpdatedComponent = updatedComponent
+  for (let i = 1; i <= componentList.length; i++) {
+    const item = componentList[componentList.length - i]
+    // strip off the props path item at the beginning
+    const propList = item.path.slice(1)
+    if (propList.length === 1) {
+      // a propList of length one means it is an object prop with no index
+      currentUpdatedComponent = React.cloneElement(item.component, {
+        [propList[0]]: currentUpdatedComponent
+      })
+    } else if (propList.length === 2) {
+      // a propList of length one means it is an object prop with no index
+      const newArrayValues = [
+        ...item.component.props[propList[0]]
+      ]
+      newArrayValues[propList[1]] = currentUpdatedComponent
+      currentUpdatedComponent = React.cloneElement(item.component, {
+        [propList[0]]: newArrayValues
+      })
+    } else {
+      console.error('Invalid prop list length when updating components', item)
+      throw new Error('Invalid prop list when updating components')
+    }
+  }
+
+  return currentUpdatedComponent
+}
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
@@ -75,7 +134,7 @@ export default class EditablePropsTable extends Component {
 
   render() {
     const {
-      onChange,
+      onChange: _,
       className,
       editableProperties,
       blacklistedProperties,
@@ -88,11 +147,17 @@ export default class EditablePropsTable extends Component {
         {({ values, editingComponent, editingComponentPath, htmlTypes, docgenInfo }) => {
           const filteredSchema = this.filterProperties(docgenInfo[editingComponent])
           const propertyKeys = Object.keys(filteredSchema)
+          const currentComponent = editingComponentPath.reduce(
+            (prev, current) => {
+              return prev[current]
+            },
+            values
+          )
 
           const onChange = (propName, newValue) => {
-            this.props.onChange(React.cloneElement(values, {
-              [propName]: newValue
-            }))
+            const updatedRootComponent = updateComponentTree(values, editingComponentPath, propName, newValue)
+
+            this.props.onChange(updatedRootComponent)
           }
 
           return (
@@ -106,7 +171,7 @@ export default class EditablePropsTable extends Component {
                     <PropertyRenderer
                       key={`${key}.${idx}`}
                       name={key}
-                      value={values.props[key]}
+                      value={currentComponent.props[key]}
                       onChange={onChange}
                       property={filteredSchema[key]}
                     />
@@ -114,7 +179,7 @@ export default class EditablePropsTable extends Component {
                 })}
 
                 {htmlTypes.includes(editingComponent) && (
-                  <AddHtmlAttributeRenderer pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
+                  <AddHtmlAttribute pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
                 )}
               </div>
             </RendererContext.Provider>
@@ -122,6 +187,21 @@ export default class EditablePropsTable extends Component {
         }}
       </SchemaContext.Consumer>
     )
+  }
+
+  _onAddProperty = (editingComponent, editingComponentPath, values, pendingAttributeName, value) => {
+    const updatedRootComponent = updateComponentTree(values, editingComponentPath, pendingAttributeName, value)
+
+    this.props.onAddProperty(editingComponent, pendingAttributeName)
+    this.props.onChange(updatedRootComponent)
+
+    this.setState((state) => {
+      return {
+        ...state,
+        pendingAttributeName: '',
+        pendingAttributeValue: ''
+      }
+    })
   }
 
   _onChangeProperty = (state) => {

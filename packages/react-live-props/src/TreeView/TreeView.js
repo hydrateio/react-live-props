@@ -1,23 +1,35 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
-import { findNodeProperties, convertSafeDisplayNameToRaw, getDisplayName } from '../Utils'
+import { findNodeProperties, getDisplayName } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import styles from './styles.css'
+
+const arePathsEquivalent = (a, b) => {
+  if (a.length !== b.length) return false
+
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false
+  }
+
+  return true
+}
 
 const RenderComponent = ({ values, componentDisplayName, onChangeComponent, componentPath }) => {
   return (
     <SchemaContext.Consumer>
       {({ docgenInfo, editingComponentPath }) => {
-        const isSelected = editingComponentPath === componentPath
+        const isSelected = arePathsEquivalent(editingComponentPath, componentPath)
         return (
           <React.Fragment>
             <li>
-              <p><a href='javascript:void(0)' className={isSelected ? cs('rlpTreeViewSelected', styles.rlpTreeViewSelected) : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{convertSafeDisplayNameToRaw(componentDisplayName)}</a></p>
+              <p><a href='javascript:void(0)' className={isSelected ? cs('rlpTreeViewSelected', styles.rlpTreeViewSelected) : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{componentDisplayName}</a></p>
             </li>
-            {findNodeProperties(docgenInfo[componentDisplayName].props).map((nodeProp, nodeIdx) => {
+            {typeof values !== 'string' && findNodeProperties(docgenInfo[componentDisplayName].props).map((nodeProp, nodeIdx) => {
               if (values && values.props[nodeProp]) {
+                if (typeof values.props[nodeProp] === 'string') return null
+
                 if (Array.isArray(values.props[nodeProp]) && values.props[nodeProp].length === 0) return null
 
                 if (Object.keys(values.props[nodeProp]).length === 0) return null
@@ -31,13 +43,13 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
                     <p>{nodeProp}</p>
                     <ul>
                       {Array.isArray(values.props[nodeProp]) && values.props[nodeProp].map((child, idx) => {
-                        const newPath = `${componentPath}.${nodeProp}.${idx}.${child.type}`
+                        const newPath = [...componentPath, 'props', nodeProp, idx]
                         return (
-                          <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values.props[nodeProp][idx]} componentDisplayName={getDisplayName(child.type)} onChangeComponent={onChangeComponent} />
+                          <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values.props[nodeProp][idx]} componentDisplayName={getDisplayName(child)} onChangeComponent={onChangeComponent} />
                         )
                       })}
                       {!Array.isArray(values.props[nodeProp]) && values.props[nodeProp] && (
-                        <RenderComponent componentPath={`${componentPath}.${nodeProp}.${values.props[nodeProp].type}`} values={values.props[nodeProp]} componentDisplayName={getDisplayName(values.props[nodeProp].type)} onChangeComponent={onChangeComponent} />
+                        <RenderComponent componentPath={[...componentPath, 'props', nodeProp]} values={values.props[nodeProp]} componentDisplayName={getDisplayName(values.props[nodeProp])} onChangeComponent={onChangeComponent} />
                       )}
                     </ul>
                   </div>
@@ -52,10 +64,10 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
 }
 
 RenderComponent.propTypes = {
-  values: PropTypes.object.isRequired,
+  values: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
   componentDisplayName: PropTypes.string.isRequired,
   onChangeComponent: PropTypes.func.isRequired,
-  componentPath: PropTypes.string.isRequired
+  componentPath: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])).isRequired
 }
 
 class TreeView extends React.Component {
@@ -73,7 +85,7 @@ class TreeView extends React.Component {
         return (
           <div className={cs('rlpTreeView', styles.rlpTreeView, className)} {...rest}>
             <ul>
-              <RenderComponent values={values} componentPath={rootComponentDisplayName} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
+              <RenderComponent values={values} componentPath={[]} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
             </ul>
           </div>
         )

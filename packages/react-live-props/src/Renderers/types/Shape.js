@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import RendererResolver from '../Resolver'
-import PropWrapper from '../PropWrapper'
+import { PropWrapper } from '../../Components'
 
 const ShapeFieldRenderer = ({ name, type, property, value, onChange, styles }) => {
   const keys = Object.keys(type)
@@ -38,6 +38,12 @@ ShapeFieldRenderer.propTypes = {
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
   styles: PropTypes.object
+}
+
+ShapeFieldRenderer.getValueWithDefault = (value) => {
+  if (value) return value
+
+  return {}
 }
 
 export default ShapeFieldRenderer

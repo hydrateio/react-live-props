@@ -55,7 +55,7 @@ const initialize = ({
     }
   )
 
-  const availableChildren = [{ name: '@@TEXT' }, { name: 'React.Fragment' }, ...DEFAULT_HTML_TYPES]
+  const availableChildren = [{ name: 'React.Fragment' }, ...DEFAULT_HTML_TYPES]
   if (availableTypes) {
     availableTypes.forEach(child => {
       if (availableChildren.includes(child)) return
@@ -120,7 +120,7 @@ const initialize = ({
       values,
       rootComponentDisplayName: safeDisplayName,
       editingComponent: safeDisplayName,
-      editingComponentPath: safeDisplayName,
+      editingComponentPath: [],
       htmlTypes,
       availableTypes: availableChildren,
       docgenInfo
@@ -311,15 +311,27 @@ export default class ReactLiveProps extends Component {
   }
 
   _onChange = (values) => {
-    console.log('changing', values)
     this.setState({
       values
     })
   }
 
-  _onAddProperty = (values) => {
+  _onAddProperty = (editingComponent, attributeName) => {
+    const newDocgenInfo = {
+      ...this.state.docgenInfo
+    }
+    newDocgenInfo[editingComponent].props = {
+      ...newDocgenInfo[editingComponent].props,
+      [attributeName]: {
+        description: 'Custom HTML Attribute',
+        required: false,
+        type: {
+          name: 'any'
+        }
+      }
+    }
     this.setState({
-      values
+      docgenInfo: newDocgenInfo
     })
   }
 }
