@@ -160,6 +160,17 @@ export default class EditablePropsTable extends Component {
             this.props.onChange(updatedRootComponent)
           }
 
+          const componentPropKeys = Object.keys(currentComponent.props)
+          if (Object.keys(componentPropKeys).length !== propertyKeys.length) {
+            // we have some props that aren't reflected in the docgenInfo.  Let's update the docgenInfo
+
+            componentPropKeys.forEach(propKey => {
+              if (!docgenInfo[editingComponent].props[propKey]) {
+                this.props.onAddProperty(editingComponent, propKey)
+              }
+            })
+          }
+
           return (
             <RendererContext.Provider value={{ ...Renderers }}>
               <div

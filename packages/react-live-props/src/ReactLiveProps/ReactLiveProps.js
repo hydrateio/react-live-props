@@ -10,7 +10,7 @@ import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
 import { SchemaContext } from '../Context'
 import { Expand, Collapse } from '../Components'
-import { findNodeProperties, getDisplayName } from '../Utils'
+import { findComponentProperties, getDisplayName } from '../Utils'
 
 import styles from './styles.css'
 
@@ -98,6 +98,42 @@ const initialize = ({
       throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
     }
     allDocGenInfo.push(...filteredTypes)
+  } else {
+    const typeInfo = DEFAULT_HTML_TYPES.map(type => {
+      if (typeof type === 'string') {
+        if (!htmlTypes.includes(type)) {
+          htmlTypes.push(type)
+        }
+
+        return {
+          description: '',
+          methods: [],
+          props: {
+            children: {
+              description: '',
+              required: false,
+              type: {
+                name: 'arrayOf',
+                value: { name: 'node' }
+              }
+            }
+          },
+          displayName: type
+        }
+      }
+
+      if (!type.__docgenInfo) {
+        console.error('Docgen info missing for type', type)
+      }
+
+      return type.__docgenInfo
+    })
+
+    const filteredTypes = typeInfo.filter(type => type !== null)
+    if (filteredTypes.filter(type => typeof type === 'undefined').length > 0) {
+      throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
+    }
+    allDocGenInfo.push(...filteredTypes)
   }
 
   try {
@@ -113,7 +149,7 @@ const initialize = ({
 
     const safeDisplayName = getDisplayName(info)
 
-    const values = initialComponent || null
+    const values = initialComponent || React.createElement(of)
 
     return {
       title: buildComponentTitle(safeDisplayName, additionalTitleText),
@@ -126,7 +162,7 @@ const initialize = ({
       docgenInfo
     }
   } catch (err) {
-    console.error('ReactLiveProps error resolving JSON Schema', err)
+    console.error('ReactLiveProps error initializing', err)
     return {
       errorMessage: err.message
     }
@@ -260,7 +296,7 @@ export default class ReactLiveProps extends Component {
               <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
                 <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{propsEditorHeaderText}</h6>
                 <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
-                  {findNodeProperties(allDocGenInfo[rootComponentDisplayName].props).length > 0 && (
+                  {findComponentProperties(allDocGenInfo[rootComponentDisplayName].props).length > 0 && (
                     <React.Fragment>
                       <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
                         <TreeView

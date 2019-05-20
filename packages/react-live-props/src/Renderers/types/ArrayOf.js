@@ -6,7 +6,7 @@ import { AddNewItem, DeleteButton, PropWrapper } from '../../Components'
 
 import arrayStyles from './Array.css'
 
-const ArrayFieldRenderer = ({ name, type = { name: 'any' }, property, value, onChange, styles }) => {
+const ArrayOfFieldRenderer = ({ name, type, property, value, onChange, styles }) => {
   const valueOrDefault = typeof value === 'string' ? [value] : value || []
 
   return (
@@ -68,7 +68,7 @@ const ArrayFieldRenderer = ({ name, type = { name: 'any' }, property, value, onC
   )
 }
 
-ArrayFieldRenderer.propTypes = {
+ArrayOfFieldRenderer.propTypes = {
   name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   property: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
@@ -79,10 +79,10 @@ ArrayFieldRenderer.propTypes = {
   })
 }
 
-ArrayFieldRenderer.getValueWithDefault = (value) => {
+ArrayOfFieldRenderer.getValueWithDefault = (value) => {
   if (value) return value
 
   return []
 }
 
-export default ArrayFieldRenderer
+export default ArrayOfFieldRenderer

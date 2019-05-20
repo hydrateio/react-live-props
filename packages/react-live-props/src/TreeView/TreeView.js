@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
-import { findNodeProperties, getDisplayName } from '../Utils'
+import { findComponentProperties, getDisplayName } from '../Utils'
 import { SchemaContext } from '../Context'
 
 import styles from './styles.css'
@@ -26,7 +26,7 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
             <li>
               <p><a href='javascript:void(0)' className={isSelected ? cs('rlpTreeViewSelected', styles.rlpTreeViewSelected) : ''} onClick={() => onChangeComponent(componentDisplayName, componentPath)}>{componentDisplayName}</a></p>
             </li>
-            {typeof values !== 'string' && findNodeProperties(docgenInfo[componentDisplayName].props).map((nodeProp, nodeIdx) => {
+            {typeof values !== 'string' && docgenInfo[componentDisplayName] && findComponentProperties(docgenInfo[componentDisplayName].props).map((nodeProp, nodeIdx) => {
               if (values && values.props[nodeProp]) {
                 if (typeof values.props[nodeProp] === 'string') return null
 

@@ -1,3 +1,3 @@
 export { tryParseStringAsType, tryConvertTypeToString } from './parser'
-export { findNodeProperties, recurseDocgenForProp } from './types'
+export { findComponentProperties, recurseDocgenForProp } from './types'
 export { getDisplayName } from './name'

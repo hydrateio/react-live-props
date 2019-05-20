@@ -3,10 +3,23 @@ import PropTypes from 'prop-types'
 
 export const RendererContext = React.createContext({})
 
+const typeofToReactType = (jsType) => {
+  if (jsType === 'boolean') return 'bool'
+
+  return jsType
+}
+
 const RendererResolver = ({ type, value, ...rest }) => {
   return (
     <RendererContext.Consumer>
       {(renderers) => {
+        if (type.name === 'union') {
+          const Renderer = renderers[type.name]
+          const valueOrDefault = Renderer.getValueWithDefault ? Renderer.getValueWithDefault(value) : value
+
+          return <Renderer renderers={renderers} {...rest} type={type.value} value={valueOrDefault} />
+        }
+
         if (renderers[type.name]) {
           const Renderer = renderers[type.name]
           const valueOrDefault = Renderer.getValueWithDefault ? Renderer.getValueWithDefault(value) : value
