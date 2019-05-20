@@ -1,11 +1,13 @@
 import React from 'react'
-import { MdSave } from 'react-icons/md'
 import PropTypes from 'prop-types'
+import { UIContext } from '../Context'
 
 const SaveButton = ({ onClick }) => (
-  <button type='button' onClick={onClick} aria-label='Save Item'>
-    <MdSave />
-  </button>
+  <UIContext.Consumer>
+    {({ SaveButton }) => (
+      <SaveButton onClick={onClick} />
+    )}
+  </UIContext.Consumer>
 )
 
 SaveButton.propTypes = {

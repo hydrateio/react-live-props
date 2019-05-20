@@ -1,11 +1,13 @@
 import React from 'react'
-import { MdDelete } from 'react-icons/md'
+import { UIContext } from '../Context'
 import PropTypes from 'prop-types'
 
 const DeleteButton = ({ onClick }) => (
-  <button type='button' onClick={onClick} aria-label='Delete Item'>
-    <MdDelete />
-  </button>
+  <UIContext.Consumer>
+    {({ DeleteButton }) => (
+      <DeleteButton onClick={onClick} />
+    )}
+  </UIContext.Consumer>
 )
 
 DeleteButton.propTypes = {

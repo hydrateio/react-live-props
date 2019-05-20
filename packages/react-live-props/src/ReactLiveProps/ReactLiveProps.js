@@ -3,12 +3,14 @@ import PropTypes from 'prop-types'
 
 import cs from 'classnames'
 
+import { MdSave, MdAddCircle, MdDelete } from 'react-icons/md'
+
 import PropsTable from '../PropsTable'
 import EditablePropsTable from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
-import { SchemaContext } from '../Context'
+import { SchemaContext, UIContext } from '../Context'
 import { Expand, Collapse } from '../Components'
 import { findComponentProperties, getDisplayName } from '../Utils'
 
@@ -19,6 +21,18 @@ const buildComponentTitle = (title, additionalTitleText) => {
   if (!additionalTitleText) return title
 
   return `${title} - ${additionalTitleText}`
+}
+
+const uiElements = {
+  SaveButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Save Item'>
+    <MdSave />
+  </button>,
+  AddButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Add Item'>
+    <MdAddCircle />
+  </button>,
+  DeleteButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Delete Item'>
+    <MdDelete />
+  </button>
 }
 
 const initialize = ({
@@ -254,88 +268,90 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <SchemaContext.Provider value={{ values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes, docgenInfo: allDocGenInfo }}>
-        <div
-          className={cs('rlpContainer', styles.rlpContainer, className)}
-          {...rest}
-        >
-          {!hideHeader && (
-            <h2
-              className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
-              role='button'
-              aria-label='Expand/Collapse the ReactLiveProps playground'
-              aria-expanded={!this.state.collapsed}
-              onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)}
-            >
-              {title}
-              {this.state.collapsed && (
-                <Expand onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
-              )}
-              {!this.state.collapsed && (
-                <Collapse onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
-              )}
-            </h2>
-          )}
+      <UIContext.Provider value={uiElements}>
+        <SchemaContext.Provider value={{ values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes, docgenInfo: allDocGenInfo }}>
+          <div
+            className={cs('rlpContainer', styles.rlpContainer, className)}
+            {...rest}
+          >
+            {!hideHeader && (
+              <h2
+                className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
+                role='button'
+                aria-label='Expand/Collapse the ReactLiveProps playground'
+                aria-expanded={!this.state.collapsed}
+                onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)}
+              >
+                {title}
+                {this.state.collapsed && (
+                  <Expand onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
+                )}
+                {!this.state.collapsed && (
+                  <Collapse onClick={() => this.onToggleExpandCollapse(!this.state.collapsed)} />
+                )}
+              </h2>
+            )}
 
-          {!this.state.collapsed && (
-            <React.Fragment>
-              {!hidePropsTable && (
-                <div className={cs('rlpSection', 'rlpPropsTableMain', styles.rlpSection, styles.rlpPropsTableMain)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Props Table</h6>
-                  <PropsTable />
-                </div>
-              )}
+            {!this.state.collapsed && (
+              <React.Fragment>
+                {!hidePropsTable && (
+                  <div className={cs('rlpSection', 'rlpPropsTableMain', styles.rlpSection, styles.rlpPropsTableMain)}>
+                    <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Props Table</h6>
+                    <PropsTable />
+                  </div>
+                )}
 
-              {!hideComponentPreview && (
-                <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{componentPreviewHeaderText}</h6>
-                  <ComponentPreview />
-                </div>
-              )}
+                {!hideComponentPreview && (
+                  <div className={cs('rlpSection', 'rlpComponentPreview', styles.rlpSection, styles.rlpComponentPreview)}>
+                    <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{componentPreviewHeaderText}</h6>
+                    <ComponentPreview />
+                  </div>
+                )}
 
-              <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{propsEditorHeaderText}</h6>
-                <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
-                  {findComponentProperties(allDocGenInfo[rootComponentDisplayName].props).length > 0 && (
-                    <React.Fragment>
-                      <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
-                        <TreeView
-                          of={of}
-                          onChangeComponent={this._editComponent}
-                        />
-                      </div>
-                      <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
-                    </React.Fragment>
-                  )}
+                <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{propsEditorHeaderText}</h6>
+                  <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
+                    {findComponentProperties(allDocGenInfo[rootComponentDisplayName].props).length > 0 && (
+                      <React.Fragment>
+                        <div className={cs('rlpEditablePropsTableTreeView', styles.rlpEditablePropsTableTreeView)}>
+                          <TreeView
+                            of={of}
+                            onChangeComponent={this._editComponent}
+                          />
+                        </div>
+                        <div className={cs('rlpEditablePropsTableSpacer', styles.rlpEditablePropsTableSpacer)} />
+                      </React.Fragment>
+                    )}
 
-                  <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
-                    <EditablePropsTable
-                      editableProperties={editableProperties}
-                      blacklistedProperties={blacklistedProperties}
-                      onChange={this._onChange}
-                      onAddProperty={this._onAddProperty}
-                    />
+                    <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
+                      <EditablePropsTable
+                        editableProperties={editableProperties}
+                        blacklistedProperties={blacklistedProperties}
+                        onChange={this._onChange}
+                        onAddProperty={this._onAddProperty}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {!hideComponentMarkup && (
-                <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Markup</h6>
-                  <ComponentMarkup />
-                </div>
-              )}
+                {!hideComponentMarkup && (
+                  <div className={cs('rlpSection', 'rlpComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup)}>
+                    <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>Component Markup</h6>
+                    <ComponentMarkup />
+                  </div>
+                )}
 
-              {CustomComponentMarkup && (
-                <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{customComponentMarkupHeaderText}</h6>
-                  <CustomComponentMarkup values={values} />
-                </div>
-              )}
-            </React.Fragment>
-          )}
-        </div>
-      </SchemaContext.Provider>
+                {CustomComponentMarkup && (
+                  <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
+                    <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{customComponentMarkupHeaderText}</h6>
+                    <CustomComponentMarkup values={values} />
+                  </div>
+                )}
+              </React.Fragment>
+            )}
+          </div>
+        </SchemaContext.Provider>
+      </UIContext.Provider>
     )
   }
 
