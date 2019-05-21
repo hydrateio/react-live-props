@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { SchemaContext } from '../Context'
+import { SchemaContext, TextContext } from '../Context'
 
 import cs from 'classnames'
 
@@ -36,7 +36,11 @@ export default class ComponentPreview extends Component {
 
     if (this.state.hasError) {
       return (
-        <p>There was an error rendering the component.  Check your props and try again.</p>
+        <TextContext.Consumer>
+          {(text) => (
+            <p>{text.componentPreviewError}</p>
+          )}
+        </TextContext.Consumer>
       )
     }
 

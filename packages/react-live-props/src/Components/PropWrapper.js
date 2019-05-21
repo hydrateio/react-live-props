@@ -5,37 +5,42 @@ import AddButton from './AddButton'
 import DeleteButton from './DeleteButton'
 
 import styles from './PropWrapper.css'
+import { TextContext } from '../Context'
 
-const buildName = (name) => {
+const buildName = (name, text) => {
   if (typeof name === 'number') {
-    return `Array Item #${name}`
+    return `${text.arrayItemLabel}${name}`
   }
 
   return name
 }
 
 const PropWrapper = ({ children, description, name, onAdd, onDelete }) => (
-  <div className={cs('rlpProp', styles.rlpProp)}>
-    {name !== '' && (
-      <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
-        <strong className={cs('rlpPropName', styles.rlpPropName)}>
-          {buildName(name)}
-          {typeof onAdd === 'function' && (
-            <AddButton onClick={onAdd} className={cs('rlpPropAddButton', styles.rlpPropAddButton)} />
-          )}
-          {typeof onDelete === 'function' && (
-            <DeleteButton onClick={onDelete} className={cs('rlpPropDeleteButton', styles.rlpPropDeleteButton)} />
-          )}
-        </strong>
-        {description && (
-          <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{description}</legend>
+  <TextContext.Consumer>
+    {(text) => (
+      <div className={cs('rlpProp', styles.rlpProp)}>
+        {name !== '' && (
+          <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
+            <strong className={cs('rlpPropName', styles.rlpPropName)}>
+              {buildName(name, text)}
+              {typeof onAdd === 'function' && (
+                <AddButton onClick={onAdd} className={cs('rlpPropAddButton', styles.rlpPropAddButton)} />
+              )}
+              {typeof onDelete === 'function' && (
+                <DeleteButton onClick={onDelete} className={cs('rlpPropDeleteButton', styles.rlpPropDeleteButton)} />
+              )}
+            </strong>
+            {description && (
+              <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{description}</legend>
+            )}
+          </div>
         )}
+        <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+          {children}
+        </div>
       </div>
     )}
-    <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-      {children}
-    </div>
-  </div>
+  </TextContext.Consumer>
 )
 
 PropWrapper.propTypes = {
