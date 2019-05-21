@@ -35,12 +35,27 @@ const uiElements = {
   </button>
 }
 
+uiElements.SaveButton.propTypes = {
+  onClick: PropTypes.func.isRequired
+}
+
+uiElements.AddButton.propTypes = {
+  onClick: PropTypes.func.isRequired
+}
+
+uiElements.DeleteButton.propTypes = {
+  onClick: PropTypes.func.isRequired
+}
+
 const initialize = ({
   of,
   docgenInfo,
   additionalTitleText,
   availableTypes,
-  initialComponent
+  initialComponent,
+  addButtonComponent = uiElements.AddButton,
+  deleteButtonComponent = uiElements.DeleteButton,
+  saveButtonComponent = uiElements.SaveButton
 }) => {
   const htmlTypes = [...DEFAULT_HTML_TYPES]
   const allDocGenInfo = []
@@ -165,6 +180,12 @@ const initialize = ({
 
     const values = initialComponent || React.createElement(of)
 
+    const configuredUiElements = {
+      AddButton: addButtonComponent,
+      SaveButton: saveButtonComponent,
+      DeleteButton: deleteButtonComponent
+    }
+
     return {
       title: buildComponentTitle(safeDisplayName, additionalTitleText),
       values,
@@ -173,7 +194,8 @@ const initialize = ({
       editingComponentPath: [],
       htmlTypes,
       availableTypes: availableChildren,
-      docgenInfo
+      docgenInfo,
+      configuredUiElements
     }
   } catch (err) {
     console.error('ReactLiveProps error initializing', err)
@@ -200,7 +222,10 @@ export default class ReactLiveProps extends Component {
     initialCollapsed: PropTypes.bool,
     hideHeader: PropTypes.bool,
     componentPreviewHeaderText: PropTypes.string,
-    propsEditorHeaderText: PropTypes.string
+    propsEditorHeaderText: PropTypes.string,
+    saveButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    addButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    deleteButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func])
   }
 
   constructor(props) {
@@ -243,6 +268,9 @@ export default class ReactLiveProps extends Component {
       hideHeader,
       componentPreviewHeaderText = 'Component Preview',
       propsEditorHeaderText = 'Props Editor',
+      addButtonComponent,
+      deleteButtonComponent,
+      saveButtonComponent,
       ...rest
     } = this.props
 
@@ -254,7 +282,8 @@ export default class ReactLiveProps extends Component {
       htmlTypes,
       editingComponentPath,
       availableTypes: availableChildTypes,
-      docgenInfo: allDocGenInfo
+      docgenInfo: allDocGenInfo,
+      configuredUiElements
     } = this.state
 
     if (this.state.errorMessage) {
@@ -268,7 +297,7 @@ export default class ReactLiveProps extends Component {
     }
 
     return (
-      <UIContext.Provider value={uiElements}>
+      <UIContext.Provider value={configuredUiElements}>
         <SchemaContext.Provider value={{ values, rootComponentDisplayName, editingComponent, editingComponentPath, htmlTypes, availableTypes: availableChildTypes, docgenInfo: allDocGenInfo }}>
           <div
             className={cs('rlpContainer', styles.rlpContainer, className)}
