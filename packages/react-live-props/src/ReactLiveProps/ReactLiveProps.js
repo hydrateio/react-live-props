@@ -416,7 +416,9 @@ export default class ReactLiveProps extends Component {
                 {CustomComponentMarkup && (
                   <div className={cs('rlpSection', 'rlpComponentMarkup', 'rlpCustomComponentMarkup', styles.rlpSection, styles.rlpComponentMarkup, styles.rlpCustomComponentMarkup)}>
                     <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{customComponentMarkupHeaderText}</h6>
-                    <CustomComponentMarkup values={values} />
+                    <CustomComponentMarkup>
+                      {values}
+                    </CustomComponentMarkup>
                   </div>
                 )}
               </React.Fragment>

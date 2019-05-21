@@ -13,8 +13,6 @@ const emptyProperty = {
 const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChange, onDelete }) => {
   const valueOrDefault = typeof value === 'string' ? [value] : value || []
 
-  console.log(property)
-
   return (
     <PropWrapper
       name={displayName}
