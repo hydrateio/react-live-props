@@ -36,7 +36,7 @@ export default class ComplexComponent extends Component {
   }
 
   static defaultProps = {
-    bar: 'bar'
+    bar: ['bar']
   }
 
   render() {
