@@ -24,27 +24,30 @@ const buildComponentTitle = (title, additionalTitleText) => {
 }
 
 const uiElements = {
-  SaveButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Save Item'>
+  SaveButton: ({ onClick, className }) => <button type='button' className={className} onClick={onClick} aria-label='Save Item'>
     <MdSave />
   </button>,
-  AddButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Add Item'>
+  AddButton: ({ onClick, className }) => <button type='button' className={className} onClick={onClick} aria-label='Add Item'>
     <MdAddCircle />
   </button>,
-  DeleteButton: ({ onClick }) => <button type='button' onClick={onClick} aria-label='Delete Item'>
+  DeleteButton: ({ onClick, className }) => <button type='button' className={className} onClick={onClick} aria-label='Delete Item'>
     <MdDelete />
   </button>
 }
 
 uiElements.SaveButton.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string
 }
 
 uiElements.AddButton.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string
 }
 
 uiElements.DeleteButton.propTypes = {
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string
 }
 
 const initialize = ({
@@ -249,6 +252,42 @@ export default class ReactLiveProps extends Component {
     })
   }
 
+  _editComponent = (rootComponentDisplayName, componentPath) => {
+    this.setState({
+      editingComponent: rootComponentDisplayName,
+      editingComponentPath: componentPath
+    })
+  }
+
+  _onChange = (values) => {
+    this.setState({
+      values
+    })
+  }
+
+  _onAddProperty = (editingComponent, attributeName) => {
+    const newDocgenInfo = {
+      ...this.state.docgenInfo
+    }
+    newDocgenInfo[editingComponent].props = {
+      ...newDocgenInfo[editingComponent].props,
+      [attributeName]: {
+        description: 'Custom HTML Attribute',
+        required: false,
+        type: {
+          name: 'any'
+        }
+      }
+    }
+    this.setState({
+      docgenInfo: newDocgenInfo
+    })
+  }
+
+  _reset = () => {
+    this.setState(initialize(this.props))
+  }
+
   render() {
     const {
       of,
@@ -338,7 +377,10 @@ export default class ReactLiveProps extends Component {
                 )}
 
                 <div className={cs('rlpSection', 'rlpEditablePropsTable', styles.rlpSection, styles.rlpEditablePropsTable)}>
-                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>{propsEditorHeaderText}</h6>
+                  <h6 className={cs('rlpContainerSubTitle', styles.rlpContainerSubTitle)}>
+                    {propsEditorHeaderText}
+                    <button type='button' onClick={this._reset}>Reset</button>
+                  </h6>
                   <div className={cs('rlpFlexContainer', styles.rlpFlexContainer)}>
                     {findComponentProperties(allDocGenInfo[rootComponentDisplayName].props).length > 0 && (
                       <React.Fragment>
@@ -358,6 +400,7 @@ export default class ReactLiveProps extends Component {
                         blacklistedProperties={blacklistedProperties}
                         onChange={this._onChange}
                         onAddProperty={this._onAddProperty}
+                        onReset={this._reset}
                       />
                     </div>
                   </div>
@@ -382,37 +425,5 @@ export default class ReactLiveProps extends Component {
         </SchemaContext.Provider>
       </UIContext.Provider>
     )
-  }
-
-  _editComponent = (rootComponentDisplayName, componentPath) => {
-    this.setState({
-      editingComponent: rootComponentDisplayName,
-      editingComponentPath: componentPath
-    })
-  }
-
-  _onChange = (values) => {
-    this.setState({
-      values
-    })
-  }
-
-  _onAddProperty = (editingComponent, attributeName) => {
-    const newDocgenInfo = {
-      ...this.state.docgenInfo
-    }
-    newDocgenInfo[editingComponent].props = {
-      ...newDocgenInfo[editingComponent].props,
-      [attributeName]: {
-        description: 'Custom HTML Attribute',
-        required: false,
-        type: {
-          name: 'any'
-        }
-      }
-    }
-    this.setState({
-      docgenInfo: newDocgenInfo
-    })
   }
 }

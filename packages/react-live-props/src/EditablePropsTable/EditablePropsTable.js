@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import cs from 'classnames'
-import { PropertyRenderer, RendererContext, Renderers } from '../Renderers'
+import { RendererContext, Renderers, RendererResolver } from '../Renderers'
 import { AddHtmlAttribute } from '../Components'
 import { SchemaContext } from '../Context'
 
@@ -179,13 +179,18 @@ export default class EditablePropsTable extends Component {
               >
                 {propertyKeys.map((key, idx) => {
                   return (
-                    <PropertyRenderer
-                      key={`${key}.${idx}`}
-                      name={key}
-                      value={currentComponent.props[key]}
-                      onChange={onChange}
-                      property={filteredSchema[key]}
-                    />
+                    <React.Fragment>
+                      <RendererResolver
+                        type={filteredSchema[key].type}
+                        key={`${key}.${idx}`}
+                        name={key}
+                        displayName={key}
+                        value={currentComponent.props[key]}
+                        onChange={onChange}
+                        property={filteredSchema[key]}
+                      />
+                      <div className={cs('rlpEditablePropsDivider', styles.rlpEditablePropsDivider)} />
+                    </React.Fragment>
                   )
                 })}
 

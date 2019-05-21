@@ -1,13 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { PropWrapper } from '../Components'
 
 export const RendererContext = React.createContext({})
-
-const typeofToReactType = (jsType) => {
-  if (jsType === 'boolean') return 'bool'
-
-  return jsType
-}
 
 const RendererResolver = ({ type, value, ...rest }) => {
   return (
@@ -29,9 +24,9 @@ const RendererResolver = ({ type, value, ...rest }) => {
 
         console.log('UNSUPPORTED', type)
         return (
-          <div>
+          <PropWrapper name={rest.name} description={rest.property.description}>
             PROP TYPE NOT SUPPORTED: {type.value && type.value.name ? `${type.name} (${type.value.name})` : type.name}
-          </div>
+          </PropWrapper>
         )
       }}
     </RendererContext.Consumer>

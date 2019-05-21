@@ -1,7 +1,6 @@
 import { ArrayOfFieldRenderer, ArrayFieldRenderer, UnionFieldRenderer, BoolFieldRenderer, EnumFieldRenderer, NumberFieldRenderer, ShapeFieldRenderer, StringFieldRenderer, AnyFieldRenderer, NodeFieldRenderer } from './types'
 
-export { default as PropertyRenderer } from './Property'
-export { RendererContext } from './Resolver'
+export { default as RendererResolver, RendererContext } from './Resolver'
 
 const Renderers = {
   arrayOf: ArrayOfFieldRenderer,

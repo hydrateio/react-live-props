@@ -3,15 +3,20 @@ import PropTypes from 'prop-types'
 import cs from 'classnames'
 import { SchemaContext } from '../../Context'
 import { getDisplayName } from '../../Utils'
+import { PropWrapper } from '../../Components'
+
+import styles from './base.css'
 
 class NodeFieldRenderer extends React.Component {
   static propTypes = {
     name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
     value: PropTypes.any,
     onChange: PropTypes.func.isRequired,
-    styles: PropTypes.object,
+    onDelete: PropTypes.func.isRequired,
     htmlTypes: PropTypes.arrayOf(PropTypes.string),
-    availableTypes: PropTypes.array
+    property: PropTypes.object.isRequired,
+    availableTypes: PropTypes.array,
+    displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
   }
 
   constructor(props, context) {
@@ -26,7 +31,9 @@ class NodeFieldRenderer extends React.Component {
     const typeDictionary = {}
     props.availableTypes.filter(type => typeof htmlDictionary[type] === 'undefined').forEach(type => {
       const typeName = getDisplayName(type)
-      typeDictionary[typeName] = type
+      if (typeName !== 'React.Fragment') {
+        typeDictionary[typeName] = type
+      }
     })
 
     const currentTypeName = getDisplayName(props.value || '')
@@ -49,11 +56,11 @@ class NodeFieldRenderer extends React.Component {
   }
 
   render() {
-    const { name, value, onChange, styles } = this.props
+    const { name, displayName, value, onChange, onDelete, property } = this.props
 
     const currentTypeName = getDisplayName(value || '')
     return (
-      <React.Fragment>
+      <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
         <select
           className={cs('rlpPropField', styles.rlpPropField)}
           value={this.state.currentElementType}
@@ -153,7 +160,7 @@ class NodeFieldRenderer extends React.Component {
             className={cs('rlpPropField', styles.rlpPropField)}
           />
         )}
-      </React.Fragment>
+      </PropWrapper>
     )
   }
 }

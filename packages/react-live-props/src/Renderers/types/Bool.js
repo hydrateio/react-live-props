@@ -1,14 +1,26 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
+import { PropWrapper } from '../../Components'
 
-const BoolFieldRenderer = ({ name, value, onChange, styles }) => {
+import styles from './base.css'
+
+const BoolFieldRenderer = ({ name, displayName, property, value, onChange, onDelete }) => {
   const valueOrDefault = value || false
 
   return (
-    <input type='checkbox' checked={valueOrDefault} className={cs('rlpPropField', styles.rlpPropField)} onChange={(e) => {
-      onChange(name, e.target.checked)
-    }} />
+    <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
+      <input
+        type='checkbox'
+        checked={valueOrDefault}
+        className={cs('rlpPropField', styles.rlpPropField)}
+        onChange={
+          (e) => {
+            onChange(name, e.target.checked)
+          }
+        }
+      />
+    </PropWrapper>
   )
 }
 
@@ -16,7 +28,9 @@ BoolFieldRenderer.propTypes = {
   name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
-  styles: PropTypes.object
+  onDelete: PropTypes.func.isRequired,
+  property: PropTypes.object.isRequired,
+  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
 }
 
 export default BoolFieldRenderer
