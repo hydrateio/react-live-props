@@ -15,9 +15,9 @@ class UnionFieldRenderer extends React.Component {
     name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
     renderers: PropTypes.object,
     value: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
-    type: PropTypes.shape({
+    type: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string
-    }),
+    })),
     property: PropTypes.object.isRequired,
     displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
     onDelete: PropTypes.func

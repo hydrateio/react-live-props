@@ -14,10 +14,6 @@
 .arrayItem button {
   flex-grow: 0;
   flex-basis: 0;
-  outline: none;
-  appearance: none;
-  border: none;
-  background: none;
 }
 
 .arrayItem button:hover {
