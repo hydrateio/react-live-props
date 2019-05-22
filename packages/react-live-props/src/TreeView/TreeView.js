@@ -81,11 +81,11 @@ class TreeView extends React.Component {
     const { of, className, onChangeComponent, ...rest } = this.props
 
     return <SchemaContext.Consumer>
-      {({ values, rootComponentDisplayName, docgenInfo }) => {
+      {({ values }) => {
         return (
           <div className={cs('rlpTreeView', styles.rlpTreeView, className)} {...rest}>
             <ul>
-              <RenderComponent values={values} componentPath={[]} componentDisplayName={rootComponentDisplayName} onChangeComponent={onChangeComponent} />
+              <RenderComponent values={values} componentPath={[]} componentDisplayName={getDisplayName(values)} onChangeComponent={onChangeComponent} />
             </ul>
           </div>
         )

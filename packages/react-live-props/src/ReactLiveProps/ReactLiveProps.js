@@ -78,14 +78,21 @@ export default class ReactLiveProps extends Component {
       ...this.state.docgenInfo
     }
 
+    const attributeType = attributeName !== 'children' ? {
+      name: 'any'
+    } : {
+      name: 'arrayOf',
+      value: {
+        name: 'node'
+      }
+    }
+
     newDocgenInfo[editingComponent].props = {
       ...newDocgenInfo[editingComponent].props,
       [attributeName]: {
         description: this.state.text.htmlAttributeDescription,
         required: false,
-        type: {
-          name: 'any'
-        }
+        type: attributeType
       }
     }
     this.setState({
