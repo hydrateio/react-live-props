@@ -1,4 +1,4 @@
-export const findComponentProperties = (props) => {
+export const findComponentProperties = (props = {}) => {
   return Object.keys(props).filter(prop => {
     if (props[prop].type.name === 'node') return true
 
