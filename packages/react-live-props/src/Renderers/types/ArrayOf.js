@@ -32,7 +32,7 @@ const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChan
             type={type}
             property={emptyProperty}
             onChange={(name, updatedValue) => {
-              const updatedValues = value.map((origValue, itemIndex) => {
+              const updatedValues = valueOrDefault.map((origValue, itemIndex) => {
                 if (itemIndex === idx) {
                   return updatedValue
                 }

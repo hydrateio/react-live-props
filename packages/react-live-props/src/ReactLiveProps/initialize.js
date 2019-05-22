@@ -208,7 +208,7 @@ export const initialize = ({
     return {
       title: buildComponentTitle(safeDisplayName, additionalTitleText),
       values,
-      rootComponentDisplayName: safeDisplayName,
+      rootComponentDisplayName: getDisplayName(values),
       editingComponent: getDisplayName(values),
       editingComponentPath: [],
       htmlTypes,
