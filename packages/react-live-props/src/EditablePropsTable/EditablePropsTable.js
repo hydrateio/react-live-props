@@ -77,7 +77,8 @@ export default class EditablePropsTable extends Component {
 
   state = {
     pendingAttributeName: '',
-    pendingAttributeValue: ''
+    pendingAttributeValue: '',
+    errorMessage: null
   }
 
   filterProperties(docgenInfo) {
@@ -127,9 +128,11 @@ export default class EditablePropsTable extends Component {
     return shouldUpdate
   }
 
-  state = {
-    pendingAttributeName: '',
-    pendingAttributeValue: ''
+  componentDidCatch(error, info) {
+    console.error('Error rendering props editor', error, info)
+    this.setState({
+      errorMessage: error
+    })
   }
 
   render() {
@@ -141,6 +144,12 @@ export default class EditablePropsTable extends Component {
       onAddProperty,
       ...rest
     } = this.props
+
+    if (this.state.errorMessage) {
+      return <p>
+        {this.state.errorMessage.message ? this.state.errorMessage.message : this.state.errorMessage}
+      </p>
+    }
 
     return (
       <SchemaContext.Consumer>

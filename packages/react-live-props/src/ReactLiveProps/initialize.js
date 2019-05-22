@@ -209,7 +209,7 @@ export const initialize = ({
       title: buildComponentTitle(safeDisplayName, additionalTitleText),
       values,
       rootComponentDisplayName: safeDisplayName,
-      editingComponent: safeDisplayName,
+      editingComponent: getDisplayName(values),
       editingComponentPath: [],
       htmlTypes,
       availableTypes: availableChildren,
