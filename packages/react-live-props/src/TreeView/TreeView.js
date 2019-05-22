@@ -77,8 +77,25 @@ class TreeView extends React.Component {
     onChangeComponent: PropTypes.func.isRequired
   }
 
+  state = {
+    errorMessage: null
+  }
+
+  componentDidCatch(error, info) {
+    console.error('Error rendering props tree', error, info)
+    this.setState({
+      errorMessage: error
+    })
+  }
+
   render() {
     const { of, className, onChangeComponent, ...rest } = this.props
+
+    if (this.state.errorMessage) {
+      return <p>
+        {this.state.errorMessage.message ? this.state.errorMessage.message : this.state.errorMessage}
+      </p>
+    }
 
     return <SchemaContext.Consumer>
       {({ values }) => {
