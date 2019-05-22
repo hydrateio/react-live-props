@@ -14,3 +14,5 @@ import AdvancedComponent from './AdvancedComponent'
 <ReactLiveProps of={AdvancedComponent} additionalTitleText='Basic Usage' />
 
 <ReactLiveProps of={AdvancedComponent} editableProperties={['baz', 'foo']} blacklistedProperties={['foo']} additionalTitleText='Whitelisted and Blacklisted Input Fields' hideComponentMarkup />
+
+<ReactLiveProps of={AdvancedComponent} editableProperties={['baz', 'foo']} additionalTitleText='Custom Preview Wrapper' hideComponentMarkup componentPreviewWrapperComponent={(props) => <div style={{ border: '1px solid red' }}>{props.children}</div>} />

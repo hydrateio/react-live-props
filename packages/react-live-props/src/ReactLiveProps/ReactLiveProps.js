@@ -27,6 +27,7 @@ export default class ReactLiveProps extends Component {
     hideComponentPreview: PropTypes.bool,
     hidePropsTable: PropTypes.bool,
     customComponentMarkup: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+    componentPreviewWrapperComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.node]),
     initialComponent: PropTypes.oneOfType([PropTypes.node, PropTypes.arrayOf(PropTypes.node)]),
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     initialCollapsed: PropTypes.bool,
@@ -116,6 +117,7 @@ export default class ReactLiveProps extends Component {
       deleteButtonComponent,
       saveButtonComponent,
       resetButtonComponent,
+      componentPreviewWrapperComponent,
       ...rest
     } = this.props
 

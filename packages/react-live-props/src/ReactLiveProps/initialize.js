@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { MdSave, MdAddCircle, MdDelete } from 'react-icons/md'
 import { getDisplayName } from '../Utils'
 import text from '../text'
-import { TextContext } from '../Context';
+import { TextContext } from '../Context'
 
 const uiElements = {
   SaveButton: ({ onClick, className }) => <button type='button' className={className} onClick={onClick} aria-label='Save Item'>
@@ -21,7 +21,8 @@ const uiElements = {
         {text.reset}
       </button>
     )}
-  </TextContext.Consumer>
+  </TextContext.Consumer>,
+  PreviewWrapper: ({ children, ...rest }) => <div {...rest}>{children}</div>
 }
 
 uiElements.SaveButton.propTypes = {
@@ -61,7 +62,8 @@ export const initialize = ({
   deleteButtonComponent = uiElements.DeleteButton,
   saveButtonComponent = uiElements.SaveButton,
   resetButtonComponent = uiElements.ResetButton,
-  overrideText = {}
+  overrideText = {},
+  componentPreviewWrapperComponent = uiElements.PreviewWrapper
 }) => {
   const htmlTypes = [...DEFAULT_HTML_TYPES]
   const allDocGenInfo = []
@@ -199,7 +201,8 @@ export const initialize = ({
       AddButton: addButtonComponent,
       SaveButton: saveButtonComponent,
       DeleteButton: deleteButtonComponent,
-      ResetButton: resetButtonComponent
+      ResetButton: resetButtonComponent,
+      PreviewWrapper: componentPreviewWrapperComponent
     }
 
     return {

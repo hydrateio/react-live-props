@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { SchemaContext, TextContext } from '../Context'
+import { SchemaContext, TextContext, UIContext } from '../Context'
 
 import cs from 'classnames'
 
@@ -45,18 +45,23 @@ export default class ComponentPreview extends Component {
     }
 
     return (
-      <SchemaContext.Consumer>
-        {({ values }) => {
-          return (
-            <div
-              className={cs(className)}
-              {...rest}
-            >
-              {values}
-            </div>
-          )
-        }}
-      </SchemaContext.Consumer>
+      <UIContext.Consumer>
+        {({ PreviewWrapper }) => (
+          <SchemaContext.Consumer>
+            {({ values }) => {
+              return (
+                <PreviewWrapper
+                  className={cs(className)}
+                  {...rest}
+                >
+                  {values}
+                </PreviewWrapper>
+              )
+            }}
+          </SchemaContext.Consumer>
+        )}
+      </UIContext.Consumer>
+
     )
   }
 }
