@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { enumTypes } from './ComplexEnums'
 
 export default class ComplexComponent extends Component {
   static propTypes = {
@@ -32,7 +33,9 @@ export default class ComplexComponent extends Component {
 
     faz: PropTypes.objectOf(PropTypes.string),
 
-    complexNode: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.node])
+    complexNode: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.node]),
+
+    computedEnum: PropTypes.oneOf(enumTypes)
   }
 
   static defaultProps = {
