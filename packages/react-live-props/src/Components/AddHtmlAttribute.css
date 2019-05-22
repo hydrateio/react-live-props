@@ -1,0 +1,23 @@
+.attributeForm {
+  display: flex;
+  min-height: 0px;
+  flex-direction: row;
+}
+
+.attributeForm > * {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.attributeForm > button {
+  flex-grow: 0;
+  flex-basis: 0;
+  outline: none;
+  appearance: none;
+  border: none;
+  background: none;
+}
+
+.attributeForm button:hover {
+  background-color: lightgray;
+}

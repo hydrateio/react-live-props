@@ -13,6 +13,10 @@
   margin: 12px 0px;
 }
 
+.rlpContainerSubTitle > button {
+  margin-left: 12px;
+}
+
 .rlpSection {
   margin-top: 12px;
   margin-bottom: 12px;

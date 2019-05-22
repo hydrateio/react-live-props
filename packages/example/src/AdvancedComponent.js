@@ -32,11 +32,11 @@ export default class AdvancedComponent extends Component {
 
     faz: PropTypes.arrayOf(PropTypes.shape({
       /**
-       * Description prop1
+       * Description prop3
        */
       prop3: PropTypes.string,
       /**
-       * Description prop2
+       * Description prop4
        */
       prop4: PropTypes.bool
     })),

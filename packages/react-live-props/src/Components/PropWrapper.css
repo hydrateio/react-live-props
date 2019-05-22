@@ -1,0 +1,24 @@
+.rlpProp {
+  padding: 12px;
+}
+
+.rlpProp label {
+  display: block;
+}
+
+.rlpPropDescription {
+  font-weight: normal;
+  font-size: 14px;
+  border-bottom: none;
+  margin-bottom: 0px;
+}
+
+.rlpPropInput input {
+  width: 100%;
+  font-weight: normal;
+}
+
+.rlpPropAddButton,
+.rlpPropDeleteButton {
+  margin-left: 12px;
+}

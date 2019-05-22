@@ -9,7 +9,7 @@ import { PropsTable } from 'docz'
 import ReactLiveProps from 'react-live-props'
 import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
 
-<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Prepopulating Children' availableTypes={["svg","path"]} initialComponentChildren={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Prepopulating Children' initialComponent={<ComponentUnderTest><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path
       d="M137.746 499.538c35.372 5.563 75.595 8.707 118.254 8.707 141.384 0 256-34.545 256-77.164 0-24.947-39.288-47.124-100.216-61.229l-2.492 21.884c0 25.518-68.631 46.204-153.292 46.204-.237 0-.471-.003-.706-.003s-.469.003-.706.003c-84.662 0-153.292-20.686-153.292-46.204l-2.455-21.568C38.694 384.288 0 406.322 0 431.081c0 26.528 44.407 49.928 112.037 63.816"
       fill="#5b3013"
@@ -46,10 +46,10 @@ import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
       d="M314.728 504.63c-142.037 0-257.184-39.839-257.184-88.981 0-15.72 11.801-30.487 32.481-43.305C34.949 386.497 0 407.555 0 431.081c0 26.528 44.407 49.928 112.037 63.816l25.709 4.639c35.372 5.563 75.595 8.707 118.254 8.707 28.338 0 55.598-1.391 81.078-3.953-7.367.221-14.818.34-22.35.34z"
       fill="#49260e"
     />
-  </svg>} />
+  </svg></ComponentUnderTest>} />
 
-<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Panel.Other, Text, 'div']} initialPropValues={{ header: <Text text='testing' />, color: 'red' }} />
+<ReactLiveProps of={ComponentUnderTest} additionalTitleText='Basic Usage' availableTypes={[Panel, Panel.Other, Text]} initialComponent={<ComponentUnderTest header={<Text text='testing' />} color='red' />} />
 
-<ReactLiveProps of={Panel} additionalTitleText='Text Children' initialComponentChildren='Testing' />
+<ReactLiveProps of={Panel} additionalTitleText='Text Children' initialComponent={<Panel>Testing</Panel>} />
 
-<ReactLiveProps of={Panel} additionalTitleText='Multiple Text Children' availableTypes={[Text]} initialComponentChildren={[<Text text="Testing1" />,<Text text="Testing2" />]} />
+<ReactLiveProps of={Panel} additionalTitleText='Multiple Text Children' availableTypes={[Text]} initialComponent={<Panel><Text text="Testing1" /><Text text="Testing2" /></Panel>} />

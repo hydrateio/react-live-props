@@ -1,0 +1,21 @@
+.arrayItem {
+  display: flex;
+  min-height: 0px;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.arrayItem > * {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 250px;
+}
+
+.arrayItem button {
+  flex-grow: 0;
+  flex-basis: 0;
+}
+
+.arrayItem button:hover {
+  background-color: lightgray;
+}

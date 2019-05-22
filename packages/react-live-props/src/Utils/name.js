@@ -1,33 +1,13 @@
-export const getDisplayName = (Component) => {
-  if (typeof Component === 'string') return Component.replace(/\./g, '-')
+export const getDisplayName = (value) => {
+  if (typeof value === 'string') return value
 
-  if (typeof Component === 'symbol') {
-    const symbolString = Component.toString()
-    const sanitizedName = symbolString.replace('Symbol(', '').replace(')', '')
-    const nameParts = sanitizedName.split('.')
-    return nameParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('-')
+  if (value.type) {
+    if (typeof value.type === 'string') return value.type
+
+    if (value.type.toString() === 'Symbol(react.fragment)') return 'React.Fragment'
+
+    return value.type.displayName || value.type.name || 'Component'
   }
 
-  const name = Component.displayName || Component.name
-
-  if (name) {
-    return name.replace(/\./g, '-')
-  }
-
-  return null
+  return value.displayName || value.name || 'Component'
 }
-
-export const getRawDisplayName = (Component) => {
-  if (typeof Component === 'string') return Component
-
-  if (typeof Component === 'symbol') {
-    const symbolString = Component.toString()
-    const sanitizedName = symbolString.replace('Symbol(', '').replace(')', '')
-    const nameParts = sanitizedName.split('.')
-    return nameParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('.')
-  }
-
-  return Component.displayName || Component.name || null
-}
-
-export const convertSafeDisplayNameToRaw = (displayName) => displayName.replace(/-/g, '.')

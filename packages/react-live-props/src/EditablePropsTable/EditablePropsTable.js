@@ -2,12 +2,69 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import cs from 'classnames'
-import dotProp from 'dot-prop'
-import cloneDeep from 'lodash.clonedeep'
-import { PropertyRenderer, AddHtmlAttributeRenderer } from '../Renderers'
+import { RendererContext, Renderers, RendererResolver } from '../Renderers'
+import { AddHtmlAttribute } from '../Components'
 import { SchemaContext } from '../Context'
 
 import styles from './styles.css'
+
+const updateComponentTree = (rootComponent, editingComponentPath, propName, newValue) => {
+  const editedComponent = editingComponentPath.reduce(
+    (prev, current) => {
+      return prev[current]
+    },
+    rootComponent
+  )
+  const updatedComponent = React.cloneElement(editedComponent, {
+    [propName]: newValue
+  })
+
+  const componentList = []
+  let workingComponent = rootComponent
+  let currentPropValue = rootComponent
+  let workingPath = []
+  editingComponentPath.forEach((pathItem) => {
+    currentPropValue = currentPropValue[pathItem]
+    workingPath.push(pathItem)
+
+    if (currentPropValue['$$typeof']) {
+      componentList.push({
+        component: workingComponent,
+        path: workingPath
+      })
+
+      workingComponent = currentPropValue
+      workingPath = []
+    }
+  })
+
+  let currentUpdatedComponent = updatedComponent
+  for (let i = 1; i <= componentList.length; i++) {
+    const item = componentList[componentList.length - i]
+    // strip off the props path item at the beginning
+    const propList = item.path.slice(1)
+    if (propList.length === 1) {
+      // a propList of length one means it is an object prop with no index
+      currentUpdatedComponent = React.cloneElement(item.component, {
+        [propList[0]]: currentUpdatedComponent
+      })
+    } else if (propList.length === 2) {
+      // a propList of length one means it is an object prop with no index
+      const newArrayValues = [
+        ...item.component.props[propList[0]]
+      ]
+      newArrayValues[propList[1]] = currentUpdatedComponent
+      currentUpdatedComponent = React.cloneElement(item.component, {
+        [propList[0]]: newArrayValues
+      })
+    } else {
+      console.error('Invalid prop list length when updating components', item)
+      throw new Error('Invalid prop list when updating components')
+    }
+  }
+
+  return currentUpdatedComponent
+}
 
 export default class EditablePropsTable extends Component {
   static propTypes = {
@@ -23,29 +80,26 @@ export default class EditablePropsTable extends Component {
     pendingAttributeValue: ''
   }
 
-  filterProperties(schema) {
+  filterProperties(docgenInfo) {
     const blacklistedProperties = this.props.blacklistedProperties || []
 
-    const editableProperties = this.props.editableProperties || Object.keys(schema.properties)
+    const editableProperties = this.props.editableProperties || Object.keys(docgenInfo.props)
 
     const editablePropertyDefs = {}
     editableProperties.forEach(key => {
       if (blacklistedProperties.includes(key)) return
 
-      editablePropertyDefs[key] = schema.properties[key]
+      editablePropertyDefs[key] = docgenInfo.props[key]
     })
 
-    if (schema && schema.properties) {
-      const keys = Object.keys(schema.properties)
+    if (docgenInfo && docgenInfo.props) {
+      const keys = Object.keys(docgenInfo.props)
       const editableKeys = Object.keys(editablePropertyDefs)
 
-      if (keys.length === editableKeys.length) return schema
+      if (keys.length === editableKeys.length) return docgenInfo.props
     }
 
-    return {
-      ...schema,
-      properties: editablePropertyDefs
-    }
+    return editablePropertyDefs
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -80,7 +134,7 @@ export default class EditablePropsTable extends Component {
 
   render() {
     const {
-      onChange,
+      onChange: _,
       className,
       editableProperties,
       blacklistedProperties,
@@ -90,158 +144,83 @@ export default class EditablePropsTable extends Component {
 
     return (
       <SchemaContext.Consumer>
-        {({ schema, values, editingComponent, editingComponentPath, htmlTypes, docgenInfo }) => {
-          const filteredSchema = this.filterProperties(schema[editingComponent])
-          const propertyKeys = Object.keys(filteredSchema.properties)
-          const currentValue = dotProp.get(values, editingComponentPath)
+        {({ values, editingComponent, editingComponentPath, htmlTypes, docgenInfo }) => {
+          const filteredSchema = this.filterProperties(docgenInfo[editingComponent])
+          const propertyKeys = Object.keys(filteredSchema)
+          const currentComponent = editingComponentPath.reduce(
+            (prev, current) => {
+              return prev[current]
+            },
+            values
+          )
+
+          const onChange = (propName, newValue) => {
+            const updatedRootComponent = updateComponentTree(values, editingComponentPath, propName, newValue)
+
+            this.props.onChange(updatedRootComponent)
+          }
+
+          const componentPropKeys = Object.keys(currentComponent.props)
+          if (Object.keys(componentPropKeys).length !== propertyKeys.length) {
+            // we have some props that aren't reflected in the docgenInfo.  Let's update the docgenInfo
+
+            componentPropKeys.forEach(propKey => {
+              if (!docgenInfo[editingComponent].props[propKey]) {
+                this.props.onAddProperty(editingComponent, propKey)
+              }
+            })
+          }
 
           return (
-            <div
-              className={cs('rlpEditableProps', styles.rlpEditableProps, className)}
-              {...rest}
-            >
-              {propertyKeys.map((key, idx) => {
-                const propertyValue = currentValue ? currentValue[key] : null
-                return (
-                  <PropertyRenderer
-                    key={`${key}.${idx}`}
-                    parentName={editingComponentPath}
-                    name={key}
-                    value={propertyValue}
-                    docgenInfo={docgenInfo}
-                    onChange={this._onChange}
-                    onDelete={this._onDelete}
-                    onAdd={this._onAdd}
-                    property={filteredSchema.properties[key]}
-                  />
-                )
-              })}
+            <RendererContext.Provider value={{ ...Renderers }}>
+              <div
+                className={cs('rlpEditableProps', styles.rlpEditableProps, className)}
+                {...rest}
+              >
+                {propertyKeys.map((key, idx) => {
+                  return (
+                    <React.Fragment>
+                      <RendererResolver
+                        type={filteredSchema[key].type}
+                        key={`${key}.${idx}`}
+                        name={key}
+                        displayName={key}
+                        value={currentComponent.props[key]}
+                        onChange={onChange}
+                        property={filteredSchema[key]}
+                      />
+                      <div className={cs('rlpEditablePropsDivider', styles.rlpEditablePropsDivider)} />
+                    </React.Fragment>
+                  )
+                })}
 
-              {htmlTypes.includes(editingComponent) && (
-                <AddHtmlAttributeRenderer pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
-              )}
-            </div>
+                {htmlTypes.includes(editingComponent) && (
+                  <AddHtmlAttribute pendingAttributeName={this.state.pendingAttributeName} onChange={this._onChangeProperty} pendingAttributeValue={this.state.pendingAttributeValue} onAddProperty={this._onAddProperty} />
+                )}
+              </div>
+            </RendererContext.Provider>
           )
         }}
       </SchemaContext.Consumer>
     )
   }
 
-  _onChangeProperty = (state) => {
-    this.setState(state)
-  }
+  _onAddProperty = (editingComponent, editingComponentPath, values, pendingAttributeName, value) => {
+    const updatedRootComponent = updateComponentTree(values, editingComponentPath, pendingAttributeName, value)
 
-  _onAddProperty = (editingComponent, editingComponentPath, schema, values, name, value) => {
-    let propertySchema
-    const valueType = typeof value
-    if (Array.isArray(value)) {
-      propertySchema = {
-        type: 'array',
-        items: { type: 'string' }
-      }
-    } else if (valueType === 'object') {
-      const childProperties = {}
-      Object.keys(value).forEach(childProp => {
-        childProperties[childProp] = { type: 'string' }
-      })
+    this.props.onAddProperty(editingComponent, pendingAttributeName)
+    this.props.onChange(updatedRootComponent)
 
-      propertySchema = {
-        type: 'object',
-        properties: childProperties
+    this.setState((state) => {
+      return {
+        ...state,
+        pendingAttributeName: '',
+        pendingAttributeValue: ''
       }
-    } else if (valueType === 'boolean') {
-      propertySchema = {
-        type: 'boolean'
-      }
-    } else if (valueType === 'number') {
-      propertySchema = {
-        type: 'number'
-      }
-    } else {
-      propertySchema = {
-        type: 'string'
-      }
-    }
-
-    const newSchema = {
-      ...schema,
-      [editingComponent]: {
-        ...schema[editingComponent],
-        properties: {
-          ...schema[editingComponent].properties,
-          [name]: propertySchema
-        }
-      }
-    }
-
-    // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(values)
-
-    const compPropValues = dotProp.get(clonedValues, editingComponentPath)
-    compPropValues[name] = value
-
-    this.setState({
-      pendingAttributeName: '',
-      pendingAttributeValue: ''
-    }, () => {
-      this.props.onAddProperty(clonedValues, newSchema)
     })
   }
 
-  _onChange = (name, newValue, values) => {
-    // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(values)
-
-    dotProp.set(clonedValues, name, newValue)
-
-    this.props.onChange(clonedValues)
-  }
-
-  _onDelete = (name, values) => {
-    // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(values)
-
-    const nameParts = name.split('.')
-    const lastProp = nameParts.pop()
-    try {
-      const index = parseInt(lastProp, 10)
-      // the property is an array index
-      const array = dotProp.get(clonedValues, nameParts.join('.'))
-      array.splice(index, 1)
-      dotProp.set(clonedValues, nameParts.join('.'), array)
-    } catch (e) {
-      // the property is not an array index
-      dotProp.delete(clonedValues, name)
-    }
-
-    this.props.onChange(clonedValues)
-  }
-
-  _onAdd = (name, type, values) => {
-    // dotProp mutates the value, so we need to clone before using dotProp
-    const clonedValues = cloneDeep(values)
-
-    let prop = dotProp.get(clonedValues, name)
-
-    if (!prop) {
-      prop = []
-      dotProp.set(clonedValues, name, prop)
-    }
-
-    if (type === 'string') {
-      prop.push('')
-    } else if (type === 'number') {
-      prop.push(0)
-    } else if (type === 'boolean') {
-      prop.push(false)
-    } else if (type === 'object') {
-      prop.push({})
-    } else if (type === 'array') {
-      prop.push([])
-    } else {
-      prop.push(null)
-    }
-
-    this.props.onChange(clonedValues)
+  _onChangeProperty = (state) => {
+    this.setState(state)
   }
 }
