@@ -45,7 +45,7 @@ uiElements.ResetButton.propTypes = {
   className: PropTypes.string
 }
 
-const DEFAULT_HTML_TYPES = ['p', 'a', 'em', 'span', 'strong', 'div', 'svg', 'path', 'ul', 'li', 'b', 'ol', 'blockquote', 'cite', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'caption', 'table', 'tbody', 'thead', 'tr', 'td', 'th', 'tfoot']
+const DEFAULT_HTML_TYPES = ['p', 'a', 'em', 'span', 'strong', 'div', 'svg', 'path', 'ul', 'li', 'b', 'ol', 'blockquote', 'cite', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'caption', 'table', 'tbody', 'thead', 'tr', 'td', 'th', 'tfoot', 'form']
 const buildComponentTitle = (title, additionalTitleText) => {
   if (!additionalTitleText) return title
 
