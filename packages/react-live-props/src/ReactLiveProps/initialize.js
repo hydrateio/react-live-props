@@ -70,7 +70,10 @@ export const initialize = ({
     throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
   }
 
-  allDocGenInfo.push(info)
+  allDocGenInfo.push({
+    props: {},
+    ...info
+  })
 
   allDocGenInfo.push(
     {
@@ -128,7 +131,10 @@ export const initialize = ({
       return type.__docgenInfo
     })
 
-    const filteredTypes = typeInfo.filter(type => type !== null)
+    const filteredTypes = typeInfo.filter(type => type !== null).map(type => ({
+      props: {},
+      ...type
+    }))
     if (filteredTypes.filter(type => typeof type === 'undefined').length > 0) {
       throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
     }
@@ -164,7 +170,10 @@ export const initialize = ({
       return type.__docgenInfo
     })
 
-    const filteredTypes = typeInfo.filter(type => type !== null)
+    const filteredTypes = typeInfo.filter(type => type !== null).map(type => ({
+      props: {},
+      ...type
+    }))
     if (filteredTypes.filter(type => typeof type === 'undefined').length > 0) {
       throw new Error('ReactLiveProps must be given docgenInfo or a component annotated with __docgenInfo')
     }
