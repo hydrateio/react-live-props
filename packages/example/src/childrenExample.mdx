@@ -52,6 +52,8 @@ import ComponentUnderTest, { Panel, Text } from './ChildrenExample'
 
 <ReactLiveProps of={Panel} additionalTitleText='Text Children' initialComponent={<Panel>Testing</Panel>} />
 
+<ReactLiveProps of={Panel} additionalTitleText='Text Children with nodes' initialComponent={<Panel>Testing <strong>other</strong> nodes in <em>text</em> as children</Panel>} />
+
 <ReactLiveProps of={Panel} additionalTitleText='Multiple Text Children' availableTypes={[Text]} initialComponent={<Panel><Text text="Testing1" /><Text text="Testing2" /></Panel>} />
 
 <ReactLiveProps of={Panel} additionalTitleText='Multiple Text Children' availableTypes={[Text, Panel]} initialComponent={<div><Panel><Text text="Testing1" /><Text text="Testing2" /></Panel></div>} />

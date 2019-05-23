@@ -43,6 +43,8 @@ const RenderComponent = ({ values, componentDisplayName, onChangeComponent, comp
                     <p>{nodeProp}</p>
                     <ul>
                       {Array.isArray(values.props[nodeProp]) && values.props[nodeProp].map((child, idx) => {
+                        if (typeof values.props[nodeProp][idx] === 'string') return null
+
                         const newPath = [...componentPath, 'props', nodeProp, idx]
                         return (
                           <RenderComponent key={`${child.type}-${idx}`} componentPath={newPath} values={values.props[nodeProp][idx]} componentDisplayName={getDisplayName(child)} onChangeComponent={onChangeComponent} />
