@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { MdSave, MdAddCircle, MdDelete } from 'react-icons/md'
 import { getDisplayName } from '../Utils'
-import text from '../text'
+import defaultText from '../text'
 import { TextContext } from '../Context'
 
 const uiElements = {
@@ -62,7 +62,7 @@ export const initialize = ({
   deleteButtonComponent = uiElements.DeleteButton,
   saveButtonComponent = uiElements.SaveButton,
   resetButtonComponent = uiElements.ResetButton,
-  overrideText = {},
+  text = {},
   componentPreviewWrapperComponent = uiElements.PreviewWrapper
 }) => {
   const htmlTypes = [...DEFAULT_HTML_TYPES]
@@ -216,8 +216,8 @@ export const initialize = ({
       docgenInfo,
       configuredUiElements,
       text: {
-        ...text,
-        ...overrideText
+        ...defaultText,
+        ...text
       }
     }
   } catch (err) {
