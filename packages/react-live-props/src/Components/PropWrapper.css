@@ -2,6 +2,16 @@
   padding: 12px;
 }
 
+.rlpPropHiddenPropInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.rlpPropInputWithDelete {
+  display: flex;
+  flex-direction: row;
+}
+
 .rlpProp label {
   display: block;
 }
@@ -14,11 +24,5 @@
 }
 
 .rlpPropInput input {
-  width: 100%;
   font-weight: normal;
-}
-
-.rlpPropAddButton,
-.rlpPropDeleteButton {
-  margin-left: 12px;
 }

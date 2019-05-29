@@ -10,6 +10,7 @@ const text = {
   propertyColumnName: 'Property',
   typeColumnName: 'Type',
   descriptionColumnName: 'Description',
+  valueColumnName: 'Value',
   required: 'required',
   noPropertiesMessage: 'There are no properties for the selected component type',
   arrayItemLabel: 'Item #',

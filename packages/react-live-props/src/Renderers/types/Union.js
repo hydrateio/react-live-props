@@ -20,14 +20,15 @@ class UnionFieldRenderer extends React.Component {
     })),
     property: PropTypes.object.isRequired,
     displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
-    onDelete: PropTypes.func
+    onDelete: PropTypes.func,
+    hidePropInfo: PropTypes.bool
   }
 
   state = {
     currentType: typeofToReactType(typeof value) || 'string'
   }
   render() {
-    const { renderers, type, value, name, displayName, property, onDelete, ...rest } = this.props
+    const { renderers, type, value, name, displayName, property, onDelete, hidePropInfo, ...rest } = this.props
 
     if (type.filter(allowedType => allowedType.name === 'node' || allowedType.name === 'element').length > 0) {
       const Renderer = renderers.node
@@ -37,7 +38,7 @@ class UnionFieldRenderer extends React.Component {
     }
 
     return (
-      <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
+      <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
         <div>
           <select value={this.state.currentType} onChange={(e) => {
             this.setState({

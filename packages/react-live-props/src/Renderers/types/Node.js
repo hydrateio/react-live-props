@@ -12,11 +12,12 @@ class NodeFieldRenderer extends React.Component {
     name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
     value: PropTypes.any,
     onChange: PropTypes.func.isRequired,
-    onDelete: PropTypes.func.isRequired,
+    onDelete: PropTypes.func,
     htmlTypes: PropTypes.arrayOf(PropTypes.string),
     property: PropTypes.object.isRequired,
     availableTypes: PropTypes.array,
-    displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
+    displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
+    hidePropInfo: PropTypes.bool
   }
 
   constructor(props, context) {
@@ -56,11 +57,11 @@ class NodeFieldRenderer extends React.Component {
   }
 
   render() {
-    const { name, displayName, value, onChange, onDelete, property } = this.props
+    const { name, displayName, value, onChange, onDelete, property, hidePropInfo } = this.props
 
     const currentTypeName = getDisplayName(value || '')
     return (
-      <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
+      <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
         <select
           className={cs('rlpPropField', styles.rlpPropField)}
           value={this.state.currentElementType}

@@ -24,8 +24,8 @@ const RendererResolver = ({ type, value, ...rest }) => {
 
         console.log('UNSUPPORTED', type)
         return (
-          <PropWrapper name={rest.name} description={rest.property.description}>
-            PROP TYPE NOT SUPPORTED: {type.value && type.value.name ? `${type.name} (${type.value.name})` : type.name}
+          <PropWrapper name={rest.name} description={rest.property.description} hidePropInfo={rest.hidePropInfo}>
+            PROP TYPE NOT SUPPORTED
           </PropWrapper>
         )
       }}

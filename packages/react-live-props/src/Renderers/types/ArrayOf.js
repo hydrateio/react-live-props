@@ -10,7 +10,7 @@ const emptyProperty = {
   description: null
 }
 
-const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChange, onDelete }) => {
+const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChange, onDelete, hidePropInfo }) => {
   const valueOrDefault = Array.isArray(value) ? value : [value]
 
   return (
@@ -23,6 +23,7 @@ const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChan
         }
       }
       onDelete={onDelete}
+      hidePropInfo={hidePropInfo}
     >
       {valueOrDefault.map((item, idx) => (
         <div className={cs('rlpArrayItem', arrayStyles.arrayItem)} key={`${name}-${idx}`}>
@@ -50,6 +51,7 @@ const ArrayOfFieldRenderer = ({ name, displayName, type, property, value, onChan
               onChange(name, updatedValues)
             }}
             value={item}
+            hidePropInfo={hidePropInfo}
           />
         </div>
       ))}
@@ -62,11 +64,12 @@ ArrayOfFieldRenderer.propTypes = {
   property: PropTypes.object,
   value: PropTypes.oneOfType([PropTypes.array, PropTypes.string]),
   onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   type: PropTypes.shape({
     name: PropTypes.string
   }),
-  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
+  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
+  hidePropInfo: PropTypes.bool
 }
 
 ArrayOfFieldRenderer.getValueWithDefault = (value) => {

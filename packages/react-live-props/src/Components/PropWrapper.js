@@ -15,29 +15,41 @@ const buildName = (name, text) => {
   return name
 }
 
-const PropWrapper = ({ children, description, name, onAdd, onDelete }) => (
+const PropWrapper = ({ children, description, name, onAdd, onDelete, hidePropInfo }) => (
   <TextContext.Consumer>
     {(text) => (
-      <div className={cs('rlpProp', styles.rlpProp)}>
+      <div className={cs('rlpProp', styles.rlpProp, hidePropInfo && styles.rlpPropHiddenPropInfo)}>
         {name !== '' && (
           <div className={cs('rlpPropHeader', styles.rlpPropHeader)}>
             <strong className={cs('rlpPropName', styles.rlpPropName)}>
-              {buildName(name, text)}
+              {!hidePropInfo && buildName(name, text)}
               {typeof onAdd === 'function' && (
                 <AddButton onClick={onAdd} className={cs('rlpPropAddButton', styles.rlpPropAddButton)} />
               )}
-              {typeof onDelete === 'function' && (
+              {typeof onDelete === 'function' && !hidePropInfo && (
                 <DeleteButton onClick={onDelete} className={cs('rlpPropDeleteButton', styles.rlpPropDeleteButton)} />
               )}
             </strong>
-            {description && (
+            {description && !hidePropInfo && (
               <legend className={cs('rlpPropDescription', styles.rlpPropDescription)}>{description}</legend>
             )}
           </div>
         )}
-        <div className={cs('rlpPropInput', styles.rlpPropInput)}>
-          {children}
-        </div>
+        {hidePropInfo && (
+          <div className={cs('rlpPropInputWithDelete', styles.rlpPropInputWithDelete)}>
+            {typeof onDelete === 'function' && (
+              <DeleteButton onClick={onDelete} className={cs('rlpPropDeleteButton', styles.rlpPropDeleteButton)} />
+            )}
+            <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+              {children}
+            </div>
+          </div>
+        )}
+        {!hidePropInfo && (
+          <div className={cs('rlpPropInput', styles.rlpPropInput)}>
+            {children}
+          </div>
+        )}
       </div>
     )}
   </TextContext.Consumer>
@@ -48,7 +60,8 @@ PropWrapper.propTypes = {
   description: PropTypes.string,
   name: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onAdd: PropTypes.func,
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
+  hidePropInfo: PropTypes.bool
 }
 
 export default PropWrapper

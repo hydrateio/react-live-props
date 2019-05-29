@@ -5,13 +5,13 @@ import { PropWrapper } from '../../Components'
 
 import styles from './base.css'
 
-const EnumFieldRenderer = ({ name, displayName, property, value, onChange, onDelete }) => {
+const EnumFieldRenderer = ({ name, displayName, property, value, onChange, onDelete, hidePropInfo }) => {
   const valueOrDefault = value || ''
 
   // computed enums don't expand out the computed values
   if (Array.isArray(property.type.value)) {
     return (
-      <PropWrapper name={displayName} description={property.description} onDelete>
+      <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
         <select
           value={valueOrDefault}
           className={cs('rlpPropField', styles.rlpPropField)}
@@ -40,7 +40,7 @@ const EnumFieldRenderer = ({ name, displayName, property, value, onChange, onDel
   }
 
   return (
-    <PropWrapper name={displayName} description={property.description} onDelete>
+    <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
       <input
         type='text'
         value={valueOrDefault}
@@ -61,8 +61,9 @@ EnumFieldRenderer.propTypes = {
   property: PropTypes.object.isRequired,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
+  onDelete: PropTypes.func,
+  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
+  hidePropInfo: PropTypes.bool
 }
 
 export default EnumFieldRenderer

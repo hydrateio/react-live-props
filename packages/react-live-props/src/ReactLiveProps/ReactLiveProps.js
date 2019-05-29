@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import cs from 'classnames'
 
 import PropsTable from '../PropsTable'
-import EditablePropsTable from '../EditablePropsTable'
+import { PropsTableEditor } from '../EditablePropsTable'
 import ComponentPreview from '../ComponentPreview'
 import ComponentMarkup from '../ComponentMarkup'
 import TreeView from '../TreeView'
@@ -31,7 +31,7 @@ export default class ReactLiveProps extends Component {
     initialComponent: PropTypes.oneOfType([PropTypes.node, PropTypes.arrayOf(PropTypes.node)]),
     availableTypes: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.func])),
     initialCollapsed: PropTypes.bool,
-    hideHeader: PropTypes.bool,
+    hidePropInfo: PropTypes.bool,
     saveButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
     addButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
     deleteButtonComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
@@ -119,7 +119,7 @@ export default class ReactLiveProps extends Component {
       availableTypes,
       initialCollapsed,
       hidePropsTable,
-      hideHeader,
+      hidePropInfo,
       addButtonComponent,
       deleteButtonComponent,
       saveButtonComponent,
@@ -160,7 +160,7 @@ export default class ReactLiveProps extends Component {
               className={cs('rlpContainer', styles.rlpContainer, className)}
               {...rest}
             >
-              {!hideHeader && (
+              {!hidePropInfo && (
                 <h2
                   className={cs('rlpContainerTitle', styles.rlpContainerTitle)}
                   role='button'
@@ -213,7 +213,7 @@ export default class ReactLiveProps extends Component {
                       )}
 
                       <div className={cs('rlpEditablePropsTableMain', styles.rlpEditablePropsTableMain)}>
-                        <EditablePropsTable
+                        <PropsTableEditor
                           editableProperties={editableProperties}
                           blacklistedProperties={blacklistedProperties}
                           onChange={this._onChange}

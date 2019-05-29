@@ -5,10 +5,10 @@ import { PropWrapper } from '../../Components'
 
 import styles from './base.css'
 
-const NumberFieldRenderer = ({ name, displayName, value, property, onChange, onDelete }) => {
+const NumberFieldRenderer = ({ name, displayName, value, property, onChange, onDelete, hidePropInfo }) => {
   const valueOrDefault = value || ''
   return (
-    <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
+    <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
       <input
         type='number'
         value={valueOrDefault}
@@ -31,9 +31,10 @@ NumberFieldRenderer.propTypes = {
   name: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
   property: PropTypes.object.isRequired,
-  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
+  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
+  hidePropInfo: PropTypes.bool
 }
 
 export default NumberFieldRenderer

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import RendererResolver from '../Resolver'
 import { PropWrapper } from '../../Components'
 
-const ShapeFieldRenderer = ({ name, displayName, type, property, value, onChange, onDelete }) => {
+const ShapeFieldRenderer = ({ name, displayName, type, property, value, onChange, onDelete, hidePropInfo }) => {
   const keys = Object.keys(type)
   const valueOrDefault = value || {}
 
   return (
-    <PropWrapper name={displayName} description={property.description} onDelete={onDelete}>
+    <PropWrapper name={displayName} description={property.description} onDelete={onDelete} hidePropInfo={hidePropInfo}>
       {keys.map((item) => (
         <RendererResolver
           key={`${name}-${item}`}
@@ -36,8 +36,9 @@ ShapeFieldRenderer.propTypes = {
   property: PropTypes.object,
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired])
+  onDelete: PropTypes.func,
+  displayName: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.number.isRequired]),
+  hidePropInfo: PropTypes.bool
 }
 
 ShapeFieldRenderer.getValueWithDefault = (value) => {

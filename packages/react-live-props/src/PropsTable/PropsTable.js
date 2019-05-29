@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import cs from 'classnames'
 import { SchemaContext, TextContext } from '../Context'
 import { Expand, Collapse } from '../Components'
@@ -8,6 +9,12 @@ import styles from './styles.css'
 const TYPES_WITH_DETAILS = ['enum', 'arrayOf', 'shape']
 
 class PropsTable extends React.Component {
+  static propTypes = {
+    enableEditor: PropTypes.bool,
+    selectedComponentDisplayName: PropTypes.string,
+    children: PropTypes.func
+  }
+
   state = {
     selectedComponentDisplayName: null,
     expandedProperties: {}
@@ -65,7 +72,7 @@ class PropsTable extends React.Component {
           {(text) => (
             <SchemaContext.Consumer>
               {({ rootComponentDisplayName, docgenInfo }) => {
-                const currentComponent = this.state.selectedComponentDisplayName || rootComponentDisplayName
+                const currentComponent = this.props.selectedComponentDisplayName || rootComponentDisplayName
                 const componentProps = docgenInfo[currentComponent].props
                 return (
                   <React.Fragment>
@@ -76,6 +83,9 @@ class PropsTable extends React.Component {
                             <th className={cs('rlpPropName', styles.rlpPropName)}>{text.propertyColumnName}</th>
                             <th className={cs('rlpTypeName', styles.rlpTypeName)}>{text.typeColumnName}</th>
                             <th className={cs('rlpDescription', styles.rlpDescription)}>{text.descriptionColumnName}</th>
+                            {this.props.enableEditor && (
+                              <th className={cs('rlpValueColumn', styles.rlpValueColumn)}>{text.valueColumnName}</th>
+                            )}
                           </tr>
                         </thead>
                         <tbody>
@@ -114,6 +124,11 @@ class PropsTable extends React.Component {
                                   )}
                                 </td>
                                 <td className={cs('rlpDescription', styles.rlpDescription)}>{property.description}</td>
+                                {this.props.enableEditor && this.props.children && (
+                                  <td className={cs('rlpValueColumn', styles.rlpValueColumn)}>
+                                    {this.props.children({ prop: propName })}
+                                  </td>
+                                )}
                               </tr>
                             )
                           })}
